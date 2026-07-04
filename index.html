@@ -530,6 +530,8 @@ try {
   const tex = await new THREE.TextureLoader().loadAsync('afaicon.png');
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 4;
+  tex.center.set(0.5, 0.5);
+  tex.rotation = Math.PI / 2;   /* face was 90° off on the cylinder cap */
 
   const rim = new THREE.MeshStandardMaterial({ color: 0xd8a917, metalness: 0.95, roughness: 0.28 });
   const face = new THREE.MeshStandardMaterial({ map: tex, metalness: 0.15, roughness: 0.5 });
