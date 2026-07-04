@@ -73,6 +73,23 @@ RTX 3090) rendered pure black; wanted a 3D object / real wow.
   coin repositioned to avoid right-edge clip). file:// blocks the coin
   texture (CORS) — use `python -m http.server` locally.
 
+## v3 — production restructure (2026-07-05)
+- Monolith split into native ES modules (see README.md); no build step.
+- XMB shipped: vertical sections × horizontal rails (wheel/keys/swipe;
+  wheel over a rail scrolls it; ←→ move card focus; Enter opens link).
+- ALL content now in js/data.js: 5 jobs incl. Amazon, 8 projects incl.
+  Rizzume/BridgeAI/GLiNER/NotMe/FIFA, all 16 recommendations.
+- Projects rail = coverflow-lite (rotateY ±30/42° side cards) with
+  wanted stars on hackathon-winner cards.
+- Fluid/clouds/coin ported into modules wired by an event bus
+  ('nav'/'row'/'start' events → bursts, flips, beeps).
+- Repo: portfolio-4/ is now itself the git repo for
+  dcrey7/dcrey7.github.io (deploys no longer run from scratchpad);
+  .nojekyll added for fast static deploys; parent workspace gitignores
+  portfolio-4/ and profile/.
+- Verified locally desktop 1440×900 (work rail, projects coverflow) and
+  mobile 390×844 (projects card, swipe-scroll); 0 console errors.
+
 ## Known gaps / next steps
 - Slide-transition could add scale/tilt depth (currently clean slide).
 - LinkedIn URL is linkedin.com/in/dcrey7 (from resume.typ) — confirm.
