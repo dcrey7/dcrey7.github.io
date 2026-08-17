@@ -228,11 +228,14 @@ export function initXmb() {
 
   function setCat(i, quiet) {
     catI = (i + CATEGORIES.length) % CATEGORIES.length;
+    const total = barEl.children.length;
     [...barEl.children].forEach((el, n) => {
       el.classList.toggle('is-on', n === catI);
-      /* cover-switch: cards tilt toward the selection from both sides */
+      /* cover-switch: cards tilt toward the selection from both sides, and
+         stack by distance so each card tucks UNDER its neighbour toward it */
       el.classList.toggle('cat--before', n < catI);
       el.classList.toggle('cat--after', n > catI);
+      el.style.zIndex = total - Math.abs(n - catI);
       el.setAttribute('aria-selected', String(n === catI));
       el.tabIndex = n === catI ? 0 : -1;
     });
