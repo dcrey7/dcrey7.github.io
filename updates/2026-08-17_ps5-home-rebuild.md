@@ -99,6 +99,64 @@ delete   js/fluid.js  js/clouds.js  js/coin.js  js/deck.js
 3. Add `assets/resume.pdf` and restore the CV tile.
 4. Merge `worktree-ps5-ui` into `main` and let Pages deploy it.
 
+---
+
+# 12:15 — the rail had no animation at all
+
+Abhishek: *"the playstation cards are terrible, there is no animation and it
+doesn't even move."* Correct on both counts. Measured before touching anything.
+
+## Root causes (three, all separate)
+
+1. **The rail physically could not move.** At 1440px the rail measured
+   `clientWidth 1336`, `scrollWidth 1336` — **0px of overflow**. All nine tiles
+   fit, so the `scrollTo()` in `centreRail()` was a no-op every single time.
+   The rail had never slid once, at any width.
+2. **Nothing but the tiles could animate.** `renderTile()` rebuilds the hero,
+   the cards and the key art with `replaceChildren()`. Those are brand-new DOM
+   nodes on every focus change, and a new node has no previous value for a CSS
+   transition to interpolate from. Measured `transition-duration: 0s` on hero,
+   title, sub, meta, key art and label. Transitions were never going to fire.
+3. **The one thing that did move** was the tile's `width`/`height` over 0.24s —
+   layout-driven, so also the least smooth property available.
+
+## Fixes
+
+1. **The rail is now a track that translates.** `.rail` is an overflow window;
+   `.rail__track` is the flex row with `transform: translateX()` and a 0.46s
+   transition. A transform always moves, whether or not the content overflows.
+   `.rail__track` is `position: relative` so `tile.offsetLeft` is measured from
+   the track and the maths cannot be broken by an ancestor's positioning.
+   The focused tile anchors one tile in from the left on desktop (so you can
+   see where you came from) and centred on phones, clamped at 0 so the first
+   tile never leaves a gap.
+2. **Rebuilt nodes get keyframes, not transitions** — `rise`, `bloom` and
+   `slidein`, staggered with `animation-delay: calc(var(--i) * 55ms)`. The
+   index is set in JS, so it works for 3 hero lines or 16 quote cards.
+   The rail label persists, so its animation is restarted with a forced reflow.
+3. **The tile grows on a `--ease-back` curve**, lifts 4px, and its glow got
+   stronger.
+
+## Measured after
+
+- **21 concurrent animations** per focus change (7 × rise, 1 × bloom,
+  1 × slidein, plus transitions on transform, width, height, opacity,
+  box-shadow and `--key`). Before: effectively none visible.
+- **Track slides on every step**: 6 of 6 distinct positions
+  (`0, −20, −126, −232, −338, −444…`).
+- **Reduced motion still suppresses all of it** — every duration drops to
+  `1e-05s` under `--force-prefers-reduced-motion`, verified side by side
+  against the normal run.
+- Interaction suite still **18/18**.
+
+## Note
+
+An earlier measurement of this looked like a failure because it read
+`getComputedStyle().transform` immediately after the key press — mid-transition
+that returns the *starting* value, so the track looked stuck at identity. The
+inline style holds the target. Read the target, not the computed value.
+
 ## Changelog
 
+- 2026-08-17 12:15 CEST — Fixed: rail now translates, rebuilt nodes animate.
 - 2026-08-17 11:27 CEST — Built and verified. Not deployed.

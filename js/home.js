@@ -3,7 +3,7 @@
    There is exactly one screen. Moving focus along the rail swaps the hero,
    the shelf and the background colour — nothing navigates anywhere. */
 
-import { MOBILE, REDUCED, emit } from './config.js';
+import { MOBILE, emit } from './config.js';
 import { TABS } from './tiles.js';
 
 const $ = sel => document.querySelector(sel);
@@ -11,6 +11,7 @@ const $ = sel => document.querySelector(sel);
 export function initHome() {
   const tabsEl  = $('#tabs');
   const railEl  = $('#rail');
+  const trackEl = $('#railTrack');
   const labelEl = $('#railLabel');
   const heroEl  = $('#hero');
   const shelfEl = $('#shelf');
@@ -32,7 +33,7 @@ export function initHome() {
 
   /* ---------- rail ---------- */
   function buildRail() {
-    railEl.replaceChildren();
+    trackEl.replaceChildren();
     TABS[tabI].tiles.forEach((tile, i) => {
       const b = document.createElement('button');
       b.className = 'tile' + (tile.pinned ? ' tile--pinned' : '');
@@ -61,7 +62,7 @@ export function initHome() {
         if (i === focusOf[tabI]) act();
         else setFocus(i);
       });
-      railEl.appendChild(b);
+      trackEl.appendChild(b);
     });
 
     dotsEl.replaceChildren();
@@ -165,7 +166,12 @@ export function initHome() {
       }
       shelfEl.appendChild(el);
     });
-    shelfEl.scrollTo({ left: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+
+    /* Stagger indices drive animation-delay for both bands. */
+    [...heroEl.children].forEach((el, n) => el.style.setProperty('--i', n));
+    [...shelfEl.children].forEach((el, n) => el.style.setProperty('--i', Math.min(n, 8)));
+
+    shelfEl.scrollLeft = 0;
   }
 
   /* ---------- focus ---------- */
@@ -174,7 +180,7 @@ export function initHome() {
     focusOf[tabI] = Math.max(0, Math.min(tiles.length - 1, i));
     const tile = tiles[focusOf[tabI]];
 
-    [...railEl.children].forEach((el, n) => {
+    [...trackEl.children].forEach((el, n) => {
       el.classList.toggle('is-focus', n === focusOf[tabI]);
       el.tabIndex = n === focusOf[tabI] ? 0 : -1;
     });
@@ -182,22 +188,36 @@ export function initHome() {
       el.classList.toggle('is-on', n === focusOf[tabI]));
 
     document.documentElement.style.setProperty('--key', tile.key);
+
+    /* The label node persists, so its animation must be restarted by hand —
+       a forced reflow between clearing and restoring it does that. */
     labelEl.textContent = tile.title;
+    labelEl.style.animation = 'none';
+    void labelEl.offsetWidth;
+    labelEl.style.animation = '';
 
     centreRail();
     renderTile(tile);
     if (!quiet) emit('focus', { tile });
   }
 
-  /* Hold the focused tile at a fixed x: centred on phones, inset on desktop. */
+  /* Slide the track so the focused tile lands on its anchor: centred on
+     phones, one tile in from the left on desktop, so you can still see where
+     you came from. Clamped at 0 so tile one never leaves a gap on the left.
+
+     This must translate rather than scroll. Every tile fits inside the rail on
+     a desktop, so there is no overflow and scrollTo() moved nothing at all. */
   function centreRail() {
-    const el = railEl.children[focusOf[tabI]];
+    const el = trackEl.children[focusOf[tabI]];
     if (!el) return;
-    const anchor = MOBILE() ? (railEl.clientWidth - el.offsetWidth) / 2 : 0;
-    railEl.scrollTo({
-      left: Math.max(0, el.offsetLeft - anchor),
-      behavior: REDUCED ? 'auto' : 'smooth'
-    });
+    /* Read the tile size from the token, not from el: when this runs the
+       focused tile is mid-grow, so its offsetWidth is still the old value. */
+    const css = getComputedStyle(document.documentElement);
+    const tile  = parseFloat(css.getPropertyValue('--tile'))  || 92;
+    const tilef = parseFloat(css.getPropertyValue('--tilef')) || 112;
+    const anchor = MOBILE() ? (railEl.clientWidth - tilef) / 2 : tile + 14;
+    const x = Math.min(0, Math.round(anchor - el.offsetLeft));
+    trackEl.style.transform = `translateX(${x}px)`;
   }
 
   function setTab(i) {
