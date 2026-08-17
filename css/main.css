@@ -150,11 +150,19 @@ body {
 
 /* ---------- horizontal axis: categories ---------- */
 
+/* Categories sliding past the edges fade out instead of being cut by the
+   overflow — a hard clip reads as a line across the icon mid-slide. */
 .barwrap {
   flex: 0 0 auto;
   overflow: hidden;
   padding: 20px 0 14px;
   margin-top: -20px;
+  mask-image: linear-gradient(to right,
+    transparent 0, #000 clamp(28px, 3.5vw, 56px),
+    #000 calc(100% - clamp(40px, 6vw, 90px)), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right,
+    transparent 0, #000 clamp(28px, 3.5vw, 56px),
+    #000 calc(100% - clamp(40px, 6vw, 90px)), transparent 100%);
 }
 
 .bar {
@@ -247,13 +255,16 @@ body {
   margin-left: calc(var(--crossx) + (var(--catf) - var(--imark)) / 2 - 4px);
   overflow: hidden;
   position: relative;
-  padding-top: 4px;
+  padding-top: 6px;
   /* hangs from the top, directly below the active category — never centred */
   align-self: flex-start;
   max-height: 100%;
-  /* the list fades out as it runs past the bottom, so it reads as continuing */
-  mask-image: linear-gradient(to bottom, #000 0 72%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 72%, transparent 100%);
+  /* soft edges both ways: rows sliding out at the top fade instead of being
+     guillotined, and the list fades at the bottom so it reads as continuing */
+  mask-image: linear-gradient(to bottom,
+    transparent 0, #000 14px, #000 68%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom,
+    transparent 0, #000 14px, #000 68%, transparent 100%);
 }
 
 .column__track {
@@ -387,6 +398,9 @@ body {
   overflow-x: auto;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
+  /* cards run off the right softly, not against a hard cut */
+  mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent 100%);
 }
 .shelf::-webkit-scrollbar { display: none; }
 
@@ -475,19 +489,16 @@ body.booting .xmb, body.booting .topbar { opacity: 0; }
     min-width: 0;
     max-width: calc(100% - var(--crossx, 0px));
     max-height: calc(var(--row) * 3.1);
-    mask-image: linear-gradient(to bottom, #000 0 62%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, #000 0 62%, transparent 100%);
+    mask-image: linear-gradient(to bottom,
+      transparent 0, #000 12px, #000 58%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0, #000 12px, #000 58%, transparent 100%);
   }
 
   /* Must grow, or the detail sits directly under the list and leaves the
      bottom half of the phone empty with the key art crashing into the text. */
   .detail { flex: 1 1 auto; min-height: 0; justify-content: flex-end; gap: 10px; }
 
-  /* the bar runs off both edges on a phone, so fade it rather than cut it */
-  .barwrap {
-    mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
-  }
   .hero__title { font-size: clamp(1.9rem, 8.6vw, 3rem); max-width: 100%; }
   .hero__body { font-size: .82rem; }
   .card { width: min(76vw, 290px); }
