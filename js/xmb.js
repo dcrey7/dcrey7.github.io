@@ -191,16 +191,19 @@ export function initXmb() {
     barEl.style.transform = `translateX(${Math.round(crossx() - el.offsetLeft)}px)`;
   }
 
-  /* Same convention vertically as horizontally: the selected item parks one
-     row down, so the box you came from is always visible above it, dissolving
-     into the top fade. On the first item that row is simply empty — the same
-     way the space left of the crosspoint is empty on the first category. */
+  /* Vertical rule (user-specified): on the FIRST item the selection sits
+     flush under the category — no reserved gap. From the second item on, the
+     selection parks one row down and the box you came from fades above it.
+     The column gets .column--athead at the first item so the top fade is
+     removed there — otherwise the fade would cut across the selected ring. */
   function slideColumn() {
     const el = colTrack.children[itemOf[catI]];
     if (!el) return;
     const row = parseFloat(getComputedStyle(document.documentElement)
       .getPropertyValue('--row')) || 46;
-    colTrack.style.transform = `translateY(${Math.round(row - el.offsetTop)}px)`;
+    colEl.classList.toggle('column--athead', itemOf[catI] === 0);
+    colTrack.style.transform =
+      `translateY(${Math.min(0, Math.round(row - el.offsetTop))}px)`;
   }
 
   function setItem(i, quiet) {

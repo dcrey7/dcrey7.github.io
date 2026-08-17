@@ -117,10 +117,14 @@ document.getElementById('f').onload = () => setTimeout(async () => {
       + d.querySelector('.item.is-on').offsetTop;     // selected row's settled y
     const rowH = parseFloat(
       w.getComputedStyle(d.documentElement).getPropertyValue('--row')) || 0;
+    /* first item sits flush under the category; any later item parks one
+       reserved row down with the previous box fading above it */
+    const els = [...d.querySelectorAll('.item')];
+    const wantY = els.findIndex(el => el.classList.contains('is-on')) === 0 ? 0 : rowH;
 
     log.push(`      ${name}: categoryX=${categoryX.toFixed(1)} columnX=${columnX.toFixed(1)} `
-           + `itemY=${itemY.toFixed(1)} (want ${rowH.toFixed(1)} — one reserved row)`);
-    return { ok: Math.abs(categoryX - columnX) <= 1 && Math.abs(itemY - rowH) <= 1,
+           + `itemY=${itemY.toFixed(1)} (want ${wantY.toFixed(1)})`);
+    return { ok: Math.abs(categoryX - columnX) <= 1 && Math.abs(itemY - wantY) <= 1,
              categoryX, itemY };
   };
   const crosses = {};
@@ -147,6 +151,14 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   const aboveY = items[onIdx - 1].offsetTop
     + parseFloat((track.style.transform.match(/-?[\d.]+/) || [0])[0]);
   say('previous item occupies the reserved row', Math.abs(aboveY) <= 1, 'true');
+  /* back at the first item: flush under the category, no gap, no top fade */
+  for (let i = 0; i < 25; i++) press('ArrowUp');
+  await new Promise(r => setTimeout(r, 250));
+  const headY = parseFloat((track.style.transform.match(/-?[\d.]+/) || [0])[0])
+    + d.querySelector('.item.is-on').offsetTop;
+  say('first item sits flush, no reserved gap', Math.abs(headY) <= 1, 'true');
+  say('top fade removed at the first item',
+      d.getElementById('column').classList.contains('column--athead'), 'true');
 
   const fails = log.filter(l => l.startsWith('FAIL')).length;
   document.getElementById('out').textContent =

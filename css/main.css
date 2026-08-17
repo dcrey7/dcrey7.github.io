@@ -267,15 +267,18 @@ body {
   /* hangs from the top, directly below the active category — never centred */
   align-self: flex-start;
   max-height: 100%;
-  /* The fade spans the whole previous row: invisible at its top, full only
-     where the selected row starts. The selected icon sits entirely inside the
-     opaque zone, so no fade edge ever crosses it — a fade that ended above
-     the selection read as a sharp line through the ring. Bottom fades too. */
+  /* The top fade spans the whole previous row: invisible at its top, full
+     only where the selected row starts — so no fade edge ever crosses the
+     selected icon. On the first item there IS no previous row, so the fade
+     collapses to zero via .column--athead and the selection sits flush. */
+  --topfade: calc(var(--row) + 6px);
   mask-image: linear-gradient(to bottom,
-    transparent 0, #000 calc(var(--row) + 6px), #000 66%, transparent 100%);
+    transparent 0, #000 var(--topfade), #000 66%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom,
-    transparent 0, #000 calc(var(--row) + 6px), #000 66%, transparent 100%);
+    transparent 0, #000 var(--topfade), #000 66%, transparent 100%);
 }
+
+.column--athead { --topfade: 0px; }
 
 .column__track {
   position: relative;
@@ -500,9 +503,9 @@ body.booting .xmb, body.booting .topbar { opacity: 0; }
     max-width: calc(100% - var(--crossx, 0px));
     max-height: calc(var(--row) * 4);
     mask-image: linear-gradient(to bottom,
-      transparent 0, #000 calc(var(--row) + 6px), #000 56%, transparent 100%);
+      transparent 0, #000 var(--topfade), #000 56%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom,
-      transparent 0, #000 calc(var(--row) + 6px), #000 56%, transparent 100%);
+      transparent 0, #000 var(--topfade), #000 56%, transparent 100%);
   }
 
   /* Must grow, or the detail sits directly under the list and leaves the
