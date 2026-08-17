@@ -168,7 +168,7 @@ body {
   max-height: calc(100vh - 240px);
   display: block;
   columns: 2;
-  column-gap: 10px;
+  column-gap: 16px;
   /* NO container box, no clipping: the board floats straight on the field */
   overflow: visible;
 }
@@ -194,9 +194,11 @@ body {
   width: 100%;
   height: auto;
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: 18px;   /* real gutters, so an enlarged photo has air */
   break-inside: avoid;
   border-radius: 12px;
+  position: relative;
+  z-index: 1;
   opacity: .78;
   filter: saturate(.9);
   transition: transform .28s var(--ease-back), opacity .2s var(--ease),
@@ -205,7 +207,9 @@ body {
 .keyart--media img:hover {
   opacity: 1;
   filter: none;
-  transform: scale(1.07);
+  transform: scale(1.06);
+  /* the hovered photo rises ABOVE its neighbours, never tangles with them */
+  z-index: 10;
   box-shadow: 0 22px 60px -20px rgba(0, 0, 0, .7);
 }
 
