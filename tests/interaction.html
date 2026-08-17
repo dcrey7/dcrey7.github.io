@@ -68,18 +68,18 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   press('ArrowLeft'); await wait();
   say('back to TROPHIES', cat(), 'TROPHIES');
   press('ArrowLeft'); await wait();
-  say('PEOPLE has 15 items (photo-less removed)', nItems(), 15);
+  say('PEOPLE has 16 items (ADD YOURS + 15)', nItems(), 16);
 
   /* --- items are circular, like the category bar --- */
-  for (let i = 0; i < 14; i++) press('ArrowDown');
+  for (let i = 0; i < 15; i++) press('ArrowDown');
   await wait();
   say('reaches the last item', item(), 'DEVESH SINGH');
   press('ArrowDown'); await wait();
-  say('down past the end wraps to the first', item(), 'PHILIPPE FRAISSE');
+  say('down past the end wraps to the first', item(), 'ADD YOURS');
   press('ArrowUp'); await wait();
   say('up past the start wraps to the last', item(), 'DEVESH SINGH');
   d.querySelectorAll('.item')[0].click(); await wait();
-  say('back at the first item', item(), 'PHILIPPE FRAISSE');
+  say('back at the first item', item(), 'ADD YOURS');
 
   /* --- category wraps, matching a console bar --- */
   for (let i = 0; i < 3; i++) { press('ArrowRight'); await wait(); }

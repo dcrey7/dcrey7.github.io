@@ -265,6 +265,14 @@ export const EDUCATION = [
     key: '#D97706', logo: 'education/sardar_vallabhbhai_national_institute_of_technology_surat_logo.jpeg' }
 ];
 
+/* Supabase project for visitor recommendations (pending → approved flow).
+   Create a free project at supabase.com, then paste its URL and anon key. */
+export const SUPA = { url: '', anon: '' };
+
+/* Paste YOUR Spotify playlist link here — the ♫ player top right plays it.
+   TEMPORARY placeholder playlist below until Abhishek supplies his own. */
+export const SPOTIFY = 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M';
+
 export const CONTACT = {
   email: 'abhishek01789@gmail.com',
   links: [

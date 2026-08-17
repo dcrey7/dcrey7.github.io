@@ -237,6 +237,42 @@ body {
 .brand span { font-size: .68rem; letter-spacing: .22em; color: var(--chrome-dim); }
 
 .sys { margin-left: auto; display: flex; align-items: center; gap: clamp(10px, 2vw, 18px); }
+/* the avatar card: afaicon, ABHISHEK stacked over @dcrey7, PS5-profile style */
+.who { display: flex; align-items: center; gap: 10px; }
+.who img { width: clamp(28px, 2.2vw, 44px); height: auto; }
+.who__names { display: flex; flex-direction: column; line-height: 1.25; }
+.who__names b {
+  font-size: .76rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  color: var(--chrome);
+}
+.who__names i {
+  font-style: normal;
+  font-size: .64rem;
+  letter-spacing: .1em;
+  color: var(--chrome-dim);
+}
+
+/* the ♫ player, dropping from the top right */
+#music {
+  position: fixed;
+  top: clamp(64px, 9vh, 110px);
+  right: 3vw;
+  width: clamp(320px, 24vw, 460px);
+  z-index: 40;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity .25s var(--ease), transform .25s var(--ease);
+}
+#music.on { opacity: 1; transform: none; pointer-events: auto; }
+#music iframe {
+  width: 100%;
+  height: clamp(300px, 44vh, 460px);
+  border: 0;
+  border-radius: 14px;
+}
 .sysbtn {
   background: none; border: 0; cursor: pointer;
   color: var(--chrome-dim); font-size: 1.05rem; line-height: 1; padding: 6px;
@@ -814,6 +850,63 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
   z-index: 10;
   box-shadow: 0 22px 60px -20px rgba(0, 0, 0, .7);
 }
+
+/* ---------- the ADD YOURS form ---------- */
+
+.recform {
+  width: min(100%, 640px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+.recform input,
+.recform textarea {
+  font: inherit;
+  font-size: .92rem;
+  color: var(--chrome);
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color .18s var(--ease);
+}
+.recform input:focus,
+.recform textarea:focus { border-color: var(--yellow); }
+.recform input::placeholder,
+.recform textarea::placeholder { color: var(--chrome-dim); }
+.recform textarea { grid-column: 1 / -1; resize: vertical; }
+.recform__photo {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 14px;
+  border: 1px dashed var(--glass-line);
+  border-radius: 10px;
+  color: var(--chrome-dim);
+  cursor: pointer;
+  transition: border-color .18s var(--ease), color .18s var(--ease);
+}
+.recform__photo:hover { border-color: var(--yellow); color: var(--chrome); }
+.recform button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: var(--void);
+  background: var(--chrome);
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 26px;
+  cursor: pointer;
+  transition: background .18s var(--ease), transform .18s var(--ease);
+}
+.recform button:hover { background: var(--yellow); transform: translateY(-2px); }
+.recform__note { grid-column: 1 / -1; font-size: .88rem; color: var(--yellow); }
 
 /* ---------- lightbox ---------- */
 

@@ -9,6 +9,7 @@
 
 import { emit } from './config.js';
 import { CATEGORIES } from './menu.js';
+import { SUPA } from './data.js';
 
 const $ = s => document.querySelector(s);
 
@@ -33,6 +34,78 @@ export function initXmb() {
     lightbox.querySelector('img').src = src;
     lightbox.classList.add('on');
   };
+
+  /* ---------- the ADD YOURS form (in-page, no redirects) ---------- */
+  /* Submissions go to Supabase as PENDING rows; approved ones appear on the
+     site. Until SUPA is configured in data.js, submit explains politely. */
+  function buildRecForm() {
+    const f = document.createElement('form');
+    f.className = 'recform';
+    f.innerHTML = `
+      <label class="recform__photo">
+        <input type="file" name="photo" accept="image/*" hidden>
+        <span>+ photo</span>
+      </label>
+      <input name="name" placeholder="your name" required>
+      <input name="role" placeholder="title & company" required>
+      <input name="rel" placeholder="teammate / manager / mentor / client">
+      <input name="year" placeholder="year we worked together">
+      <input name="contact" placeholder="linkedin or email">
+      <textarea name="quote" rows="5" placeholder="your recommendation" required></textarea>
+      <button type="submit">submit for approval</button>
+      <p class="recform__note" hidden></p>`;
+
+    const photoInput = f.querySelector('input[type=file]');
+    photoInput.addEventListener('change', () => {
+      f.querySelector('.recform__photo span').textContent =
+        photoInput.files[0] ? photoInput.files[0].name : '+ photo';
+    });
+
+    f.addEventListener('submit', async e => {
+      e.preventDefault();
+      const note = f.querySelector('.recform__note');
+      note.hidden = false;
+      if (!SUPA.url || !SUPA.anon) {
+        note.textContent = 'Submissions are switching on very soon. Come back in a day!';
+        return;
+      }
+      note.textContent = 'Sending…';
+      try {
+        const fd = new FormData(f);
+        let photo_path = null;
+        const file = photoInput.files[0];
+        if (file) {
+          photo_path = `pending/${Date.now()}-${file.name.replace(/[^\w.\-]/g, '_')}`;
+          const up = await fetch(`${SUPA.url}/storage/v1/object/recs/${photo_path}`, {
+            method: 'POST',
+            headers: { apikey: SUPA.anon, Authorization: `Bearer ${SUPA.anon}` },
+            body: file
+          });
+          if (!up.ok) throw new Error('photo upload failed');
+        }
+        const res = await fetch(`${SUPA.url}/rest/v1/recommendations`, {
+          method: 'POST',
+          headers: {
+            apikey: SUPA.anon,
+            Authorization: `Bearer ${SUPA.anon}`,
+            'Content-Type': 'application/json',
+            Prefer: 'return=minimal'
+          },
+          body: JSON.stringify({
+            name: fd.get('name'), role: fd.get('role'), rel: fd.get('rel'),
+            year: fd.get('year'), contact: fd.get('contact'),
+            quote: fd.get('quote'), photo_path, approved: false
+          })
+        });
+        if (!res.ok) throw new Error('save failed');
+        f.reset();
+        note.textContent = 'Sent! It appears here once Abhishek approves it. Thank you!';
+      } catch {
+        note.textContent = 'Something went wrong, please try again in a minute.';
+      }
+    });
+    return f;
+  }
 
   /* ---------- marks and logos ---------- */
   /* A logo is used when the file exists; if it 404s we swap back to the mark,
@@ -169,7 +242,9 @@ export function initXmb() {
     heroEl.appendChild(h1);
     put(heroEl, 'hero__meta', item.meta);
 
-    if (vid) {
+    if (item.form) {
+      heroEl.appendChild(buildRecForm());
+    } else if (vid) {
       const frame = document.createElement('iframe');
       frame.className = 'hero__video';
       frame.src = `https://www.youtube-nocookie.com/embed/${vid}`;

@@ -86,7 +86,14 @@ const play = {
 /* ---------- PEOPLE ---------- */
 const people = {
   id: 'people', label: 'PEOPLE', mark: '❝', key: '#8B5CF6',
-  items: PEOPLE.map(p => ({
+  items: [{
+    id: 'add-yours', mark: '+', key: '#8B5CF6', form: true,
+    title: 'ADD YOURS', sub: 'worked with me?', meta: null, badge: null,
+    body: 'Worked with me and have something to say? Fill the form. Your recommendation lands in my review queue, and once I approve it, it appears right here with the others.',
+    action: null,
+    cards: []
+  },
+  ...PEOPLE.map(p => ({
     id: slug(p.name), mark: p.init, key: '#8B5CF6', logo: p.photo,
     title: p.name.toUpperCase(),
     sub: p.role,
@@ -95,7 +102,7 @@ const people = {
     body: `“${p.quote}”`,
     action: null,
     cards: []
-  }))
+  }))]
 };
 
 /* ---------- TROPHIES ---------- */
