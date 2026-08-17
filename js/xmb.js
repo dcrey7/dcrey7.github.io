@@ -39,7 +39,7 @@ export function initXmb() {
     }
     if (entry.logo) {
       const img = document.createElement('img');
-      img.src = 'assets/logos/' + entry.logo;
+      img.src = 'assets/' + entry.logo;
       img.alt = '';
       img.className = 'logo';
       img.addEventListener('error', () => {
@@ -49,9 +49,12 @@ export function initXmb() {
         const parent = img.parentNode;
         if (!parent) return;
         img.remove();
+        parent.classList.remove('has-img');
         parent.appendChild(span);
       }, { once: true });
       el.appendChild(img);
+      /* an image is its OWN box — the coloured slab behind it disappears */
+      el.classList.add('has-img');
       return;
     }
     el.appendChild(span);
@@ -149,7 +152,37 @@ export function initXmb() {
     }
 
     shelfEl.replaceChildren();
+
+    /* Demo video first: an embedded player, only ever mounted for the
+       selected item, so at most one iframe exists at a time. */
+    if (item.video) {
+      const id = (item.video.match(/(?:youtu\.be\/|[?&]v=)([\w-]{6,})/) || [])[1];
+      if (id) {
+        const media = document.createElement('article');
+        media.className = 'card card--media';
+        const frame = document.createElement('iframe');
+        frame.src = `https://www.youtube-nocookie.com/embed/${id}`;
+        frame.title = `${item.title} — demo video`;
+        frame.loading = 'lazy';
+        frame.allow = 'accelerometer; encrypted-media; picture-in-picture; fullscreen';
+        frame.allowFullscreen = true;
+        media.appendChild(frame);
+        shelfEl.appendChild(media);
+      }
+    }
+
     (item.cards || []).forEach(c => {
+      if (c.photo) {
+        const el = document.createElement('article');
+        el.className = 'card card--photo';
+        const img = document.createElement('img');
+        img.src = 'assets/' + c.photo;
+        img.alt = '';
+        img.loading = 'lazy';
+        el.appendChild(img);
+        shelfEl.appendChild(el);
+        return;
+      }
       const el = document.createElement(c.href ? 'a' : 'article');
       el.className = 'card';
       if (c.href) { el.href = c.href; el.target = '_blank'; el.rel = 'noopener'; }

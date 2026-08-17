@@ -25,7 +25,7 @@ export const ABOUT = {
 export const WORK = [
   {
     company: 'Vistiq.AI', role: 'AI Engineer', where: 'Paris', dates: '2026 —',
-    key: '#2F6BFF', mark: 'V',
+    key: '#2F6BFF', mark: 'V', logo: 'work/vistiq_ai_logo.jpeg',
     bullets: [
       'LLM evals for long-context retrieval — measured answer accuracy +15%',
       'RAG over financial corpora — inference cost −40% via retrieval, caching, routing',
@@ -35,7 +35,7 @@ export const WORK = [
   },
   {
     company: 'AXA France', role: 'Data Scientist', where: 'Paris', dates: '2025 — 26',
-    key: '#1B34C8', mark: 'AXA',
+    key: '#1B34C8', mark: 'AXA', logo: 'work/axa_france_logo.jpeg',
     bullets: [
       'Production OCR + KV extraction — fine-tuned Qwen 3.5 4B (Unsloth), +4% accuracy',
       'GLiNER2 with LoRA distillation of GPT-4o mini — operational cost −85%',
@@ -45,7 +45,7 @@ export const WORK = [
   },
   {
     company: 'EXL Services', role: 'Senior Data Scientist', where: 'Bangalore', dates: '2022 — 24',
-    key: '#6D28D9', mark: 'EXL',
+    key: '#6D28D9', mark: 'EXL', logo: 'work/exl_service_logo.jpeg',
     bullets: [
       'Production LightGBM models — GINI +6% on large-scale data',
       'Back-testing, drift detection & compliance monitoring frameworks',
@@ -55,7 +55,7 @@ export const WORK = [
   },
   {
     company: 'MathCo', role: 'Data Scientist', where: 'Bangalore', dates: '2021 — 22',
-    key: '#0EA5A4', mark: 'MC',
+    key: '#0EA5A4', mark: 'MC', logo: 'work/themathcompany_logo.jpeg',
     bullets: [
       'Marketing-mix models (lag, adstock) — channel ROI +3%',
       'Dash & Streamlit apps for KPIs, funnels, engagement',
@@ -65,7 +65,7 @@ export const WORK = [
   },
   {
     company: 'Amazon', role: 'Risk Analyst', where: 'Bangalore', dates: '2019 — 21',
-    key: '#FF9900', mark: 'AMZ',
+    key: '#FF9900', mark: 'AMZ', logo: 'work/amazon_logo.jpeg',
     bullets: [
       'Fraud & anomaly scoring (XGBoost, KNN) — transaction risk −12%',
       'Power BI dashboards for cross-functional stakeholders',
@@ -79,6 +79,7 @@ export const PROJECTS = [
   {
     name: 'KICKY AI', tag: 'build-small hackathon', passed: true,
     key: '#16A34A', mark: 'K',
+    video: 'https://www.youtube.com/watch?v=knL8shghyBU',
     desc: 'Zero-label football shot analysis. SAM3 + LocateAnything-3B auto-labels distilled into a fast RF-DETR-Seg detector; on-device VLM coach (MiniCPM-V) + BlazePose. Detects goals, shooting foot, shot speed.',
     links: [
       { label: '▶ demo', href: 'https://www.youtube.com/watch?v=knL8shghyBU' },
@@ -89,6 +90,11 @@ export const PROJECTS = [
     name: 'MEMORY BRIDGEAI', tag: 'treble hackathon — winner ×3 awards', passed: true,
     key: '#DC2626', mark: 'MB',
     desc: 'Voice-AI agent that calls patients over real phone lines (Twilio PSTN) to reinforce memories. LiveKit · Speechmatics · Backboard.io.',
+    photos: [
+      'projectsandhackthons/speechmatics/1772453175497.jpeg',
+      'projectsandhackthons/speechmatics/1772453176051.jpeg',
+      'projectsandhackthons/speechmatics/b388a5b5-50b5-416f-89de-c4c800b4afd1.jpeg'
+    ],
     links: [{ label: 'the story', href: 'https://www.linkedin.com/posts/dcrey7_hackathon-voiceai-ai-activity-7434207452876800000-Da2X' }]
   },
   {
@@ -116,13 +122,42 @@ export const PROJECTS = [
     name: 'NOTME', tag: 'mistral game jam — finalist',
     key: '#E11D48', mark: 'NM',
     desc: 'Voice imposter detection game built for the Mistral AI Game Jam.',
-    links: [{ label: '🤗 space', href: 'https://huggingface.co/spaces/dcrey7/NotMe' }]
+    photos: [
+      'projectsandhackthons/mistralgamejam/1737915427569.jpeg',
+      'projectsandhackthons/mistralgamejam/1737915428002.jpeg',
+      'projectsandhackthons/mistralgamejam/1737915428112.jpeg',
+      'projectsandhackthons/mistralgamejam/1737915434912.jpeg',
+      'projectsandhackthons/mistralgamejam/1737915440270.jpeg'
+    ],
+    links: [
+      { label: '🤗 space', href: 'https://huggingface.co/spaces/dcrey7/NotMe' },
+      { label: 'the story', href: 'https://www.linkedin.com/posts/dcrey7_mistralai-huggingface-elevenlabs-ugcPost-7289345687324934145-pTog/' }
+    ]
   },
   {
     name: 'MEDICAL RAG', tag: 'mistral × alan — finalist',
     key: '#059669', mark: 'MR',
     desc: 'RAG + fine-tuning on French medical MCQs.',
-    links: [{ label: 'slides', href: 'https://github.com/dcrey7/mistral_alan_hackathon/blob/main/Mistral%20ppt%20hackathon%20_compressed.pdf' }]
+    photos: [
+      'projectsandhackthons/mistralrag/1728839714292.jpeg',
+      'projectsandhackthons/mistralrag/1728839714328.jpeg'
+    ],
+    links: [
+      { label: 'slides', href: 'https://github.com/dcrey7/mistral_alan_hackathon/blob/main/Mistral%20ppt%20hackathon%20_compressed.pdf' },
+      { label: 'the story', href: 'https://www.linkedin.com/posts/dcrey7_one-incredible-month-in-paris-and-i-had-ugcPost-7251279334219374592-OCwQ/' }
+    ]
+  },
+  {
+    name: 'WIDS × HF', tag: 'wids datathon — hugging face',
+    key: '#0D9488', mark: 'W',
+    desc: 'WiDS Datathon with Hugging Face — responsible-AI challenge.',
+    photos: [
+      'projectsandhackthons/widsshiuggingface/1742974537676.jpeg',
+      'projectsandhackthons/widsshiuggingface/1742974538096.jpeg',
+      'projectsandhackthons/widsshiuggingface/1742974538183.jpeg',
+      'projectsandhackthons/widsshiuggingface/1742974538435.jpeg'
+    ],
+    links: [{ label: 'the story', href: 'https://www.linkedin.com/posts/dcrey7_wids-datathon-responsibleai-ugcPost-7310565086404714497-Rzzx/' }]
   },
   {
     name: 'FIFA ELO', tag: 'unique method award',
@@ -134,6 +169,7 @@ export const PROJECTS = [
 
 export const PEOPLE = [
   { init:'PF', name:'Philippe Fraisse', role:'Head of AI Lab · AXA France', rel:'managed me',
+    photo:'reccomendations/philppe.jpeg',
     quote:'Finds unexpected technical solutions autonomously… brainstorming with him is a pleasure.' },
   { init:'ED', name:'Ekaterina Dmitrieva', role:'AI & Data Engineer', rel:'studied together',
     quote:'The kind of person you want to call first — to achieve something truly outstanding.' },
@@ -172,6 +208,42 @@ export const TROPHIES = [
   { n: '3',  label: 'awards — Treble voice-AI hackathon winner' },
   { n: '2',  label: 'OSS PRs merged — GLiNER · HF Gemma' },
   { n: '16', label: 'LinkedIn recommendations' }
+];
+
+/* Certifications — each with its verification link (assets/links.txt). */
+export const CERTS = [
+  { name: 'AWS ML SPECIALTY', issuer: 'Amazon Web Services', mark: 'ML',
+    key: '#FF9900', logo: 'certifications/aws-mls.png',
+    href: 'https://www.credly.com/badges/79f99a54-3b81-44a7-b4d5-ec9b131f9678/linked_in_profile' },
+  { name: 'AWS CLOUD PRACTITIONER', issuer: 'Amazon Web Services', mark: 'CP',
+    key: '#EC7211', logo: 'certifications/aws-cp1.png',
+    href: 'https://cp.certmetrics.com/amazon/en/public/verify/credential/cf3d32bbf8ad4d178e5776980cd54731' },
+  { name: 'GOOGLE CLOUD', issuer: 'Google · skills badge', mark: 'G',
+    key: '#4285F4',
+    href: 'https://www.skills.google/public_profiles/805b81d6-b4f4-49dd-9a56-ed83fff6c719/badges/1312320' },
+  { name: 'GEN AI WITH LLMS', issuer: 'DeepLearning.AI · Coursera', mark: 'AI',
+    key: '#DC2626',
+    href: 'https://www.coursera.org/account/accomplishments/verify/6DP9L2ALTU27' },
+  { name: 'COHERE', issuer: 'Cohere · verified credential', mark: 'CO',
+    key: '#0EA5A4',
+    href: 'https://credsverse.com/credentials/e4121a84-0d35-411a-86da-1435a26f997a' },
+  { name: 'DGM · IISc', issuer: 'IISc Bangalore', mark: 'DG',
+    key: '#7C3AED', logo: 'certifications/dgm-iisc.jpg',
+    href: 'https://drive.google.com/file/d/1ILI3O1_qUFbRJsUGlLb8OrcPE5gdJKxf/view' },
+  { name: 'CHITRAKALA', issuer: 'art', mark: '🎨',
+    key: '#E11D48',
+    href: 'https://drive.google.com/file/d/1nvwbt2sHyTMtxiSNGlekgztIA1lLseQT/view' }
+];
+
+/* Education — school logos live in assets/education/. */
+export const EDUCATION = [
+  { school: 'EMLYON', line: 'Masters in Data Science & AI · Paris · 2026', mark: 'EM',
+    key: '#C8102E', logo: 'education/emlyon_business_school_logo.jpeg',
+    href: 'https://certificate.bcdiploma.com/check/DB040D4C62396A4CAD0001E4A01FB14D402F43E556B3962C5964899D0A5BD766SGcwRjhKTWpqaUkxSUJPYU8rUG14MTlKcnJ5aHNCT3cyd2l4NHhJZXhPNXFlanhU' },
+  { school: 'MCGILL', line: 'School of Continuing Studies · Montréal', mark: 'MG',
+    key: '#ED1B2F', logo: 'education/mcgill_university_school_of_continuing_studies_logo.jpeg' },
+  { school: 'SVNIT SURAT', line: 'National Institute of Technology', mark: 'SV',
+    key: '#D97706', logo: 'education/sardar_vallabhbhai_national_institute_of_technology_surat_logo.jpeg' }
 ];
 
 export const CONTACT = {

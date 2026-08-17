@@ -1,0 +1,16 @@
+cohere:https://credsverse.com/credentials/e4121a84-0d35-411a-86da-1435a26f997a
+aws-mls:https://www.credly.com/badges/79f99a54-3b81-44a7-b4d5-ec9b131f9678/linked_in_profile
+emlyon:https://certificate.bcdiploma.com/check/DB040D4C62396A4CAD0001E4A01FB14D402F43E556B3962C5964899D0A5BD766SGcwRjhKTWpqaUkxSUJPYU8rUG14MTlKcnJ5aHNCT3cyd2l4NHhJZXhPNXFlanhU
+aws-cp:https://cp.certmetrics.com/amazon/en/public/verify/credential/cf3d32bbf8ad4d178e5776980cd54731
+deeplearningai:https://www.coursera.org/account/accomplishments/verify/6DP9L2ALTU27
+iisc:https://drive.google.com/file/d/1ILI3O1_qUFbRJsUGlLb8OrcPE5gdJKxf/view
+google gcp:https://www.skills.google/public_profiles/805b81d6-b4f4-49dd-9a56-ed83fff6c719/badges/1312320
+art chtraklaly:https://drive.google.com/file/d/1nvwbt2sHyTMtxiSNGlekgztIA1lLseQT/view
+---
+linkedin
+
+mistral game jam:https://www.linkedin.com/posts/dcrey7_mistralai-huggingface-elevenlabs-ugcPost-7289345687324934145-pTog/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAChw7K0Bn7enXEuywkZ2fDS7SgPc7L90kyw
+msitral rag:https://www.linkedin.com/posts/dcrey7_one-incredible-month-in-paris-and-i-had-ugcPost-7251279334219374592-OCwQ/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAChw7K0Bn7enXEuywkZ2fDS7SgPc7L90kyw
+widshugging face:https://www.linkedin.com/posts/dcrey7_wids-datathon-responsibleai-ugcPost-7310565086404714497-Rzzx/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAChw7K0Bn7enXEuywkZ2fDS7SgPc7L90kyw
+speechamtics:https://www.linkedin.com/posts/dcrey7_hackathon-voiceai-ai-ugcPost-7434207451387891713-pD_q/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAChw7K0Bn7enXEuywkZ2fDS7SgPc7L90kyw
+

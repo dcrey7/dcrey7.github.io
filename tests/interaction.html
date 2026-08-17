@@ -22,7 +22,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
 
   /* --- the two axes --- */
   say('starts on ABOUT', cat(), 'ABOUT');
-  say('about has 3 items', nItems(), 3);
+  say('about has 6 items (3 facets + 3 schools)', nItems(), 6);
 
   press('ArrowRight'); await wait();
   say('right moves category', cat(), 'WORK');
@@ -46,7 +46,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   /* --- each category remembers its own item --- */
   press('ArrowRight'); await wait();
   say('right to PLAY', cat(), 'PLAY');
-  say('play has 8 items', nItems(), 8);
+  say('play has 9 items (WIDS added)', nItems(), 9);
   press('ArrowDown'); await wait();
   say('play item 2', item(), 'MEMORY BRIDGEAI');
   say('badge renders', d.querySelector('.hero__badge').textContent.includes('MISSION PASSED'), 'true');
@@ -88,14 +88,22 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   d.querySelectorAll('.item')[2].click(); await wait();
   say('click selects item', item(), '2');
 
-  /* --- no logo file exists yet, so every mark must fall back cleanly --- */
+  /* --- key art: exactly ONE child — a loaded logo image, or the mark --- */
   d.querySelectorAll('.cat')[1].click(); await wait();
-  await new Promise(r => setTimeout(r, 400));
-  const ka = d.getElementById('keyart').textContent.trim();
-  const selectedMark = d.querySelector('.item.is-on .item__glyph').textContent.trim();
-  say('key art matches the selected item', ka, selectedMark);
-  say('key art holds exactly one mark', d.getElementById('keyart').childNodes.length, 1);
-  say('no stray logo images left', d.querySelectorAll('#keyart img').length, 0);
+  await new Promise(r => setTimeout(r, 500));
+  const kaEl = d.getElementById('keyart');
+  say('key art holds exactly one child', kaEl.childNodes.length, 1);
+  const kaImg = kaEl.querySelector('img');
+  if (kaImg) {
+    say('key art logo actually loaded', kaImg.naturalWidth > 0, 'true');
+  } else {
+    const mark = d.querySelector('.item.is-on .item__glyph').textContent.trim();
+    say('key art mark matches the selected item', kaEl.textContent.trim(), mark);
+  }
+  /* work items all carry logos now — the row icons must show loaded images */
+  const rowImgs = [...d.querySelectorAll('.item .item__mark img')];
+  say('work rows render logo images', rowImgs.length, 5);
+  say('every row logo loaded', rowImgs.every(i => i.naturalWidth > 0), 'true');
 
   /* --- the cross must actually cross: the item column hangs directly under
          the active category's icon, at every category --- */
