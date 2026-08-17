@@ -19,6 +19,14 @@
   initial-value: 0px;
 }
 
+/* Registered for the same reason: the column engine anchors the selected
+   item exactly one row down, and needs this resolved, not as a calc(). */
+@property --row {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 46px;
+}
+
 :root {
   --key: #FFC800;
 
@@ -259,12 +267,14 @@ body {
   /* hangs from the top, directly below the active category — never centred */
   align-self: flex-start;
   max-height: 100%;
-  /* soft edges both ways: rows sliding out at the top fade instead of being
-     guillotined, and the list fades at the bottom so it reads as continuing */
+  /* The fade spans the whole previous row: invisible at its top, full only
+     where the selected row starts. The selected icon sits entirely inside the
+     opaque zone, so no fade edge ever crosses it — a fade that ended above
+     the selection read as a sharp line through the ring. Bottom fades too. */
   mask-image: linear-gradient(to bottom,
-    transparent 0, #000 14px, #000 68%, transparent 100%);
+    transparent 0, #000 calc(var(--row) + 6px), #000 66%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom,
-    transparent 0, #000 14px, #000 68%, transparent 100%);
+    transparent 0, #000 calc(var(--row) + 6px), #000 66%, transparent 100%);
 }
 
 .column__track {
@@ -488,11 +498,11 @@ body.booting .xmb, body.booting .topbar { opacity: 0; }
     width: auto;
     min-width: 0;
     max-width: calc(100% - var(--crossx, 0px));
-    max-height: calc(var(--row) * 3.1);
+    max-height: calc(var(--row) * 4);
     mask-image: linear-gradient(to bottom,
-      transparent 0, #000 12px, #000 58%, transparent 100%);
+      transparent 0, #000 calc(var(--row) + 6px), #000 56%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom,
-      transparent 0, #000 12px, #000 58%, transparent 100%);
+      transparent 0, #000 calc(var(--row) + 6px), #000 56%, transparent 100%);
   }
 
   /* Must grow, or the detail sits directly under the list and leaves the

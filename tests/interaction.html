@@ -115,9 +115,13 @@ document.getElementById('f').onload = () => setTimeout(async () => {
     const itemY = parseFloat((d.getElementById('columnTrack').style.transform
       .match(/-?[\d.]+/) || [0])[0])
       + d.querySelector('.item.is-on').offsetTop;     // selected row's settled y
+    const rowH = parseFloat(
+      w.getComputedStyle(d.documentElement).getPropertyValue('--row')) || 0;
 
-    log.push(`      ${name}: categoryX=${categoryX.toFixed(1)} columnX=${columnX.toFixed(1)} itemY=${itemY.toFixed(1)}`);
-    return { ok: Math.abs(categoryX - columnX) <= 1, categoryX, itemY };
+    log.push(`      ${name}: categoryX=${categoryX.toFixed(1)} columnX=${columnX.toFixed(1)} `
+           + `itemY=${itemY.toFixed(1)} (want ${rowH.toFixed(1)} — one reserved row)`);
+    return { ok: Math.abs(categoryX - columnX) <= 1 && Math.abs(itemY - rowH) <= 1,
+             categoryX, itemY };
   };
   const crosses = {};
   for (const n of ['ABOUT', 'WORK', 'PLAY', 'PEOPLE', 'CONTACT']) {
@@ -126,14 +130,23 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   }
   const xs = Object.values(crosses).map(c => c.categoryX.toFixed(0));
   say('ONE crosspoint for every category (first included)', new Set(xs).size, 1);
-  /* walk deep into PEOPLE: the selected row must stay at y=0 at every index */
+  /* walk deep into PEOPLE: the selected row must park one reserved row down
+     at every index — the box above it is the one you came from */
   d.querySelectorAll('.cat')[3].click(); await wait();
   for (let i = 0; i < 7; i++) press('ArrowDown');
   await new Promise(r => setTimeout(r, 250));
   const track = d.getElementById('columnTrack');
+  const rowH2 = parseFloat(
+    w.getComputedStyle(d.documentElement).getPropertyValue('--row')) || 0;
   const deepY = parseFloat((track.style.transform.match(/-?[\d.]+/) || [0])[0])
     + d.querySelector('.item.is-on').offsetTop;
-  say('selected row parks at the top at every depth', Math.abs(deepY) <= 1, 'true');
+  say('selected row parks one row down at depth', Math.abs(deepY - rowH2) <= 1, 'true');
+  /* and the reserved row above holds the previous item, not a random one */
+  const items = [...d.querySelectorAll('.item')];
+  const onIdx = items.findIndex(el => el.classList.contains('is-on'));
+  const aboveY = items[onIdx - 1].offsetTop
+    + parseFloat((track.style.transform.match(/-?[\d.]+/) || [0])[0]);
+  say('previous item occupies the reserved row', Math.abs(aboveY) <= 1, 'true');
 
   const fails = log.filter(l => l.startsWith('FAIL')).length;
   document.getElementById('out').textContent =

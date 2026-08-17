@@ -191,13 +191,16 @@ export function initXmb() {
     barEl.style.transform = `translateX(${Math.round(crossx() - el.offsetLeft)}px)`;
   }
 
-  /* Same rule vertically: the selected item always parks at the very top of
-     the column — directly below the active category — for every index. Items
-     you have passed slide up out of view. */
+  /* Same convention vertically as horizontally: the selected item parks one
+     row down, so the box you came from is always visible above it, dissolving
+     into the top fade. On the first item that row is simply empty — the same
+     way the space left of the crosspoint is empty on the first category. */
   function slideColumn() {
     const el = colTrack.children[itemOf[catI]];
     if (!el) return;
-    colTrack.style.transform = `translateY(${-el.offsetTop}px)`;
+    const row = parseFloat(getComputedStyle(document.documentElement)
+      .getPropertyValue('--row')) || 46;
+    colTrack.style.transform = `translateY(${Math.round(row - el.offsetTop)}px)`;
   }
 
   function setItem(i, quiet) {
