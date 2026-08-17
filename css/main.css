@@ -50,13 +50,13 @@
   --imarkw: calc(var(--imark) * 1.6);   /* item card width — same landscape
                                            ratio as the category cards  */
   --row:  calc(var(--imark) + 15px);    /* item row height             */
-  /* Coverflow deck ratios: each side card shows a .30 sliver, the selected
-     card gets .13 clearance on each side. The crosspoint is their sum — the
-     exact space one faded sliver + one clearance occupies left of the
-     selection. The deck is drawn purely with transforms over a constant
-     layout pitch (one card width), so alignment can never drift again:
-     animating layout margins was what broke it. */
-  --crossx: calc(var(--catw) * .43);
+  /* Coverflow deck: each side card shows a .30 sliver, tucked directly
+     against the selection — no clearance. The crosspoint equals one sliver,
+     the exact space the faded neighbour occupies left of the selection.
+     The deck is drawn purely with transforms over a constant layout pitch
+     (one card width), so alignment can never drift: animating layout
+     margins was what broke it. */
+  --crossx: calc(var(--catw) * .30);
 
   --ease:      cubic-bezier(.22, .61, .36, 1);
   --ease-back: cubic-bezier(.34, 1.28, .64, 1);

@@ -235,7 +235,7 @@ export function initXmb() {
        so the crosspoint stays exact — animating layout margins did not. */
     const total = barEl.children.length;
     const catw = barEl.children[0] ? barEl.children[0].offsetWidth : 0;
-    const KEEP = catw * .30, CLEAR = catw * .13;
+    const KEEP = catw * .30, CLEAR = 0;   /* no clearance — a continuous deck */
     [...barEl.children].forEach((el, n) => {
       const d = n - catI, k = Math.abs(d), dir = Math.sign(d);
       el.classList.toggle('is-on', d === 0);
