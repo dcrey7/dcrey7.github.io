@@ -11,7 +11,7 @@ initSound(document.getElementById('sndBtn'));
 /* Deep link: ?cat=play&i=1 opens a category on a given item. */
 const q = new URLSearchParams(location.search);
 if (q.has('cat')) {
-  const names = ['about', 'work', 'play', 'people', 'trophies', 'contact'];
+  const names = ['about', 'work', 'education', 'play', 'people', 'trophies', 'contact'];
   const n = names.indexOf(q.get('cat'));
   if (n >= 0) xmb.setCat(n, true);
 }

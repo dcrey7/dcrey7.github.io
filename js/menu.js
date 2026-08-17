@@ -20,23 +20,27 @@ const host = url => {
   catch { return null; }
 };
 
-/* ---------- ABOUT: the intro facets, then the schools ---------- */
+/* ---------- ABOUT: one intro item, the afaicon is its image ---------- */
 const about = {
   id: 'about', label: 'ABOUT', mark: null, icon: true, key: ABOUT.key,
-  items: [
-    ...ABOUT.cards.map((c, i) => ({
-      id: 'about-' + i, mark: ['①','②','③'][i] || '·', key: ABOUT.key,
-      title: c.title, sub: c.kicker, meta: null, badge: null,
-      body: c.body, action: null, cards: []
-    })),
-    ...EDUCATION.map(e => ({
-      id: slug(e.school), mark: e.mark, key: e.key, logo: e.logo,
-      title: e.school, sub: 'education', meta: null, badge: null,
-      body: e.line,
-      action: e.href ? { label: 'verify diploma', href: e.href } : null,
-      cards: []
-    }))
-  ]
+  items: [{
+    id: 'intro', icon: true, mark: '☻', key: ABOUT.key,
+    title: ABOUT.title, sub: ABOUT.sub, meta: ABOUT.meta, badge: null,
+    body: 'Making LLMs behave at Vistiq.AI, Paris. 5+ years turning data science into shipped systems, Amazon to AXA to AI native startups. Masters in Data Science & AI, emlyon 2026.',
+    action: null, cards: []
+  }]
+};
+
+/* ---------- EDUCATION: its own category, right after experience ---------- */
+const education = {
+  id: 'education', label: 'EDUCATION', mark: '🎓', key: '#C8102E',
+  items: EDUCATION.map(e => ({
+    id: slug(e.school), mark: e.mark, key: e.key, logo: e.logo,
+    title: e.school, sub: 'education', meta: null, badge: null,
+    body: e.line,
+    action: e.href ? { label: 'verify diploma', href: e.href } : null,
+    cards: []
+  }))
 };
 
 /* ---------- WORK ---------- */
@@ -49,16 +53,20 @@ const work = {
     meta: `${j.where} · ${j.dates}`,
     badge: null,
     body: null,
+    bullets: j.bullets,
+    stack: j.stack,
     action: null,
-    cards: j.bullets.map(b => ({ body: b }))
-      .concat([{ kicker: 'STACK', body: j.stack }])
+    cards: []
   }))
 };
 
 /* ---------- PLAY ---------- */
+/* Only projects with real media survive (user rule); links that duplicate
+   the embedded video are dropped. */
 const play = {
   id: 'play', label: 'PLAY', mark: '▶', key: '#16A34A',
-  items: PROJECTS.map(p => ({
+  items: PROJECTS.filter(p => p.video || (p.photos && p.photos.length) || p.logo)
+    .map(p => ({
     id: slug(p.name), mark: p.mark, key: p.key, logo: p.logo,
     title: p.name,
     sub: p.tag,
@@ -68,7 +76,10 @@ const play = {
     action: p.links[0] || null,
     video: p.video || null,
     photos: p.photos || [],
-    cards: p.links.map(l => ({ kicker: 'OPEN', title: l.label, body: host(l.href), href: l.href }))
+    /* no duplicates: drop links the video embed or the action button covers */
+    cards: p.links.slice(1)
+      .filter(l => !(p.video && /youtu/.test(l.href)))
+      .map(l => ({ kicker: 'OPEN', title: l.label, body: host(l.href), href: l.href }))
   }))
 };
 
@@ -88,32 +99,20 @@ const people = {
 };
 
 /* ---------- TROPHIES ---------- */
-/* The trophy cabinet: the numbers first, then the certifications — each cert
-   opens its public verification link. */
+/* The trophy cabinet: certifications with a badge image (user rule), each
+   opening its public verification link. */
 const trophies = {
   id: 'trophies', label: 'TROPHIES', mark: '★', key: '#F59E0B',
-  items: [
-    ...TROPHIES.map((t, i) => ({
-      id: 'trophy-' + i, mark: t.n, key: '#F59E0B',
-      title: t.n,
-      sub: null,
-      meta: null,
-      badge: null,
-      body: t.label,
-      action: null,
-      cards: []
-    })),
-    ...CERTS.map(c => ({
-      id: slug(c.name), mark: c.mark, key: c.key, logo: c.logo,
-      title: c.name,
-      sub: c.issuer,
-      meta: null,
-      badge: null,
-      body: null,
-      action: { label: '✓ verify', href: c.href },
-      cards: []
-    }))
-  ]
+  items: CERTS.filter(c => c.logo).map(c => ({
+    id: slug(c.name), mark: c.mark, key: c.key, logo: c.logo,
+    title: c.name,
+    sub: c.issuer,
+    meta: null,
+    badge: null,
+    body: null,
+    action: { label: '✓ verify', href: c.href },
+    cards: []
+  }))
 };
 
 /* ---------- CONTACT ---------- */
@@ -137,4 +136,4 @@ const contact = {
   ]
 };
 
-export const CATEGORIES = [about, work, play, people, trophies, contact];
+export const CATEGORIES = [about, work, education, play, people, trophies, contact];

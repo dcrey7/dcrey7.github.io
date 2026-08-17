@@ -116,33 +116,24 @@ export function initXmb() {
 
   /* ---------- detail ---------- */
   function renderItem(item) {
-    /* The right-side panel, in priority order: the demo VIDEO is the main
-       thing when the item has one, the event photos follow, and an item
-       with neither shows its logo (full colour) or the ghosted mark. */
+    /* The right-side panel: the event photos in full colour, else the logo
+       in full colour, else the ghosted mark. The VIDEO does not live here,
+       it takes the main middle area of the screen. */
     keyartEl.replaceChildren();
     keyartEl.classList.remove('has-img');
     const photos = item.photos || [];
-    const vid = item.video
-      ? (item.video.match(/(?:youtu\.be\/|[?&]v=)([\w-]{6,})/) || [])[1]
-      : null;
-    keyartEl.classList.toggle('keyart--media', !!vid || photos.length > 0);
-    if (vid) {
-      const frame = document.createElement('iframe');
-      frame.src = `https://www.youtube-nocookie.com/embed/${vid}`;
-      frame.title = `${item.title} demo`;
-      frame.loading = 'lazy';
-      frame.allow = 'accelerometer; encrypted-media; picture-in-picture; fullscreen';
-      frame.allowFullscreen = true;
-      keyartEl.appendChild(frame);
+    keyartEl.classList.toggle('keyart--media', photos.length > 0);
+    if (photos.length) {
+      photos.slice(0, 3).forEach(f => {
+        const img = document.createElement('img');
+        img.src = 'assets/' + f;
+        img.alt = '';
+        img.loading = 'lazy';
+        keyartEl.appendChild(img);
+      });
+    } else {
+      markInto(keyartEl, item, 'keyart__mark');
     }
-    photos.slice(0, vid ? 2 : 3).forEach(f => {
-      const img = document.createElement('img');
-      img.src = 'assets/' + f;
-      img.alt = '';
-      img.loading = 'lazy';
-      keyartEl.appendChild(img);
-    });
-    if (!vid && !photos.length) markInto(keyartEl, item, 'keyart__mark');
 
     heroEl.replaceChildren();
     const add = (cls, text, tag = 'p') => {
@@ -163,6 +154,34 @@ export function initXmb() {
     add('hero__title', item.title, 'h1');
     add('hero__meta', item.meta);
     add('hero__body', item.body);
+
+    /* experience bullets as a real list */
+    if (item.bullets && item.bullets.length) {
+      const ul = document.createElement('ul');
+      ul.className = 'hero__bullets';
+      item.bullets.forEach(b => {
+        const li = document.createElement('li');
+        li.textContent = b;
+        ul.appendChild(li);
+      });
+      heroEl.appendChild(ul);
+    }
+    add('hero__stack', item.stack);
+
+    /* the demo video IS the main middle area when the item has one */
+    const vid = item.video
+      ? (item.video.match(/(?:youtu\.be\/|[?&]v=)([\w-]{6,})/) || [])[1]
+      : null;
+    if (vid) {
+      const frame = document.createElement('iframe');
+      frame.className = 'hero__video';
+      frame.src = `https://www.youtube-nocookie.com/embed/${vid}`;
+      frame.title = `${item.title} demo`;
+      frame.loading = 'lazy';
+      frame.allow = 'accelerometer; encrypted-media; picture-in-picture; fullscreen';
+      frame.allowFullscreen = true;
+      heroEl.appendChild(frame);
+    }
 
     if (item.action) {
       const a = document.createElement('a');
