@@ -1,112 +1,105 @@
 # Portfolio v4 — locked design decisions
 
-Updated 2026-08-17. This is the build contract; `updates/` logs how each piece
-lands. It replaces the reel/XMB contract of 2026-07-05, which was rejected for
-being unreadable on a phone.
+Updated 2026-08-17 19:00 CEST. This is the build contract for the state tagged
+`xmb-v1`; `updates/` logs how each piece landed. Supersedes the 2026-08-17
+tile-rail contract and the 2026-07-05 reel/XMB contract.
 
-## The conceit — a PlayStation 5 home screen
+## The conceit — a Cross Media Bar in the PS5's skin
 
-The site is a console home screen painted in the afaicon palette. Not a Sony
-clone, not the PS4 blue menu. Research: `../moodboards/playstation-home-ui/`.
-
-There is **one screen**. Nothing navigates anywhere; moving focus along the
-rail changes what the screen is.
-
-```
-┌──────────────────────────────────────────────────────────┐
-│ ☻ DCREY7    WORK  PLAY                    ♪   11:27     │  topbar
-│                                                          │
-│  ┌──────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐  ┊ (16)(★)(✉)     │  rail
-│  │  V   │ │AXA │ │EXL │ │ MC │ │AMZ │  ┊  pinned         │
-│  └──────┘ └────┘ └────┘ └────┘ └────┘                    │
-│    VISTIQ.AI                                             │  label
-│                                       ██                 │
-│                                      ████  ← key art     │
-│    AI ENGINEER                        ██                 │
-│    VISTIQ.AI                                             │  hero
-│    Paris · 2026 —                                        │
-│    [ ▶ demo ]                                            │
-│                                                          │
-│  ┌────────────┐┌────────────┐┌────────────┐              │  shelf
-│  │ LLM evals  ││ RAG −40%   ││ MCP agents │              │
-│  └────────────┘└────────────┘└────────────┘              │
-└──────────────────────────────────────────────────────────┘
-```
-
-Four bands: **topbar · rail · hero · shelf**. The same four at 390px, 768px
-and 1440px. There is no second layout to maintain — that was the failure of
-both portfolio-3 and the v4 reel prototype.
-
-## Non-negotiables
-
-1. **No separate detail page.** The shelf below the hero is the detail. A tile
-   that has somewhere to go gets one button; everything else is cards.
-2. **No image assets for content.** Every entry carries a `key` colour and a
-   1–3 character `mark`. Background, glow and tile face derive from `key` with
-   `color-mix()`; the mark, set in Anton, is the art — on the tile and blown
-   up to 32vh behind the hero. Adding a project must never mean commissioning
-   artwork.
-3. **No third-party JavaScript.** No three.js, no GSAP, no shader libraries.
-   Native ES modules, no build step.
-4. **Yellow means focus, nothing else.** `#FFC800` is the focus ring, the card
-   kicker and the active dot. It is never decoration.
-5. **Every feature states its phone behaviour before it is built.**
-6. Sound is opt-in. `prefers-reduced-motion` kills animation but keeps the
-   colour change.
-
-## Tokens
+One screen, never a page. Categories run across, the items inside the
+selected category run down, and the whole screen takes the selected item's
+colour. Near-black base, afaicon yellow for focus only, per-entry key colour
+driving background, glow, cards and the ghosted key art.
 
 ```
---void       #08090B   near-black base
---chrome     #EDEFF3   primary text
---chrome-dim #8A9099   secondary text
---yellow     #FFC800   focus only
---key        per entry, registered with @property so it crossfades
+        ┌────────┐
+  ▶sliv │  WORK  │ PLAY-sliv CONTACT-sliv        ← coverflow deck
+        └────────┘
+          WORK                                   ← only selected is titled
+        ┌───────┐
+        │VISTIQ │  VISTIQ.AI                     ← straight rows
+        └───────┘
+         AXA FRANCE      (faded)
+         EXL SERVICES    (faded)
+                  ┌─ hero: huge Anton title, meta, action
+                  └─ shelf: glass cards
 ```
 
-Type: **Anton** display (hero title, tile marks, key art) · **Archivo 300/500/600**
-chrome (tabs, labels, buttons, card body) · **Space Mono** meta (dates, clock).
-Three faces, three jobs. Yellowtail is gone.
+## The horizontal axis — coverflow deck (user-approved final)
 
-Tile sizes: 92px desktop / 76px tablet / 58px phone. Focused tile is ~1.2× and
-pushes the rail.
+The Ubuntu/Compiz cover-switch alt-tab grammar:
 
-## The rails
+- **Landscape cards** (`--catw` = 1.6 × height), all the SAME size — never
+  scale-on-focus.
+- **Selected card**: flat, front (`translateZ`), yellow ring, glow with room
+  to fall (the bar's clipping box carries glow padding), the ONLY card with
+  a visible title.
+- **Side cards**: tilted ±38° with the pivot on the edge FACING the
+  selection, tucked flush against it, each showing a **.30 sliver** from
+  under its neighbour, z-stacked nearest-on-top, dimmed by **brightness,
+  never opacity** (transparent cards dissolve the stacking).
+- **No clearance** around the selected card — a continuous deck.
+- Categories **wrap** on input.
 
-```
-WORK  [☻ ABOUT] [VISTIQ] [AXA] [EXL] [MATHCO] [AMAZON]     ┊ pinned
-PLAY  [☻ ABOUT] [KICKY] [BRIDGEAI] [JOBAMATRIX] [RIZZUME]
-                [GLINER] [NOTME] [MEDICAL RAG] [FIFA ELO]  ┊ pinned
+## The vertical axis — straight rows (user-approved final)
 
-pinned = [16 PEOPLE] [★ TROPHIES] [✉ CONTACT]   round, both rails
-```
+No 3D here (a picker-drum variant was tried and rejected — `33ed4b1`,
+reverted in `d5a6eaa`):
 
-Each tab remembers its own focus.
+- Landscape item cards (`--imarkw`), same shape language as the deck.
+- **First item flush** under the category — no gap, no top fade
+  (`.column--athead`).
+- **Deeper items park one reserved row down**, with the row you came from
+  fading above (`--topfade` spans that whole row, so no fade edge can cross
+  the selected ring).
+- Items **wrap** (circular) like the bar.
+- Bottom of the list fades out; every clipping edge everywhere fades rather
+  than cuts.
+
+## The crosspoint — the one law of the layout
+
+`--crossx = .36 × card width` (one sliver + air). The active category always
+parks exactly there; the column hangs at exactly the same x and NEVER moves.
+The bar's left fade is defined as half of `--crossx`, so it can never
+swallow the reserved slot.
+
+**Architecture rule that keeps this true: the deck and every visual effect
+are TRANSFORMS over a constant layout pitch.** Layout properties (margins)
+were tried for the deck spacing and broke alignment mid-animation — never
+position the deck with layout again.
+
+## Sizing — one fluid base
+
+`--cat: clamp(46px, 4.6vw, 66px)`; every other dimension derives from it by
+calc. No per-breakpoint size re-declarations. `--key`, `--crossx`, `--row`
+are registered `@property` so JS reads resolved pixels and the background
+crossfades.
+
+## Content
+
+All content in `js/data.js` (`key` colour + 1–3 char `mark` per entry).
+`js/menu.js` shapes it into categories × items. Logos: drop
+`assets/logos/<id>.svg` and it replaces the mark, missing files fall back
+silently (fallback only if the img is still mounted — 404s arrive after
+re-renders).
 
 ## Input
 
 ```
-                desktop                    phone
-tile      ◄►    ← →  ·  wheel over rail    horizontal swipe
-tab       ▲▼    ↑ ↓                        vertical swipe
-open            enter · click focused tile tap focused tile
-back            esc
-deep link       ?skip&tab=play&i=1         (also used for screenshots)
+←→ categories (wrap) · ↑↓ items (wrap) · enter acts · wheel both axes
+swipe: horizontal = category, vertical = item · ?skip&cat=play&i=1 deep link
 ```
 
-## Content
+## Verification
 
-All of it lives in `js/data.js`. `js/tiles.js` turns it into the rail model.
-Adding a job or project means adding one object with a `key` and a `mark`.
-
-## Tests
-
-`tests/interaction.html` drives the real page in an iframe and asserts focus,
-tabs, clamping, colour propagation and card counts. Open it on the dev server,
-or run it headless — see README.
+`tests/interaction.html` — 49 assertions: both axes, wrap both directions,
+per-category memory, crosspoint identical everywhere, flush-first and
+reserved-row geometry, logo fallback. Compare LAYOUT values in tests, never
+rendered rects — mid-transition rects lie (twice bitten this project).
 
 ## Changelog
 
-- 2026-08-17 — Rewritten for the PS5 home screen. Replaces the reel/XMB
-  contract; fluid simulation, cloud shader and 3D coin removed.
+- 2026-08-17 19:00 — Final `xmb-v1` contract: coverflow deck + straight
+  vertical, transform-only architecture, crosspoint law.
+- 2026-08-17 — XMB rebuild; tile-rail contract superseded.
 - 2026-07-05 — Original reel/XMB contract (superseded).
