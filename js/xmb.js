@@ -143,26 +143,31 @@ export function initXmb() {
       return el;
     };
 
-    heroEl.replaceChildren();
-    put(heroEl, 'hero__sub', item.sub);
-    put(heroEl, 'hero__title', item.title, 'h1');
-    put(heroEl, 'hero__meta', item.meta);
-
-    /* the primary action lives WITH the heading (and on the logo below),
-       not out on the rail — the rail keeps only extra links */
-    if (item.action) {
-      const a = document.createElement('a');
-      a.className = 'hero__act';
-      a.href = item.action.href;
-      if (!item.action.href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
-      a.textContent = item.action.label;
-      heroEl.appendChild(a);
-    }
-
     const photos = item.photos || [];
     const vid = item.video
       ? (item.video.match(/(?:youtu\.be\/|[?&]v=)([\w-]{6,})/) || [])[1]
       : null;
+    /* the action IS the heading link — and never a duplicate of the
+       embedded player */
+    const action = (item.action && !(vid && /youtu/.test(item.action.href)))
+      ? item.action : null;
+
+    heroEl.replaceChildren();
+    put(heroEl, 'hero__sub', item.sub);
+    const h1 = document.createElement('h1');
+    h1.className = 'hero__title';
+    if (action) {
+      const a = document.createElement('a');
+      a.href = action.href;
+      if (!action.href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
+      a.textContent = item.title;
+      a.title = action.label;
+      h1.appendChild(a);
+    } else {
+      h1.textContent = item.title;
+    }
+    heroEl.appendChild(h1);
+    put(heroEl, 'hero__meta', item.meta);
 
     if (vid) {
       const frame = document.createElement('iframe');
@@ -190,11 +195,11 @@ export function initXmb() {
       img.className = 'hero__logo';
       img.src = item.icon ? 'assets/afaicon.png' : 'assets/' + item.logo;
       img.alt = '';
-      if (item.action) {
+      if (action) {
         /* the logo itself is the action too */
         const a = document.createElement('a');
-        a.href = item.action.href;
-        if (!item.action.href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
+        a.href = action.href;
+        if (!action.href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
         a.appendChild(img);
         heroEl.appendChild(a);
       } else {
