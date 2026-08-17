@@ -334,15 +334,29 @@ body {
   border-radius: 12px;
   display: grid;
   place-items: center;
-  overflow: hidden;
+  overflow: visible;  /* the reflection hangs BELOW the box */
   background: color-mix(in oklab, var(--key) 55%, var(--void));
   transition: box-shadow .28s var(--ease), transform .38s var(--ease-back),
               filter .28s var(--ease);
-  /* Every card stands on the same glossy floor. ONE shared gradient for all
-     states: box-reflect cannot animate between gradients, but a constant
-     reflection mirrors the card's own scale/tilt transitions smoothly. */
-  -webkit-box-reflect: below 6px
-    linear-gradient(to bottom, transparent 72%, rgba(255, 255, 255, .16));
+  position: relative;
+}
+
+/* Every card stands on the same glossy floor. The reflection is a pseudo
+   element INSIDE the card's paint layer, so it scales, tilts, dims and
+   fades in the same frame as the card itself — box-reflect could not:
+   Chrome repaints it only after a composited animation ends (the lag). */
+.cat__icon::after {
+  content: '';
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  height: 44%;
+  border-radius: inherit;
+  background: linear-gradient(to bottom,
+    color-mix(in oklab, var(--key) 55%, var(--void)), transparent 88%);
+  opacity: .38;
+  pointer-events: none;
 }
 /* Per-card perspective, not a shared one: a shared vanishing point sits at
    the bar's centre, so distant cards barely foreshorten — every card gets
@@ -365,8 +379,8 @@ body {
 /* Selection: full colour, forward, and a soft floor REFLECTION under the
    card (classic cover-switch cap) — no grow, no ring (user rules). */
 .cat.is-on .cat__icon {
-  /* clearly bigger than the side cards; its reflection scales along with it
-     smoothly because the gradient never changes */
+  /* clearly bigger than the side cards; the reflection rides along in the
+     same frame because it is part of the card's own layer */
   transform: perspective(700px) translateZ(14px) scale(1.16);
 }
 .cat__icon img { width: 66%; height: 66%; object-fit: contain; }
@@ -412,7 +426,7 @@ body {
    difference. The extra 4px of item padding (ring room) is subtracted back. */
 .column {
   flex: 0 0 auto;
-  width: clamp(200px, 24vw, 300px);
+  width: clamp(230px, 22vw, 430px);  /* names fit, video gets the rest */
   margin-left: calc(var(--crossx) + (var(--catw) - var(--imark)) / 2 - 4px);
   overflow: hidden;
   position: relative;
@@ -516,6 +530,8 @@ body {
 
 /* Heading at the TOP of the detail (right of the vertical menu); the shelf
    stays pinned to the bottom; the photos live on the middle right. */
+/* The screen is three thirds: menu | heading + media | words. The middle
+   column ends where the right rail begins and NEVER extends into it. */
 .detail {
   flex: 1 1 auto;
   min-width: 0;
@@ -524,12 +540,14 @@ body {
   justify-content: space-between;
   gap: clamp(12px, 2.4vh, 22px);
   padding: 6px 0 4px;
+  margin-right: calc(clamp(280px, 20vw, 540px) + 4vw);
 }
 
 .hero {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  align-items: flex-start;   /* the middle third is always LEFT aligned */
   gap: 8px;
   min-height: 0;
 }
@@ -549,16 +567,13 @@ body {
 .hero__title {
   font-family: 'Anton', sans-serif;
   font-weight: 400;
-  font-size: clamp(2.4rem, 6.6vw, 9rem);
+  font-size: clamp(1.8rem, 3vw, 4.2rem);   /* small: the media is the star */
   line-height: .88;
   letter-spacing: -.02em;
   text-transform: uppercase;
   max-width: 16ch;
   text-wrap: balance;
 }
-/* under a video the heading is a sub-heading, not the hero statement */
-h2.hero__title { font-size: clamp(1.9rem, 3.4vw, 4.4rem); }
-
 .hero__meta { font-family: 'Space Mono', monospace; font-size: .72rem; color: var(--chrome-dim); }
 .hero__body {
   font-size: .88rem; line-height: 1.55; color: #C9CDD4;
@@ -599,7 +614,8 @@ h2.hero__title { font-size: clamp(1.9rem, 3.4vw, 4.4rem); }
 /* a PROPER video frame: exact 16:9 always — the width is capped by the
    height budget, so the player is never letterboxed or squashed */
 .hero__video {
-  width: min(46vw, calc(40vh * 16 / 9));
+  /* as big as the middle third allows */
+  width: min(100%, calc(64vh * 16 / 9));
   aspect-ratio: 16 / 9;
   border: 0;
   border-radius: 16px;
@@ -701,6 +717,83 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
 .card__kicker { font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: var(--yellow); }
 .card__title  { font-size: .86rem; font-weight: 600; }
 .card__body   { font-size: .76rem; line-height: 1.5; color: #C9CDD4; }
+
+/* ---------- the uniform item layout ---------- */
+
+/* right rail: links on top, description or bullets below */
+.keyart-rail {
+  position: fixed;
+  z-index: 1;
+  right: 3vw;
+  top: clamp(110px, 14vh, 190px);
+  bottom: clamp(60px, 8vh, 120px);   /* definite height: links pin to the
+                                        top, the words centre in the middle */
+  width: clamp(280px, 20vw, 540px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  pointer-events: auto;
+  font-family: 'Archivo', system-ui, sans-serif;
+}
+/* the right third is centre aligned; description and bullets sit in its
+   vertical MIDDLE (links stay pinned on top) */
+.keyart-rail { text-align: center; align-items: center; }
+.keyart-rail > .side__desc,
+.keyart-rail > .hero__bullets { margin-block: auto; }
+.rail-links { justify-content: center; }
+.keyart-rail .hero__bullets { text-align: left; }   /* bullets read left */
+.keyart-rail::-webkit-scrollbar { display: none; }
+.keyart-rail > * {
+  animation: rise .44s var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+.rail-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px clamp(16px, 1.8vw, 32px);
+  align-items: baseline;
+}
+
+/* The middle image fills the space under the heading. NO shadow and no
+   backing: the image IS the card — a shadow around the letterboxed element
+   box painted a phantom panel behind portraits. */
+.hero__logo {
+  height: clamp(220px, 46vh, 680px);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
+/* the middle photo board: ordered masonry, hover air, click = lightbox */
+.mboard {
+  width: 100%;   /* the middle third, never past it */
+  columns: 3 260px;
+  column-gap: 16px;
+  margin-top: 10px;
+}
+.mboard img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 16px;
+  break-inside: avoid;
+  border-radius: 12px;
+  position: relative;
+  z-index: 1;
+  cursor: zoom-in;
+  opacity: .85;
+  transition: transform .28s var(--ease-back), opacity .2s var(--ease);
+}
+.mboard img:hover {
+  opacity: 1;
+  transform: scale(1.05);
+  z-index: 10;
+  box-shadow: 0 22px 60px -20px rgba(0, 0, 0, .7);
+}
 
 /* ---------- lightbox ---------- */
 

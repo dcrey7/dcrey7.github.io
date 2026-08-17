@@ -127,46 +127,32 @@ export function initXmb() {
 
   /* ---------- detail ---------- */
   function renderItem(item) {
-    /* The side panel (user rule): the middle holds only heading and video;
-       the DESCRIPTION and the PICTURES live here on the right. Items with a
-       logo and no photos show the logo; never giant ghost letters. */
-    keyartEl.replaceChildren();
-    keyartEl.classList.remove('has-img');
-    const photos = item.photos || [];
-    keyartEl.classList.toggle('keyart--media', !!(photos.length || item.body));
-    if (item.body) {
-      const p = document.createElement('p');
-      p.className = 'side__desc';
-      p.textContent = item.body;
-      keyartEl.appendChild(p);
-    }
-    if (photos.length) {
-      photos.slice(0, 6).forEach(f => {
-        const img = document.createElement('img');
-        img.src = 'assets/' + f;
-        img.alt = '';
-        img.loading = 'lazy';
-        img.addEventListener('click', () => openLightbox(img.src));
-        keyartEl.appendChild(img);
-      });
-    } else if (item.logo || item.icon) {
-      markInto(keyartEl, item, 'keyart__mark');
-    }
+    /* ONE uniform layout for every item (user spec):
+       MIDDLE = heading top-left, then the media: the full video, else the
+                photo board (masonry, hover air, click = lightbox), else the
+                logo big enough to fill the space.
+       RIGHT  = links on top, description or bullet points below.
+       No badges, no stars: clean. */
 
-    heroEl.replaceChildren();
-    const add = (cls, text, tag = 'p') => {
-      if (!text) return;
+    const put = (host, cls, text, tag = 'p') => {
+      if (!text) return null;
       const el = document.createElement(tag);
       el.className = cls;
       el.textContent = text;
-      heroEl.appendChild(el);
+      host.appendChild(el);
+      return el;
     };
 
-    /* the demo video IS the main thing: it comes first, the heading and
-       description sit under it */
+    heroEl.replaceChildren();
+    put(heroEl, 'hero__sub', item.sub);
+    put(heroEl, 'hero__title', item.title, 'h1');
+    put(heroEl, 'hero__meta', item.meta);
+
+    const photos = item.photos || [];
     const vid = item.video
       ? (item.video.match(/(?:youtu\.be\/|[?&]v=)([\w-]{6,})/) || [])[1]
       : null;
+
     if (vid) {
       const frame = document.createElement('iframe');
       frame.className = 'hero__video';
@@ -176,19 +162,57 @@ export function initXmb() {
       frame.allow = 'accelerometer; encrypted-media; picture-in-picture; fullscreen';
       frame.allowFullscreen = true;
       heroEl.appendChild(frame);
+    } else if (photos.length) {
+      const board = document.createElement('div');
+      board.className = 'mboard';
+      photos.slice(0, 6).forEach(f => {
+        const img = document.createElement('img');
+        img.src = 'assets/' + f;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.addEventListener('click', () => openLightbox(img.src));
+        board.appendChild(img);
+      });
+      heroEl.appendChild(board);
+    } else if (item.logo || item.icon) {
+      const img = document.createElement('img');
+      img.className = 'hero__logo';
+      img.src = item.icon ? 'assets/afaicon.png' : 'assets/' + item.logo;
+      img.alt = '';
+      heroEl.appendChild(img);
     }
 
-    if (item.badge) {
-      const bd = document.createElement('p');
-      bd.className = 'hero__badge';
-      bd.innerHTML = '<span class="stars">★★★★★</span>' + item.badge;
-      heroEl.appendChild(bd);
+    /* the right rail: links on top, then the words */
+    keyartEl.className = 'keyart-rail';
+    keyartEl.replaceChildren();
+    const links = [];
+    /* never duplicate the embedded player as a link */
+    if (item.action && !(vid && /youtu/.test(item.action.href))) {
+      links.push({ title: item.action.label, href: item.action.href, host: null });
     }
-    add('hero__sub', item.sub);
-    add('hero__title', item.title, vid ? 'h2' : 'h1');
-    add('hero__meta', item.meta);
-
-    /* experience bullets as a real list */
+    (item.cards || []).forEach(c => {
+      if (c.href) links.push({ title: c.title, href: c.href, host: c.body });
+    });
+    if (links.length) {
+      const row = document.createElement('div');
+      row.className = 'rail-links';
+      links.forEach(l => {
+        const a = document.createElement('a');
+        a.className = 'plink';
+        a.href = l.href;
+        if (!l.href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
+        a.textContent = l.title;
+        if (l.host) {
+          const h = document.createElement('span');
+          h.className = 'plink__host';
+          h.textContent = l.host;
+          a.appendChild(h);
+        }
+        row.appendChild(a);
+      });
+      keyartEl.appendChild(row);
+    }
+    put(keyartEl, 'side__desc', item.body);
     if (item.bullets && item.bullets.length) {
       const ul = document.createElement('ul');
       ul.className = 'hero__bullets';
@@ -197,42 +221,13 @@ export function initXmb() {
         li.textContent = b;
         ul.appendChild(li);
       });
-      heroEl.appendChild(ul);
+      keyartEl.appendChild(ul);
     }
-    add('hero__stack', item.stack);
+    put(keyartEl, 'hero__stack', item.stack);
 
-    if (item.action) {
-      const a = document.createElement('a');
-      a.className = 'btn';
-      a.href = item.action.href;
-      a.textContent = item.action.label;
-      if (!item.action.href.startsWith('mailto:')) {
-        a.target = '_blank';
-        a.rel = 'noopener';
-      }
-      heroEl.appendChild(a);
-    }
-
-    /* links are plain text, never boxes or cards */
     shelfEl.replaceChildren();
-    (item.cards || []).forEach(c => {
-      if (!c.href) return;
-      const a = document.createElement('a');
-      a.className = 'plink';
-      a.href = c.href;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      a.textContent = c.title;
-      const h = document.createElement('span');
-      h.className = 'plink__host';
-      h.textContent = c.body || '';
-      a.appendChild(h);
-      shelfEl.appendChild(a);
-    });
-
     [...heroEl.children].forEach((el, n) => el.style.setProperty('--i', n));
-    [...shelfEl.children].forEach((el, n) => el.style.setProperty('--i', Math.min(n, 8)));
-    shelfEl.scrollLeft = 0;
+    [...keyartEl.children].forEach((el, n) => el.style.setProperty('--i', n + 1));
   }
 
   /* ---------- movement ---------- */
@@ -318,7 +313,8 @@ export function initXmb() {
   }
 
   function act() {
-    const a = heroEl.querySelector('.btn');
+    /* enter opens the item's first link, which lives on the right rail */
+    const a = keyartEl.querySelector('a');
     if (a) a.click();
   }
 

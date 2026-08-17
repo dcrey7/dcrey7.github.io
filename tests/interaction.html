@@ -53,8 +53,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   say('play has 6 items (media-less projects cut)', nItems(), 6);
   press('ArrowDown'); await wait();
   say('play item 2', item(), 'MEMORY BRIDGEAI');
-  say('badge renders', d.querySelector('.hero__badge').textContent.includes('MISSION PASSED'), 'true');
-  say('action href', d.querySelector('.btn').getAttribute('href').includes('linkedin.com'), 'true');
+  say('rail link opens the story', d.querySelector('#keyart a').getAttribute('href').includes('linkedin.com'), 'true');
 
   press('ArrowLeft'); press('ArrowLeft'); await wait();
   say('back to WORK', cat(), 'WORK');
@@ -93,18 +92,15 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   d.querySelectorAll('.item')[2].click(); await wait();
   say('click selects item', item(), 'DGM · IISc');
 
-  /* --- key art: exactly ONE child — a loaded logo image, or the mark --- */
+  /* --- uniform layout: middle carries the media, right rail the words --- */
   d.querySelectorAll('.cat')[1].click(); await wait();
   await new Promise(r => setTimeout(r, 500));
   const kaEl = d.getElementById('keyart');
-  say('key art holds exactly one child', kaEl.childNodes.length, 1);
-  const kaImg = kaEl.querySelector('img');
-  if (kaImg) {
-    say('key art logo actually loaded', kaImg.naturalWidth > 0, 'true');
-  } else {
-    const mark = d.querySelector('.item.is-on .item__glyph').textContent.trim();
-    say('key art mark matches the selected item', kaEl.textContent.trim(), mark);
-  }
+  say('right rail carries the work bullets', !!kaEl.querySelector('.hero__bullets'), 'true');
+  const heroLogo = d.querySelector('.hero .hero__logo');
+  say('middle shows the company logo', !!heroLogo, 'true');
+  say('middle logo actually loaded', !!heroLogo && heroLogo.naturalWidth > 0, 'true');
+  say('no badge rubbish anywhere', d.querySelectorAll('.hero__badge').length, 0);
   /* work items all carry logos now — the row icons must show loaded images */
   const rowImgs = [...d.querySelectorAll('.item .item__mark img')];
   say('work rows render logo images', rowImgs.length, 5);
