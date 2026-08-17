@@ -541,7 +541,7 @@ body {
   justify-content: space-between;
   gap: clamp(12px, 2.4vh, 22px);
   padding: 6px 0 4px;
-  margin-right: calc(clamp(280px, 20vw, 540px) + 4vw);
+  margin-right: calc(clamp(300px, 23vw, 620px) + 3.5vw);
 }
 
 .hero {
@@ -748,7 +748,7 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
   top: clamp(110px, 14vh, 190px);
   bottom: clamp(60px, 8vh, 120px);   /* definite height: links pin to the
                                         top, the words centre in the middle */
-  width: clamp(280px, 20vw, 540px);
+  width: clamp(300px, 23vw, 620px);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -780,7 +780,7 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
    backing: the image IS the card — a shadow around the letterboxed element
    box painted a phantom panel behind portraits. */
 .hero__logo {
-  height: clamp(220px, 46vh, 680px);
+  height: clamp(240px, 56vh, 780px);   /* big: fills the middle, kills the gap */
   width: auto;
   max-width: 100%;
   object-fit: contain;
