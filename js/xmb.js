@@ -23,6 +23,17 @@ export function initXmb() {
   let catI = 0;
   const itemOf = CATEGORIES.map(() => 0);
 
+  /* ---------- lightbox: click a photo, see it properly ---------- */
+  const lightbox = document.createElement('div');
+  lightbox.id = 'lightbox';
+  lightbox.appendChild(document.createElement('img'));
+  document.body.appendChild(lightbox);
+  lightbox.addEventListener('click', () => lightbox.classList.remove('on'));
+  const openLightbox = src => {
+    lightbox.querySelector('img').src = src;
+    lightbox.classList.add('on');
+  };
+
   /* ---------- marks and logos ---------- */
   /* A logo is used when the file exists; if it 404s we swap back to the mark,
      so logos can be added to assets/logos/ later without touching code. */
@@ -135,6 +146,7 @@ export function initXmb() {
         img.src = 'assets/' + f;
         img.alt = '';
         img.loading = 'lazy';
+        img.addEventListener('click', () => openLightbox(img.src));
         keyartEl.appendChild(img);
       });
     } else if (item.logo || item.icon) {
@@ -313,6 +325,10 @@ export function initXmb() {
   /* ---------- input ---------- */
   addEventListener('keydown', e => {
     if (document.body.classList.contains('booting')) return;
+    if (lightbox.classList.contains('on')) {
+      if (e.key === 'Escape' || e.key === 'Enter') lightbox.classList.remove('on');
+      return;
+    }
     switch (e.key) {
       case 'ArrowRight': setCat(catI + 1); e.preventDefault(); break;
       case 'ArrowLeft':  setCat(catI - 1); e.preventDefault(); break;

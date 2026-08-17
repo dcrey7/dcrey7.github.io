@@ -159,19 +159,18 @@ body {
    They sit blended into the field; hovering one lifts it out clear. */
 .keyart--media {
   pointer-events: auto;
-  top: clamp(96px, 13vh, 170px);
-  bottom: clamp(44px, 7vh, 90px);
+  top: clamp(90px, 12vh, 150px);
+  bottom: auto;
   right: 3vw;
   transform: none;
-  width: clamp(300px, 25vw, 620px);
+  /* big enough that a hover enlarge is actually visible */
+  width: clamp(340px, 30vw, 800px);
+  max-height: calc(100vh - 240px);
   display: block;
   columns: 2;
-  column-gap: 12px;
-  /* NO container box (user rule): the media floats straight on the field */
-  overflow: hidden;
-  /* the board fades out at its bottom rather than cutting a photo */
-  mask-image: linear-gradient(to bottom, #000 0 88%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0 88%, transparent 100%);
+  column-gap: 10px;
+  /* NO container box, no clipping: the board floats straight on the field */
+  overflow: visible;
 }
 /* the description spans the panel above the photo columns; it must reset
    the keyart's display styling (Anton, nowrap) or it clips to one letter */
@@ -303,7 +302,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 13px;   /* room between the card and its title */
+  gap: clamp(18px, 1.6vw, 30px);   /* clear air between card and title */
   padding: 0;
   position: relative;   /* stacking: JS sets z-index by distance from the
                            selection, so cards tuck under toward it */
@@ -335,6 +334,9 @@ body {
   background: color-mix(in oklab, var(--key) 55%, var(--void));
   transition: box-shadow .28s var(--ease), transform .38s var(--ease-back),
               filter .28s var(--ease);
+  /* every card stands on a faint glossy floor, true cover-flow style */
+  -webkit-box-reflect: below 6px
+    linear-gradient(to bottom, transparent 76%, rgba(255, 255, 255, .12));
 }
 /* Per-card perspective, not a shared one: a shared vanishing point sits at
    the bar's centre, so distant cards barely foreshorten — every card gets
@@ -354,10 +356,14 @@ body {
 /* Bigger AND middle-aligned in one move: scale grows the card symmetrically
    around its centre, so its centre line stays on the deck's centre line.
    (A layout size change would shift the grid — transforms only, as ever.) */
-/* selection reads from SIZE and full colour, never a ring (user rule) */
+/* Selection: full colour, forward, and a soft floor REFLECTION under the
+   card (classic cover-switch cap) — no grow, no ring (user rules). */
 .cat.is-on .cat__icon {
-  transform: perspective(700px) translateZ(18px) scale(1.16);
-  box-shadow: 0 16px 40px -12px color-mix(in oklab, var(--key) 85%, transparent);
+  /* a hair larger than the tilted sides — presence, not a grow effect */
+  transform: perspective(700px) translateZ(14px) scale(1.05);
+  /* no glow — the reflection alone marks the selection */
+  -webkit-box-reflect: below 6px
+    linear-gradient(to bottom, transparent 70%, rgba(255, 255, 255, .22));
 }
 .cat__icon img { width: 66%; height: 66%; object-fit: contain; }
 .cat__mark {
@@ -691,6 +697,31 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
 .card__kicker { font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: var(--yellow); }
 .card__title  { font-size: .86rem; font-weight: 600; }
 .card__body   { font-size: .76rem; line-height: 1.5; color: #C9CDD4; }
+
+/* ---------- lightbox ---------- */
+
+#lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: rgba(4, 7, 14, .55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s var(--ease);
+  cursor: zoom-out;
+}
+#lightbox.on { opacity: 1; pointer-events: auto; }
+#lightbox img {
+  max-width: 86vw;
+  max-height: 86vh;
+  border-radius: 16px;
+  box-shadow: 0 40px 120px -30px rgba(0, 0, 0, .9);
+}
+.keyart--media img { cursor: zoom-in; }
 
 /* ---------- boot ---------- */
 
