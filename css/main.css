@@ -359,8 +359,8 @@ body {
 /* Selection: full colour, forward, and a soft floor REFLECTION under the
    card (classic cover-switch cap) — no grow, no ring (user rules). */
 .cat.is-on .cat__icon {
-  /* a hair larger than the tilted sides — presence, not a grow effect */
-  transform: perspective(700px) translateZ(14px) scale(1.05);
+  /* clearly bigger than the side cards */
+  transform: perspective(700px) translateZ(14px) scale(1.16);
   /* no glow — the reflection alone marks the selection */
   -webkit-box-reflect: below 6px
     linear-gradient(to bottom, transparent 70%, rgba(255, 255, 255, .22));
