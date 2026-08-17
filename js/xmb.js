@@ -185,15 +185,10 @@ export function initXmb() {
       .getPropertyValue('--crossx')) || 0;
   }
 
-  /* Same rule as the vertical: on the FIRST category the whole freeze pane
-     (crosspoint, bar, column) slides flush to the gutter — the class flips
-     --crossx to 0 and CSS glides the column along. Anywhere deeper, the
-     crosspoint is exactly one category slot, filled by the faded neighbour. */
   function slideBar() {
     const el = barEl.children[catI];
     if (!el) return;
-    document.documentElement.classList.toggle('at-first-cat', catI === 0);
-    barEl.style.transform = `translateX(${Math.min(0, Math.round(crossx() - el.offsetLeft))}px)`;
+    barEl.style.transform = `translateX(${Math.round(crossx() - el.offsetLeft)}px)`;
   }
 
   /* Vertical rule (user-specified): on the FIRST item the selection sits

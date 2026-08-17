@@ -132,12 +132,8 @@ document.getElementById('f').onload = () => setTimeout(async () => {
     crosses[n] = await crossAt(n);
     say(`column aligns under ${n}`, crosses[n].ok, 'true');
   }
-  /* first category: whole cross flush at the gutter; all others share one
-     crosspoint exactly one category-slot in */
-  say('first category parks flush at the gutter', Math.abs(crosses.ABOUT.categoryX) <= 1, 'true');
-  const rest = ['WORK', 'PLAY', 'PEOPLE', 'CONTACT'].map(n => crosses[n].categoryX.toFixed(0));
-  say('one shared crosspoint for every later category', new Set(rest).size, 1);
-  say('later crosspoint is one slot in (not flush)', crosses.WORK.categoryX > 40, 'true');
+  const xs = Object.values(crosses).map(c => c.categoryX.toFixed(0));
+  say('ONE crosspoint for every category (first included)', new Set(xs).size, 1);
   /* walk deep into PEOPLE: the selected row must park one reserved row down
      at every index — the box above it is the one you came from */
   d.querySelectorAll('.cat')[3].click(); await wait();
