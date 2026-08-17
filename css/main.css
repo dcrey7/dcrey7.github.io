@@ -45,7 +45,12 @@
   --catf: calc(var(--cat) * 1.28);      /* active category icon edge   */
   --imark: calc(var(--cat) * .74);      /* item icon edge              */
   --row:  calc(var(--imark) + 15px);    /* item row height             */
-  --crossx: calc(var(--catf) + 2vw);    /* the crosspoint — NEVER moves */
+  --catgap: clamp(14px, 2.4vw, 30px);   /* gap between categories      */
+  /* The crosspoint = exactly one category slot, so the faded neighbour fills
+     it precisely. On the FIRST category the whole cross slides flush to the
+     gutter — html.at-first-cat collapses it, mirroring the vertical rule. */
+  --crossx: calc(var(--catf) + var(--catgap));
+  --leftfade: clamp(28px, 3.5vw, 56px); /* bar's left fade width       */
 
   --ease:      cubic-bezier(.22, .61, .36, 1);
   --ease-back: cubic-bezier(.34, 1.28, .64, 1);
@@ -166,17 +171,17 @@ body {
   padding: 20px 0 14px;
   margin-top: -20px;
   mask-image: linear-gradient(to right,
-    transparent 0, #000 clamp(28px, 3.5vw, 56px),
+    transparent 0, #000 var(--leftfade),
     #000 calc(100% - clamp(40px, 6vw, 90px)), transparent 100%);
   -webkit-mask-image: linear-gradient(to right,
-    transparent 0, #000 clamp(28px, 3.5vw, 56px),
+    transparent 0, #000 var(--leftfade),
     #000 calc(100% - clamp(40px, 6vw, 90px)), transparent 100%);
 }
 
 .bar {
   display: flex;
   align-items: flex-start;
-  gap: clamp(14px, 2.4vw, 30px);
+  gap: var(--catgap);
   width: max-content;
   position: relative;
   will-change: transform;
@@ -261,6 +266,8 @@ body {
   flex: 0 0 auto;
   width: clamp(200px, 24vw, 300px);
   margin-left: calc(var(--crossx) + (var(--catf) - var(--imark)) / 2 - 4px);
+  /* glides with the bar when the crosspoint collapses at the first category */
+  transition: margin-left .46s var(--ease);
   overflow: hidden;
   position: relative;
   padding-top: 6px;
@@ -279,6 +286,10 @@ body {
 }
 
 .column--athead { --topfade: 0px; }
+
+/* First category: the whole freeze pane goes flush left, and the bar's left
+   fade collapses so it cannot cut across the selected category. */
+html.at-first-cat { --crossx: 0px; --leftfade: 0px; }
 
 .column__track {
   position: relative;
