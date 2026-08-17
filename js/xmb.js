@@ -116,22 +116,28 @@ export function initXmb() {
 
   /* ---------- detail ---------- */
   function renderItem(item) {
-    /* The right-side panel: the event photos in full colour, else the logo
-       in full colour, else the ghosted mark. The VIDEO does not live here,
-       it takes the main middle area of the screen. */
+    /* The side panel (user rule): the middle holds only heading and video;
+       the DESCRIPTION and the PICTURES live here on the right. Items with a
+       logo and no photos show the logo; never giant ghost letters. */
     keyartEl.replaceChildren();
     keyartEl.classList.remove('has-img');
     const photos = item.photos || [];
-    keyartEl.classList.toggle('keyart--media', photos.length > 0);
+    keyartEl.classList.toggle('keyart--media', !!(photos.length || item.body));
+    if (item.body) {
+      const p = document.createElement('p');
+      p.className = 'side__desc';
+      p.textContent = item.body;
+      keyartEl.appendChild(p);
+    }
     if (photos.length) {
-      photos.slice(0, 3).forEach(f => {
+      photos.slice(0, 6).forEach(f => {
         const img = document.createElement('img');
         img.src = 'assets/' + f;
         img.alt = '';
         img.loading = 'lazy';
         keyartEl.appendChild(img);
       });
-    } else {
+    } else if (item.logo || item.icon) {
       markInto(keyartEl, item, 'keyart__mark');
     }
 
@@ -144,31 +150,8 @@ export function initXmb() {
       heroEl.appendChild(el);
     };
 
-    if (item.badge) {
-      const bd = document.createElement('p');
-      bd.className = 'hero__badge';
-      bd.innerHTML = '<span class="stars">★★★★★</span>' + item.badge;
-      heroEl.appendChild(bd);
-    }
-    add('hero__sub', item.sub);
-    add('hero__title', item.title, 'h1');
-    add('hero__meta', item.meta);
-    add('hero__body', item.body);
-
-    /* experience bullets as a real list */
-    if (item.bullets && item.bullets.length) {
-      const ul = document.createElement('ul');
-      ul.className = 'hero__bullets';
-      item.bullets.forEach(b => {
-        const li = document.createElement('li');
-        li.textContent = b;
-        ul.appendChild(li);
-      });
-      heroEl.appendChild(ul);
-    }
-    add('hero__stack', item.stack);
-
-    /* the demo video IS the main middle area when the item has one */
+    /* the demo video IS the main thing: it comes first, the heading and
+       description sit under it */
     const vid = item.video
       ? (item.video.match(/(?:youtu\.be\/|[?&]v=)([\w-]{6,})/) || [])[1]
       : null;
@@ -183,6 +166,29 @@ export function initXmb() {
       heroEl.appendChild(frame);
     }
 
+    if (item.badge) {
+      const bd = document.createElement('p');
+      bd.className = 'hero__badge';
+      bd.innerHTML = '<span class="stars">★★★★★</span>' + item.badge;
+      heroEl.appendChild(bd);
+    }
+    add('hero__sub', item.sub);
+    add('hero__title', item.title, vid ? 'h2' : 'h1');
+    add('hero__meta', item.meta);
+
+    /* experience bullets as a real list */
+    if (item.bullets && item.bullets.length) {
+      const ul = document.createElement('ul');
+      ul.className = 'hero__bullets';
+      item.bullets.forEach(b => {
+        const li = document.createElement('li');
+        li.textContent = b;
+        ul.appendChild(li);
+      });
+      heroEl.appendChild(ul);
+    }
+    add('hero__stack', item.stack);
+
     if (item.action) {
       const a = document.createElement('a');
       a.className = 'btn';
@@ -195,22 +201,21 @@ export function initXmb() {
       heroEl.appendChild(a);
     }
 
+    /* links are plain text, never boxes or cards */
     shelfEl.replaceChildren();
     (item.cards || []).forEach(c => {
-      const el = document.createElement(c.href ? 'a' : 'article');
-      el.className = 'card';
-      if (c.href) { el.href = c.href; el.target = '_blank'; el.rel = 'noopener'; }
-      const put = (cls, text) => {
-        if (!text) return;
-        const p = document.createElement('p');
-        p.className = cls;
-        p.textContent = text;
-        el.appendChild(p);
-      };
-      put('card__kicker', c.kicker);
-      put('card__title', c.title);
-      put('card__body', c.body);
-      shelfEl.appendChild(el);
+      if (!c.href) return;
+      const a = document.createElement('a');
+      a.className = 'plink';
+      a.href = c.href;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = c.title;
+      const h = document.createElement('span');
+      h.className = 'plink__host';
+      h.textContent = c.body || '';
+      a.appendChild(h);
+      shelfEl.appendChild(a);
     });
 
     [...heroEl.children].forEach((el, n) => el.style.setProperty('--i', n));

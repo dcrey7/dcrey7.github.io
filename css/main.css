@@ -41,7 +41,8 @@
   /* One fluid base size; every other dimension of the cross derives from it,
      so the whole thing scales continuously with the viewport — no per-
      breakpoint re-declarations. */
-  --cat:  clamp(46px, 4.6vw, 66px);     /* base size unit              */
+  --cat:  clamp(46px, 5.6vw, 124px);    /* base size unit — keeps scaling
+                                           on big screens (175% reference) */
   --catf: calc(var(--cat) * 1.28);      /* category card height        */
   --catw: calc(var(--catf) * 1.6);      /* category card width — landscape,
                                            like the window thumbnails of a
@@ -75,6 +76,11 @@
 @keyframes bloom { from { opacity: 0; transform: translateX(26px) scale(.96); } to { opacity: var(--ka-op, .07); transform: none; } }
 
 html, body { height: 100%; }
+
+/* The reference size is what 175% zoom showed on a ~2000px window: type
+   scales with the viewport and the caps sit far higher, so big screens get
+   a big interface instead of a laptop layout floating in space. */
+html { font-size: clamp(15px, 1.4vw, 30px); }
 
 body {
   background: var(--void);
@@ -148,33 +154,60 @@ body {
   box-shadow: 0 26px 70px -24px rgba(0, 0, 0, .65);
   pointer-events: auto;   /* the panel itself is pointer-transparent */
 }
-/* Photos live BLENDED into the field: feathered edges, slightly sunk into
-   the background. Hovering one lifts it out, clear, clean and enlarged. */
-.keyart--media { pointer-events: auto; }
-.keyart--media img {
-  width: clamp(210px, 23vw, 350px);
-  max-height: 24vh;
-  object-fit: cover;
-  border-radius: 14px;
-  position: relative;
-  opacity: .55;
-  filter: saturate(.85) brightness(.92);
-  mask-image: radial-gradient(140% 140% at 50% 50%, #000 52%, transparent 100%);
-  -webkit-mask-image: radial-gradient(140% 140% at 50% 50%, #000 52%, transparent 100%);
-  transition: transform .32s var(--ease-back), opacity .22s var(--ease),
-              filter .22s var(--ease);
+/* The photo board: a full-height container on the right, photos arranged
+   neatly in ordered masonry columns — straight, no angles, Pinterest style.
+   They sit blended into the field; hovering one lifts it out clear. */
+.keyart--media {
+  pointer-events: auto;
+  top: clamp(96px, 13vh, 170px);
+  bottom: clamp(44px, 7vh, 90px);
+  right: 3vw;
+  transform: none;
+  width: clamp(300px, 25vw, 620px);
+  display: block;
+  columns: 2;
+  column-gap: 12px;
+  /* NO container box (user rule): the media floats straight on the field */
+  overflow: hidden;
+  /* the board fades out at its bottom rather than cutting a photo */
+  mask-image: linear-gradient(to bottom, #000 0 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 88%, transparent 100%);
 }
-.keyart--media img:nth-child(1) { transform: rotate(-2.2deg); }
-.keyart--media img:nth-child(2) { transform: rotate(1.6deg); }
-.keyart--media img:nth-child(3) { transform: rotate(-1.2deg); }
+/* the description spans the panel above the photo columns; it must reset
+   the keyart's display styling (Anton, nowrap) or it clips to one letter */
+.side__desc {
+  column-span: all;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-weight: 300;
+  white-space: normal;
+  letter-spacing: 0;
+  font-size: .92rem;
+  line-height: 1.55;
+  color: #C9CDD4;
+  margin-bottom: 14px;
+  max-height: 36vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.side__desc::-webkit-scrollbar { display: none; }
+
+.keyart--media img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 12px;
+  break-inside: avoid;
+  border-radius: 12px;
+  opacity: .78;
+  filter: saturate(.9);
+  transition: transform .28s var(--ease-back), opacity .2s var(--ease),
+              filter .2s var(--ease);
+}
 .keyart--media img:hover {
   opacity: 1;
   filter: none;
-  mask-image: none;
-  -webkit-mask-image: none;
-  transform: scale(1.45);
-  z-index: 5;
-  box-shadow: 0 32px 90px -22px rgba(0, 0, 0, .8);
+  transform: scale(1.07);
+  box-shadow: 0 22px 60px -20px rgba(0, 0, 0, .7);
 }
 
 .grain {
@@ -234,8 +267,9 @@ body {
 .barwrap {
   flex: 0 0 auto;
   overflow: hidden;
-  padding: 20px 0 60px;
-  margin: -20px 0 -36px;   /* 24px effective — the title breathes above the column */
+  padding: 20px 0 76px;
+  margin: -20px 0 -30px;   /* 46px effective — clear air between the category
+                              label and the vertical menu below it */
   position: relative;
   z-index: 1;           /* glow may bleed over the column area, never under a box edge */
   pointer-events: none;
@@ -320,11 +354,10 @@ body {
 /* Bigger AND middle-aligned in one move: scale grows the card symmetrically
    around its centre, so its centre line stays on the deck's centre line.
    (A layout size change would shift the grid — transforms only, as ever.) */
+/* selection reads from SIZE and full colour, never a ring (user rule) */
 .cat.is-on .cat__icon {
   transform: perspective(700px) translateZ(18px) scale(1.16);
-  box-shadow:
-    0 0 0 2px var(--yellow),
-    0 16px 40px -12px color-mix(in oklab, var(--key) 85%, transparent);
+  box-shadow: 0 16px 40px -12px color-mix(in oklab, var(--key) 85%, transparent);
 }
 .cat__icon img { width: 66%; height: 66%; object-fit: contain; }
 .cat__mark {
@@ -440,9 +473,8 @@ body {
   color: #fff;
 }
 .item__mark img { width: 72%; height: 72%; object-fit: contain; }
-/* the selected row's icon grows, centre-symmetric like the category card;
-   1.12 stays inside the row's height so it cannot bleed onto neighbours */
-.item.is-on .item__mark { box-shadow: 0 0 0 2px var(--yellow); transform: scale(1.12); }
+/* the selected row's icon grows, centre-symmetric, no ring (user rule) */
+.item.is-on .item__mark { transform: scale(1.12); }
 
 /* A real image is its OWN box: the coloured slab vanishes and the image
    fills the full row height, rounded like a proper icon. Square logos and
@@ -456,8 +488,9 @@ body {
   object-fit: cover;
   border-radius: 10px;
 }
-.item.is-on .item__mark.has-img { box-shadow: none; }
-.item.is-on .item__mark.has-img img { box-shadow: 0 0 0 2px var(--yellow); }
+.item.is-on .item__mark.has-img img {
+  box-shadow: 0 14px 34px -12px rgba(0, 0, 0, .6);
+}
 
 .item__name {
   font-size: .84rem;
@@ -506,13 +539,16 @@ body {
 .hero__title {
   font-family: 'Anton', sans-serif;
   font-weight: 400;
-  font-size: clamp(2.2rem, 6.4vw, 5.4rem);
+  font-size: clamp(2.4rem, 6.6vw, 9rem);
   line-height: .88;
   letter-spacing: -.02em;
   text-transform: uppercase;
   max-width: 16ch;
   text-wrap: balance;
 }
+/* under a video the heading is a sub-heading, not the hero statement */
+h2.hero__title { font-size: clamp(1.9rem, 3.4vw, 4.4rem); }
+
 .hero__meta { font-family: 'Space Mono', monospace; font-size: .72rem; color: var(--chrome-dim); }
 .hero__body {
   font-size: .88rem; line-height: 1.55; color: #C9CDD4;
@@ -550,9 +586,10 @@ body {
 }
 
 /* the demo video owns the main middle area */
+/* a PROPER video frame: exact 16:9 always — the width is capped by the
+   height budget, so the player is never letterboxed or squashed */
 .hero__video {
-  width: min(54vw, 840px);
-  max-height: 46vh;
+  width: min(46vw, calc(40vh * 16 / 9));
   aspect-ratio: 16 / 9;
   border: 0;
   border-radius: 16px;
@@ -579,7 +616,7 @@ body {
 .shelf {
   flex: 0 0 auto;
   display: flex;
-  gap: 11px;
+  gap: clamp(18px, 2.2vw, 40px); align-items: center;
   overflow-x: auto;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
@@ -625,6 +662,30 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
   height: clamp(120px, 17vh, 165px);
   width: auto;
   display: block;
+}
+
+/* plain text links, no boxes */
+.plink {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 9px;
+  color: var(--chrome);
+  font-size: .84rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  text-decoration-color: var(--glass-line);
+  transition: color .18s var(--ease);
+  animation: rise .42s var(--ease) both;
+  animation-delay: calc(180ms + var(--i, 0) * 45ms);
+}
+.plink:hover { color: var(--yellow); }
+.plink__host {
+  font-family: 'Space Mono', monospace;
+  font-size: .68rem;
+  font-weight: 400;
+  color: var(--chrome-dim);
 }
 
 .card__kicker { font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: var(--yellow); }
