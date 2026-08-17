@@ -210,21 +210,27 @@ body {
 .cat:hover { opacity: .75; }
 .cat.is-on { opacity: 1; }
 
+/* Cover-switch cards (Compiz Shift "Cover" / CoverflowAltTab grammar): every
+   card the SAME size. The selected one faces the camera flat and slightly
+   forward; cards before it tilt toward the centre, cards after it mirror.
+   Selection reads from the tilt, the ring and the glow — never from scale. */
 .cat__icon {
-  width: var(--cat);
-  height: var(--cat);
+  width: var(--catf);
+  height: var(--catf);
   border-radius: 14px;
   display: grid;
   place-items: center;
   overflow: hidden;
   background: color-mix(in oklab, var(--key) 55%, var(--void));
-  transition: width .3s var(--ease-back), height .3s var(--ease-back),
-              box-shadow .28s var(--ease), transform .3s var(--ease-back);
+  transition: box-shadow .28s var(--ease), transform .38s var(--ease-back);
 }
+/* Per-card perspective, not a shared one: a shared vanishing point sits at
+   the bar's centre, so distant cards barely foreshorten — every card gets
+   the identical camera, which is what keeps a strip looking uniform. */
+.cat--before .cat__icon { transform: perspective(640px) rotateY(34deg)  translateZ(-22px); }
+.cat--after  .cat__icon { transform: perspective(640px) rotateY(-34deg) translateZ(-22px); }
 .cat.is-on .cat__icon {
-  width: var(--catf);
-  height: var(--catf);
-  transform: translateY(-3px);
+  transform: perspective(640px) translateY(-3px) translateZ(16px);
   box-shadow:
     0 0 0 2px var(--yellow),
     0 16px 40px -12px color-mix(in oklab, var(--key) 85%, transparent);
@@ -232,11 +238,10 @@ body {
 .cat__icon img { width: 66%; height: 66%; object-fit: contain; }
 .cat__mark {
   font-family: 'Anton', sans-serif;
-  font-size: calc(var(--cat) * .5);
+  font-size: calc(var(--catf) * .5);
   line-height: 1;
   color: rgba(255, 255, 255, .93);
 }
-.cat.is-on .cat__mark { font-size: calc(var(--catf) * .5); }
 
 .cat__label {
   font-size: .6rem;
