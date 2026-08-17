@@ -148,6 +148,17 @@ export function initXmb() {
     put(heroEl, 'hero__title', item.title, 'h1');
     put(heroEl, 'hero__meta', item.meta);
 
+    /* the primary action lives WITH the heading (and on the logo below),
+       not out on the rail — the rail keeps only extra links */
+    if (item.action) {
+      const a = document.createElement('a');
+      a.className = 'hero__act';
+      a.href = item.action.href;
+      if (!item.action.href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
+      a.textContent = item.action.label;
+      heroEl.appendChild(a);
+    }
+
     const photos = item.photos || [];
     const vid = item.video
       ? (item.video.match(/(?:youtu\.be\/|[?&]v=)([\w-]{6,})/) || [])[1]
@@ -179,17 +190,24 @@ export function initXmb() {
       img.className = 'hero__logo';
       img.src = item.icon ? 'assets/afaicon.png' : 'assets/' + item.logo;
       img.alt = '';
-      heroEl.appendChild(img);
+      if (item.action) {
+        /* the logo itself is the action too */
+        const a = document.createElement('a');
+        a.href = item.action.href;
+        if (!item.action.href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
+        a.appendChild(img);
+        heroEl.appendChild(a);
+      } else {
+        heroEl.appendChild(img);
+      }
     }
 
     /* the right rail: links on top, then the words */
     keyartEl.className = 'keyart-rail';
     keyartEl.replaceChildren();
+    /* the rail carries only EXTRA links (blogs, spaces …) — the primary
+       action sits with the heading, the video is embedded already */
     const links = [];
-    /* never duplicate the embedded player as a link */
-    if (item.action && !(vid && /youtu/.test(item.action.href))) {
-      links.push({ title: item.action.label, href: item.action.href, host: null });
-    }
     (item.cards || []).forEach(c => {
       if (c.href) links.push({ title: c.title, href: c.href, host: c.body });
     });
@@ -313,8 +331,8 @@ export function initXmb() {
   }
 
   function act() {
-    /* enter opens the item's first link, which lives on the right rail */
-    const a = keyartEl.querySelector('a');
+    /* enter opens the primary action at the heading, else a rail link */
+    const a = heroEl.querySelector('a') || keyartEl.querySelector('a');
     if (a) a.click();
   }
 

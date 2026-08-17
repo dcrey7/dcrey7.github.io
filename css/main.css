@@ -180,8 +180,8 @@ body {
   font-weight: 300;
   white-space: normal;
   letter-spacing: 0;
-  font-size: .92rem;
-  line-height: 1.55;
+  font-size: 1.14rem;   /* the written stuff takes real space */
+  line-height: 1.6;
   color: #C9CDD4;
   margin-bottom: 14px;
   max-height: 36vh;
@@ -568,6 +568,8 @@ body {
   font-family: 'Anton', sans-serif;
   font-weight: 400;
   font-size: clamp(1.8rem, 3vw, 4.2rem);   /* small: the media is the star */
+  margin-left: -.045em;   /* optical: Anton's side bearing pushed the huge
+                             glyphs visually right of the eyebrow above */
   line-height: .88;
   letter-spacing: -.02em;
   text-transform: uppercase;
@@ -575,6 +577,19 @@ body {
   text-wrap: balance;
 }
 .hero__meta { font-family: 'Space Mono', monospace; font-size: .72rem; color: var(--chrome-dim); }
+
+/* the primary action, embedded with the heading */
+.hero__act {
+  font-size: .92rem;
+  font-weight: 600;
+  color: var(--chrome);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  text-decoration-color: var(--glass-line);
+  transition: color .18s var(--ease);
+}
+.hero__act:hover { color: var(--yellow); }
+.hero > a { align-self: flex-start; }   /* a linked logo stays left */
 .hero__body {
   font-size: .88rem; line-height: 1.55; color: #C9CDD4;
   max-width: 56ch;
@@ -589,10 +604,10 @@ body {
 .hero__bullets {
   list-style: none;
   display: grid;
-  gap: 7px;
+  gap: 10px;
   max-width: 60ch;
-  font-size: .88rem;
-  line-height: 1.5;
+  font-size: 1.05rem;
+  line-height: 1.55;
   color: #C9CDD4;
 }
 .hero__bullets li { padding-left: 1.1em; position: relative; }
@@ -615,7 +630,8 @@ body {
    height budget, so the player is never letterboxed or squashed */
 .hero__video {
   /* as big as the middle third allows */
-  width: min(100%, calc(64vh * 16 / 9));
+  /* fill the middle third: whichever of width or height runs out first */
+  width: min(100%, calc((100vh - clamp(260px, 30vh, 380px)) * 16 / 9));
   aspect-ratio: 16 / 9;
   border: 0;
   border-radius: 16px;

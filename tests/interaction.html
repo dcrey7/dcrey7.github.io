@@ -53,7 +53,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   say('play has 6 items (media-less projects cut)', nItems(), 6);
   press('ArrowDown'); await wait();
   say('play item 2', item(), 'MEMORY BRIDGEAI');
-  say('rail link opens the story', d.querySelector('#keyart a').getAttribute('href').includes('linkedin.com'), 'true');
+  say('primary action embedded at the heading', d.querySelector('.hero a').getAttribute('href').includes('linkedin.com'), 'true');
 
   press('ArrowLeft'); press('ArrowLeft'); await wait();
   say('back to WORK', cat(), 'WORK');
