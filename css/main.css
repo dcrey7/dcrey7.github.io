@@ -159,12 +159,20 @@ body {
 /* ---------- horizontal axis: categories ---------- */
 
 /* Categories sliding past the edges fade out instead of being cut by the
-   overflow — a hard clip reads as a line across the icon mid-slide. */
+   overflow — a hard clip reads as a line across the icon mid-slide.
+
+   The vertical padding is glow room: the active icon's shadow reaches ~45px
+   below it, and clipping it at the box edge drew a straight line right above
+   the item column, exposing the container. The padding shows the glow inside
+   the overflow box; the negative margins give the space back to the layout. */
 .barwrap {
   flex: 0 0 auto;
   overflow: hidden;
-  padding: 20px 0 14px;
-  margin-top: -20px;
+  padding: 20px 0 52px;
+  margin: -20px 0 -38px;
+  position: relative;
+  z-index: 1;           /* glow may bleed over the column area, never under a box edge */
+  pointer-events: none;
   mask-image: linear-gradient(to right,
     transparent 0, #000 clamp(28px, 3.5vw, 56px),
     #000 calc(100% - clamp(40px, 6vw, 90px)), transparent 100%);
@@ -172,6 +180,7 @@ body {
     transparent 0, #000 clamp(28px, 3.5vw, 56px),
     #000 calc(100% - clamp(40px, 6vw, 90px)), transparent 100%);
 }
+.barwrap .bar { pointer-events: auto; }
 
 .bar {
   display: flex;

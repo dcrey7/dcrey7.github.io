@@ -67,13 +67,16 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   press('ArrowLeft'); await wait();
   say('PEOPLE has 16 items', nItems(), 16);
 
-  /* --- clamping --- */
-  for (let i = 0; i < 25; i++) press('ArrowDown');
+  /* --- items are circular, like the category bar --- */
+  for (let i = 0; i < 15; i++) press('ArrowDown');
   await wait();
-  say('item clamps at end', item(), 'DEVESH SINGH');
-  for (let i = 0; i < 25; i++) press('ArrowUp');
-  await wait();
-  say('item clamps at start', item(), 'PHILIPPE FRAISSE');
+  say('reaches the last item', item(), 'DEVESH SINGH');
+  press('ArrowDown'); await wait();
+  say('down past the end wraps to the first', item(), 'PHILIPPE FRAISSE');
+  press('ArrowUp'); await wait();
+  say('up past the start wraps to the last', item(), 'DEVESH SINGH');
+  d.querySelectorAll('.item')[0].click(); await wait();
+  say('back at the first item', item(), 'PHILIPPE FRAISSE');
 
   /* --- category wraps, matching a console bar --- */
   for (let i = 0; i < 3; i++) { press('ArrowRight'); await wait(); }
@@ -152,7 +155,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
     + parseFloat((track.style.transform.match(/-?[\d.]+/) || [0])[0]);
   say('previous item occupies the reserved row', Math.abs(aboveY) <= 1, 'true');
   /* back at the first item: flush under the category, no gap, no top fade */
-  for (let i = 0; i < 25; i++) press('ArrowUp');
+  d.querySelectorAll('.item')[0].click();
   await new Promise(r => setTimeout(r, 250));
   const headY = parseFloat((track.style.transform.match(/-?[\d.]+/) || [0])[0])
     + d.querySelector('.item.is-on').offsetTop;

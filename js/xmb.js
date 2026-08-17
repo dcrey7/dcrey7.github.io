@@ -208,7 +208,9 @@ export function initXmb() {
 
   function setItem(i, quiet) {
     const items = CATEGORIES[catI].items;
-    itemOf[catI] = Math.max(0, Math.min(items.length - 1, i));
+    /* circular, like the category bar: past the last item you are back at
+       the first — the column takes the long slide home, same as the bar */
+    itemOf[catI] = ((i % items.length) + items.length) % items.length;
     const item = items[itemOf[catI]];
 
     [...colTrack.children].forEach((el, n) => {
