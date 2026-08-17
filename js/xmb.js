@@ -7,7 +7,7 @@
 
    Skin is PS5: near-black, one key colour per item driving the whole screen. */
 
-import { MOBILE, emit } from './config.js';
+import { emit } from './config.js';
 import { CATEGORIES } from './menu.js';
 
 const $ = s => document.querySelector(s);
@@ -172,16 +172,21 @@ export function initXmb() {
   }
 
   /* ---------- movement ---------- */
-  /* Both axes keep one neighbour visible behind the selection, so you can
-     always see where you came from. Clamped at 0 so the first entry never
-     leaves a gap. */
+  /* The crosspoint. The bar slides so the active category always lands on the
+     same x, and that x is published as --crossx so the item column can hang
+     directly beneath it. That alignment is what makes this a cross rather than
+     a bar with a list next to it.
+
+     One category width of inset keeps the previous category visible. Clamped
+     at 0 so the first category never leaves a gap on the left. */
   function slideBar() {
     const el = barEl.children[catI];
     if (!el) return;
-    const anchor = MOBILE()
-      ? (barEl.parentElement.clientWidth - el.offsetWidth) / 2
-      : el.offsetWidth + 24;
-    barEl.style.transform = `translateX(${Math.min(0, Math.round(anchor - el.offsetLeft))}px)`;
+    const inset = el.offsetWidth + 24;
+    const x = Math.min(0, Math.round(inset - el.offsetLeft));
+    barEl.style.transform = `translateX(${x}px)`;
+    /* Where the active category actually ended up, after the clamp. */
+    document.documentElement.style.setProperty('--crossx', (el.offsetLeft + x) + 'px');
   }
 
   function slideColumn() {

@@ -113,6 +113,45 @@ delete   js/home.js  js/tiles.js
 3. Decide whether items should wrap like categories do.
 4. Merge to `main` when Abhishek says so. He has not.
 
+---
+
+# 16:52 — making the cross actually cross
+
+Abhishek: *"the vertical cross media bar should be exactly below the main
+selection."* Right, and it wasn't. The item column sat in a fixed left gutter
+while the category bar slid above it, so the two axes never met. That is a bar
+with a list beside it, not a cross.
+
+**Fix.** `slideBar()` already parks the active category on a fixed x. It now
+publishes that x as `--crossx`, and the column takes `margin-left: var(--crossx)`
+with a matching transition. The column hangs from exactly where the category
+landed, at every category, including the clamped first one.
+
+Also removed the `translateX(6px)` nudge on the selected row. It was a nice
+selection affordance but it broke the alignment by 6px, and "exactly below"
+wins. The yellow ring and the weight already carry the state.
+
+**Measured** (`--crossx` versus the category's settled x, in layout units):
+
+```
+ABOUT    categoryX=0.0    columnX=0.0
+WORK     categoryX=106.0  columnX=106.0
+PLAY     categoryX=106.0  columnX=106.0
+CONTACT  categoryX=106.0  columnX=106.0
+```
+
+Every category after the first parks on the same crosspoint; ABOUT clamps to 0
+so it never leaves a gap at the left edge. **40/40 assertions pass.**
+
+**Test lesson, repeated.** The first version of the alignment test compared
+`getBoundingClientRect()` values and reported three failures the code was not
+producing — mid-transition a rect returns an intermediate position, and under
+Chrome's virtual time the wait does not settle it. It reported `icon.left=-21`,
+a value the code cannot produce at rest. The test now compares `offsetLeft`
+(which ignores transforms) against the inline transform target. Measure layout,
+never the animation — this is the second time this has bitten in this project.
+
 ## Changelog
 
+- 2026-08-17 16:52 CEST — Column now hangs under the active category (`--crossx`).
 - 2026-08-17 16:36 CEST — XMB rebuild; four bugs fixed; logos wired but unshipped.

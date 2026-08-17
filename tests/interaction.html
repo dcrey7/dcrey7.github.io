@@ -94,6 +94,33 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   say('key art holds exactly one mark', d.getElementById('keyart').childNodes.length, 1);
   say('no stray logo images left', d.querySelectorAll('#keyart img').length, 0);
 
+  /* --- the cross must actually cross: the item column hangs directly under
+         the active category's icon, at every category --- */
+  /* Compare LAYOUT values, never rendered ones: mid-transition a rect returns
+     an intermediate position, which made an earlier version of this test
+     report failures the code was not actually producing. offsetLeft ignores
+     transforms, and the inline transform holds the settled target. */
+  const alignedAt = async name => {
+    const idx = [...d.querySelectorAll('.cat')].findIndex(
+      c => c.querySelector('.cat__label').textContent === name);
+    d.querySelectorAll('.cat')[idx].click();
+    await new Promise(r => setTimeout(r, 250));
+
+    const bar  = d.getElementById('bar');
+    const cat  = d.querySelector('.cat.is-on');
+    const barX = parseFloat((bar.style.transform.match(/-?[\d.]+/) || [0])[0]);
+    const categoryX = cat.offsetLeft + barX;          // where the icon settles
+    const columnX = parseFloat(
+      w.getComputedStyle(d.documentElement).getPropertyValue('--crossx')) || 0;
+
+    log.push(`      ${name}: categoryX=${categoryX.toFixed(1)} columnX=${columnX.toFixed(1)}`);
+    return Math.abs(categoryX - columnX) <= 1;
+  };
+  say('column aligns under ABOUT',    await alignedAt('ABOUT'),    'true');
+  say('column aligns under WORK',     await alignedAt('WORK'),     'true');
+  say('column aligns under PLAY',     await alignedAt('PLAY'),     'true');
+  say('column aligns under CONTACT',  await alignedAt('CONTACT'),  'true');
+
   const fails = log.filter(l => l.startsWith('FAIL')).length;
   document.getElementById('out').textContent =
     log.join('\n') + `\n\n${log.length - fails}/${log.length} passed`;
