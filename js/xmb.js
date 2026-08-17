@@ -213,33 +213,11 @@ export function initXmb() {
     itemOf[catI] = ((i % items.length) + items.length) % items.length;
     const item = items[itemOf[catI]];
 
-    /* The drum (iOS picker wheel): rows sit on a cylinder. The selected row
-       is flat and front; each row above/below rotates A degrees further
-       around the X axis and its spacing compresses toward the rim
-       (R·sin instead of linear). R is chosen so the immediate neighbours
-       keep exactly one row of pitch — the reserved-row geometry the rest of
-       the cross depends on is untouched. Transforms only; layout never moves. */
-    const rowH = parseFloat(getComputedStyle(document.documentElement)
-      .getPropertyValue('--row')) || 46;
-    const A = 26, R = rowH / Math.sin(A * Math.PI / 180);
     [...colTrack.children].forEach((el, n) => {
-      const d = n - itemOf[catI], k = Math.abs(d);
-      const on = d === 0;
+      const on = n === itemOf[catI];
       el.classList.toggle('is-on', on);
       el.setAttribute('aria-current', String(on));
       el.tabIndex = on ? 0 : -1;
-      if (on) {
-        el.style.transform = '';
-        el.style.opacity = '';
-        el.style.zIndex = 100;
-      } else {
-        const ang = Math.max(-72, Math.min(72, d * A));
-        const ty = Math.round(R * Math.sin(ang * Math.PI / 180) - d * rowH);
-        el.style.transform =
-          `translateY(${ty}px) perspective(520px) rotateX(${-ang}deg)`;
-        el.style.opacity = String(Math.max(.14, .55 - .11 * (k - 1)));
-        el.style.zIndex = 100 - k;
-      }
     });
 
     document.documentElement.style.setProperty('--key', item.key);
