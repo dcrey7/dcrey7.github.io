@@ -334,9 +334,11 @@ body {
   background: color-mix(in oklab, var(--key) 55%, var(--void));
   transition: box-shadow .28s var(--ease), transform .38s var(--ease-back),
               filter .28s var(--ease);
-  /* every card stands on a faint glossy floor, true cover-flow style */
+  /* Every card stands on the same glossy floor. ONE shared gradient for all
+     states: box-reflect cannot animate between gradients, but a constant
+     reflection mirrors the card's own scale/tilt transitions smoothly. */
   -webkit-box-reflect: below 6px
-    linear-gradient(to bottom, transparent 76%, rgba(255, 255, 255, .12));
+    linear-gradient(to bottom, transparent 72%, rgba(255, 255, 255, .16));
 }
 /* Per-card perspective, not a shared one: a shared vanishing point sits at
    the bar's centre, so distant cards barely foreshorten — every card gets
@@ -359,11 +361,9 @@ body {
 /* Selection: full colour, forward, and a soft floor REFLECTION under the
    card (classic cover-switch cap) — no grow, no ring (user rules). */
 .cat.is-on .cat__icon {
-  /* clearly bigger than the side cards */
+  /* clearly bigger than the side cards; its reflection scales along with it
+     smoothly because the gradient never changes */
   transform: perspective(700px) translateZ(14px) scale(1.16);
-  /* no glow — the reflection alone marks the selection */
-  -webkit-box-reflect: below 6px
-    linear-gradient(to bottom, transparent 70%, rgba(255, 255, 255, .22));
 }
 .cat__icon img { width: 66%; height: 66%; object-fit: contain; }
 .cat__mark {
