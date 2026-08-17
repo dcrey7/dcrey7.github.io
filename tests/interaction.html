@@ -65,10 +65,10 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   press('ArrowLeft'); await wait();
   say('back to TROPHIES', cat(), 'TROPHIES');
   press('ArrowLeft'); await wait();
-  say('PEOPLE has 16 items', nItems(), 16);
+  say('PEOPLE has 15 items (photo-less removed)', nItems(), 15);
 
   /* --- items are circular, like the category bar --- */
-  for (let i = 0; i < 15; i++) press('ArrowDown');
+  for (let i = 0; i < 14; i++) press('ArrowDown');
   await wait();
   say('reaches the last item', item(), 'DEVESH SINGH');
   press('ArrowDown'); await wait();

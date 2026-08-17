@@ -46,7 +46,7 @@
   --catw: calc(var(--catf) * 1.6);      /* category card width — landscape,
                                            like the window thumbnails of a
                                            cover-switch alt-tab         */
-  --imark: calc(var(--cat) * .86);      /* item card height            */
+  --imark: calc(var(--cat) * .74);      /* item card height            */
   --imarkw: calc(var(--imark) * 1.6);   /* item card width — same landscape
                                            ratio as the category cards  */
   --row:  calc(var(--imark) + 15px);    /* item row height             */
@@ -71,7 +71,7 @@
    those nodes have no previous state for a transition to interpolate from.
    They get keyframes instead, staggered by --i, which run on creation. */
 @keyframes rise  { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-@keyframes bloom { from { opacity: 0; transform: translateX(26px) scale(.96); } to { opacity: .07; transform: none; } }
+@keyframes bloom { from { opacity: 0; transform: translateX(26px) scale(.96); } to { opacity: var(--ka-op, .07); transform: none; } }
 
 html, body { height: 100%; }
 
@@ -102,8 +102,10 @@ body {
     color-mix(in oklab, var(--key) 12%, var(--void));
 }
 
-/* The key art: the item's own mark or logo, blown up and ghosted. */
+/* The right-side panel. Text marks are ghosted type; a real image (logo,
+   photo) shows in FULL colour as its own box — never a transparent slab. */
 .keyart {
+  --ka-op: .07;
   position: fixed;
   z-index: -2;
   right: 5vw;
@@ -114,13 +116,49 @@ body {
   line-height: .78;
   letter-spacing: -.05em;
   color: #fff;
-  opacity: .07;
+  opacity: var(--ka-op);
   pointer-events: none;
   user-select: none;
   white-space: nowrap;
   animation: bloom .7s var(--ease) both;
 }
 .keyart img { width: clamp(9rem, 32vh, 24rem); display: block; }
+
+/* full-colour treatments sit above the grain, so they stay crisp */
+.keyart.has-img,
+.keyart--media { --ka-op: 1; z-index: 0; }
+.keyart.has-img img {
+  width: clamp(8rem, 26vh, 19rem);
+  border-radius: 18px;
+  box-shadow: 0 26px 70px -24px rgba(0, 0, 0, .65);
+}
+
+/* the event's media, stacked on the middle right: the demo video is the
+   main element when there is one, photos follow with a casual fan */
+.keyart--media {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  white-space: normal;
+}
+.keyart--media iframe {
+  width: clamp(260px, 27vw, 400px);
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 26px 70px -24px rgba(0, 0, 0, .65);
+  pointer-events: auto;   /* the panel itself is pointer-transparent */
+}
+.keyart--media img {
+  width: clamp(200px, 22vw, 330px);
+  max-height: 24vh;
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 22px 60px -22px rgba(0, 0, 0, .6);
+}
+.keyart--media img:nth-child(1) { transform: rotate(-2.2deg); }
+.keyart--media img:nth-child(2) { transform: rotate(1.6deg); }
+.keyart--media img:nth-child(3) { transform: rotate(-1.2deg); }
 
 .grain {
   position: fixed;
@@ -374,6 +412,7 @@ body {
   width: var(--imarkw);
   height: var(--imark);
   border-radius: 10px;
+  transition: transform .3s var(--ease-back);
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -383,16 +422,19 @@ body {
   color: #fff;
 }
 .item__mark img { width: 72%; height: 72%; object-fit: contain; }
-.item.is-on .item__mark { box-shadow: 0 0 0 2px var(--yellow); }
+/* the selected row's icon grows, centre-symmetric like the category card */
+.item.is-on .item__mark { box-shadow: 0 0 0 2px var(--yellow); transform: scale(1.22); }
 
 /* A real image is its OWN box: the coloured slab vanishes and the image
    fills the full row height, rounded like a proper icon. Square logos and
    portraits read as app icons, not stickers on a rectangle. */
-.item__mark.has-img { background: none; }
+.item__mark.has-img { background: none; overflow: visible; }
 .item__mark.has-img img {
+  /* explicit height, never a percentage: inside an auto-row grid a % height
+     cannot resolve and the image blows up to its natural size */
+  height: calc(var(--imark) * 1.22);
   width: auto;
-  height: 100%;
-  max-width: 100%;
+  max-width: calc(var(--imarkw) * 1.22);
   object-fit: contain;
   border-radius: 10px;
 }
@@ -411,20 +453,22 @@ body {
 
 /* ---------- detail ---------- */
 
+/* Heading at the TOP of the detail (right of the vertical menu); the shelf
+   stays pinned to the bottom; the photos live on the middle right. */
 .detail {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: clamp(12px, 2.4vh, 22px);
-  padding-bottom: 4px;
+  padding: 6px 0 4px;
 }
 
 .hero {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 8px;
   min-height: 0;
 }
@@ -454,8 +498,13 @@ body {
 .hero__meta { font-family: 'Space Mono', monospace; font-size: .72rem; color: var(--chrome-dim); }
 .hero__body {
   font-size: .88rem; line-height: 1.55; color: #C9CDD4;
-  max-width: 52ch;
+  max-width: 56ch;
+  /* full recommendation quotes are long — contain them quietly */
+  max-height: 40vh;
+  overflow-y: auto;
+  scrollbar-width: none;
 }
+.hero__body::-webkit-scrollbar { display: none; }
 
 .btn {
   align-self: flex-start;

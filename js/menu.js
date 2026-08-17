@@ -67,8 +67,8 @@ const play = {
     body: p.desc,
     action: p.links[0] || null,
     video: p.video || null,
+    photos: p.photos || [],
     cards: p.links.map(l => ({ kicker: 'OPEN', title: l.label, body: host(l.href), href: l.href }))
-      .concat((p.photos || []).map(f => ({ photo: f })))
   }))
 };
 

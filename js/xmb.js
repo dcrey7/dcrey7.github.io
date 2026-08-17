@@ -116,8 +116,33 @@ export function initXmb() {
 
   /* ---------- detail ---------- */
   function renderItem(item) {
+    /* The right-side panel, in priority order: the demo VIDEO is the main
+       thing when the item has one, the event photos follow, and an item
+       with neither shows its logo (full colour) or the ghosted mark. */
     keyartEl.replaceChildren();
-    markInto(keyartEl, item, 'keyart__mark');
+    keyartEl.classList.remove('has-img');
+    const photos = item.photos || [];
+    const vid = item.video
+      ? (item.video.match(/(?:youtu\.be\/|[?&]v=)([\w-]{6,})/) || [])[1]
+      : null;
+    keyartEl.classList.toggle('keyart--media', !!vid || photos.length > 0);
+    if (vid) {
+      const frame = document.createElement('iframe');
+      frame.src = `https://www.youtube-nocookie.com/embed/${vid}`;
+      frame.title = `${item.title} demo`;
+      frame.loading = 'lazy';
+      frame.allow = 'accelerometer; encrypted-media; picture-in-picture; fullscreen';
+      frame.allowFullscreen = true;
+      keyartEl.appendChild(frame);
+    }
+    photos.slice(0, vid ? 2 : 3).forEach(f => {
+      const img = document.createElement('img');
+      img.src = 'assets/' + f;
+      img.alt = '';
+      img.loading = 'lazy';
+      keyartEl.appendChild(img);
+    });
+    if (!vid && !photos.length) markInto(keyartEl, item, 'keyart__mark');
 
     heroEl.replaceChildren();
     const add = (cls, text, tag = 'p') => {
@@ -152,37 +177,7 @@ export function initXmb() {
     }
 
     shelfEl.replaceChildren();
-
-    /* Demo video first: an embedded player, only ever mounted for the
-       selected item, so at most one iframe exists at a time. */
-    if (item.video) {
-      const id = (item.video.match(/(?:youtu\.be\/|[?&]v=)([\w-]{6,})/) || [])[1];
-      if (id) {
-        const media = document.createElement('article');
-        media.className = 'card card--media';
-        const frame = document.createElement('iframe');
-        frame.src = `https://www.youtube-nocookie.com/embed/${id}`;
-        frame.title = `${item.title} — demo video`;
-        frame.loading = 'lazy';
-        frame.allow = 'accelerometer; encrypted-media; picture-in-picture; fullscreen';
-        frame.allowFullscreen = true;
-        media.appendChild(frame);
-        shelfEl.appendChild(media);
-      }
-    }
-
     (item.cards || []).forEach(c => {
-      if (c.photo) {
-        const el = document.createElement('article');
-        el.className = 'card card--photo';
-        const img = document.createElement('img');
-        img.src = 'assets/' + c.photo;
-        img.alt = '';
-        img.loading = 'lazy';
-        el.appendChild(img);
-        shelfEl.appendChild(el);
-        return;
-      }
       const el = document.createElement(c.href ? 'a' : 'article');
       el.className = 'card';
       if (c.href) { el.href = c.href; el.target = '_blank'; el.rel = 'noopener'; }
