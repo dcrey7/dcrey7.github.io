@@ -184,11 +184,9 @@ body {
   line-height: 1.6;
   color: #C9CDD4;
   margin-bottom: 14px;
-  max-height: 36vh;
-  overflow-y: auto;
-  scrollbar-width: none;
+  /* NO height cap: the text uses the full right third — a capped box with a
+     hidden scrollbar read as text cut off mid-sentence */
 }
-.side__desc::-webkit-scrollbar { display: none; }
 
 .keyart--media img {
   width: 100%;
