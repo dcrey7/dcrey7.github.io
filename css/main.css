@@ -41,11 +41,15 @@
   /* One fluid base size; every other dimension of the cross derives from it,
      so the whole thing scales continuously with the viewport — no per-
      breakpoint re-declarations. */
-  --cat:  clamp(46px, 4.6vw, 66px);     /* category icon edge          */
-  --catf: calc(var(--cat) * 1.28);      /* active category icon edge   */
+  --cat:  clamp(46px, 4.6vw, 66px);     /* base size unit              */
+  --catf: calc(var(--cat) * 1.28);      /* category card height        */
+  --catw: calc(var(--catf) * 1.6);      /* category card width — landscape,
+                                           like the window thumbnails of a
+                                           cover-switch alt-tab         */
+  --catgap: clamp(3px, .4vw, 6px);      /* tight: the deck almost touches */
   --imark: calc(var(--cat) * .74);      /* item icon edge              */
   --row:  calc(var(--imark) + 15px);    /* item row height             */
-  --crossx: calc(var(--catf) + 2vw);    /* the crosspoint — NEVER moves */
+  --crossx: calc(var(--catw) + var(--catgap));  /* crosspoint = one slot */
 
   --ease:      cubic-bezier(.22, .61, .36, 1);
   --ease-back: cubic-bezier(.34, 1.28, .64, 1);
@@ -185,7 +189,7 @@ body {
 .bar {
   display: flex;
   align-items: flex-start;
-  gap: clamp(14px, 2.4vw, 30px);
+  gap: var(--catgap);
   width: max-content;
   position: relative;
   will-change: transform;
@@ -194,7 +198,7 @@ body {
 
 .cat {
   flex: 0 0 auto;
-  width: var(--catf);
+  width: var(--catw);
   background: none;
   border: 0;
   cursor: pointer;
@@ -215,9 +219,9 @@ body {
    forward; cards before it tilt toward the centre, cards after it mirror.
    Selection reads from the tilt, the ring and the glow — never from scale. */
 .cat__icon {
-  width: var(--catf);
+  width: var(--catw);
   height: var(--catf);
-  border-radius: 14px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -226,11 +230,21 @@ body {
 }
 /* Per-card perspective, not a shared one: a shared vanishing point sits at
    the bar's centre, so distant cards barely foreshorten — every card gets
-   the identical camera, which is what keeps a strip looking uniform. */
-.cat--before .cat__icon { transform: perspective(640px) rotateY(34deg)  translateZ(-22px); }
-.cat--after  .cat__icon { transform: perspective(640px) rotateY(-34deg) translateZ(-22px); }
+   the identical camera, which is what keeps a strip looking uniform.
+
+   The pivot is the edge FACING the selection: the near edge stays planted
+   next to its neighbour while the far edge swings back, so the tilted cards
+   stay a packed deck instead of splaying apart. */
+.cat--before .cat__icon {
+  transform-origin: right center;
+  transform: perspective(700px) rotateY(38deg) translateZ(-14px);
+}
+.cat--after .cat__icon {
+  transform-origin: left center;
+  transform: perspective(700px) rotateY(-38deg) translateZ(-14px);
+}
 .cat.is-on .cat__icon {
-  transform: perspective(640px) translateY(-3px) translateZ(16px);
+  transform: perspective(700px) translateY(-3px) translateZ(16px);
   box-shadow:
     0 0 0 2px var(--yellow),
     0 16px 40px -12px color-mix(in oklab, var(--key) 85%, transparent);
@@ -243,13 +257,18 @@ body {
   color: rgba(255, 255, 255, .93);
 }
 
+/* Only the selected card is titled — the sides are anonymous thumbnails,
+   exactly as the PS5 rail and an alt-tab switcher both do it. */
 .cat__label {
   font-size: .6rem;
   letter-spacing: .18em;
-  color: var(--chrome-dim);
+  color: var(--chrome);
+  font-weight: 600;
   white-space: nowrap;
+  opacity: 0;
+  transition: opacity .25s var(--ease);
 }
-.cat.is-on .cat__label { color: var(--chrome); font-weight: 600; }
+.cat.is-on .cat__label { opacity: 1; }
 .cat:focus-visible { outline: 2px solid var(--chrome); outline-offset: 3px; }
 
 /* ---------- the cross ---------- */
@@ -274,7 +293,7 @@ body {
 .column {
   flex: 0 0 auto;
   width: clamp(200px, 24vw, 300px);
-  margin-left: calc(var(--crossx) + (var(--catf) - var(--imark)) / 2 - 4px);
+  margin-left: calc(var(--crossx) + (var(--catw) - var(--imark)) / 2 - 4px);
   overflow: hidden;
   position: relative;
   padding-top: 6px;
