@@ -56,7 +56,7 @@
      The deck is drawn purely with transforms over a constant layout pitch
      (one card width), so alignment can never drift: animating layout
      margins was what broke it. */
-  --crossx: calc(var(--catw) * .30);
+  --crossx: calc(var(--catw) * .36);
 
   --ease:      cubic-bezier(.22, .61, .36, 1);
   --ease-back: cubic-bezier(.34, 1.28, .64, 1);
@@ -184,11 +184,13 @@ body {
   position: relative;
   z-index: 1;           /* glow may bleed over the column area, never under a box edge */
   pointer-events: none;
+  /* The left fade must be NARROWER than the reserved slot (--crossx), or the
+     faded neighbour dissolves entirely inside it and the slot reads empty. */
   mask-image: linear-gradient(to right,
-    transparent 0, #000 clamp(28px, 3.5vw, 56px),
+    transparent 0, #000 calc(var(--crossx) * .5),
     #000 calc(100% - clamp(40px, 6vw, 90px)), transparent 100%);
   -webkit-mask-image: linear-gradient(to right,
-    transparent 0, #000 clamp(28px, 3.5vw, 56px),
+    transparent 0, #000 calc(var(--crossx) * .5),
     #000 calc(100% - clamp(40px, 6vw, 90px)), transparent 100%);
 }
 .barwrap .bar { pointer-events: auto; }
