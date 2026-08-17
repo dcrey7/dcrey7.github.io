@@ -151,7 +151,40 @@ a value the code cannot produce at rest. The test now compares `offsetLeft`
 (which ignores transforms) against the inline transform target. Measure layout,
 never the animation — this is the second time this has bitten in this project.
 
+---
+
+# 17:04 — one crosspoint, no clamps
+
+Abhishek: the alignment was inconsistent — ABOUT's column went all the way
+left (into the page margin) while the other categories' columns sat further
+in, and the column floated instead of hanging right below the selection.
+
+He was right, and the cause was the clamping I added at both axes:
+
+- **Horizontal:** `Math.min(0, …)` parked the FIRST category at the page edge
+  (x=0) and every other category at 106px. Two different crosspoints — exactly
+  the inconsistency he saw.
+- **Vertical:** the same clamp parked the first item one row higher than every
+  other item.
+- **Also:** the column was `align-self: center`, so with few items it floated
+  mid-page rather than hanging from the bar.
+
+**Fix:** the crosspoint is now a CSS constant — `--crossx: calc(var(--catf) +
+28px)`, registered with `@property` so JS reads it back as resolved pixels.
+The bar slides so the active category always parks exactly there, with NO
+clamp: on the first category the space to the left is simply empty, the way a
+real XMB leaves it. The column takes `margin-left: var(--crossx)` and
+`align-self: flex-start`, so it never moves at all — it hangs from the fixed
+crosspoint, and the selected item parks at its very top (`-offsetTop`, no
+clamp), directly below the category icon at every index.
+
+**Measured:** categoryX = columnX = **110.0 for every category, ABOUT
+included**; selected-row y = 0.0 at every depth (verified 8 deep in PEOPLE).
+**44/44 assertions pass**, including "ONE crosspoint for every category".
+
 ## Changelog
 
+- 2026-08-17 17:04 CEST — One fixed crosspoint; clamps removed on both axes;
+  column top-anchored. 44/44.
 - 2026-08-17 16:52 CEST — Column now hangs under the active category (`--crossx`).
 - 2026-08-17 16:36 CEST — XMB rebuild; four bugs fixed; logos wired but unshipped.

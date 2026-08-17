@@ -100,7 +100,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
      an intermediate position, which made an earlier version of this test
      report failures the code was not actually producing. offsetLeft ignores
      transforms, and the inline transform holds the settled target. */
-  const alignedAt = async name => {
+  const crossAt = async name => {
     const idx = [...d.querySelectorAll('.cat')].findIndex(
       c => c.querySelector('.cat__label').textContent === name);
     d.querySelectorAll('.cat')[idx].click();
@@ -112,14 +112,28 @@ document.getElementById('f').onload = () => setTimeout(async () => {
     const categoryX = cat.offsetLeft + barX;          // where the icon settles
     const columnX = parseFloat(
       w.getComputedStyle(d.documentElement).getPropertyValue('--crossx')) || 0;
+    const itemY = parseFloat((d.getElementById('columnTrack').style.transform
+      .match(/-?[\d.]+/) || [0])[0])
+      + d.querySelector('.item.is-on').offsetTop;     // selected row's settled y
 
-    log.push(`      ${name}: categoryX=${categoryX.toFixed(1)} columnX=${columnX.toFixed(1)}`);
-    return Math.abs(categoryX - columnX) <= 1;
+    log.push(`      ${name}: categoryX=${categoryX.toFixed(1)} columnX=${columnX.toFixed(1)} itemY=${itemY.toFixed(1)}`);
+    return { ok: Math.abs(categoryX - columnX) <= 1, categoryX, itemY };
   };
-  say('column aligns under ABOUT',    await alignedAt('ABOUT'),    'true');
-  say('column aligns under WORK',     await alignedAt('WORK'),     'true');
-  say('column aligns under PLAY',     await alignedAt('PLAY'),     'true');
-  say('column aligns under CONTACT',  await alignedAt('CONTACT'),  'true');
+  const crosses = {};
+  for (const n of ['ABOUT', 'WORK', 'PLAY', 'PEOPLE', 'CONTACT']) {
+    crosses[n] = await crossAt(n);
+    say(`column aligns under ${n}`, crosses[n].ok, 'true');
+  }
+  const xs = Object.values(crosses).map(c => c.categoryX.toFixed(0));
+  say('ONE crosspoint for every category (first included)', new Set(xs).size, 1);
+  /* walk deep into PEOPLE: the selected row must stay at y=0 at every index */
+  d.querySelectorAll('.cat')[3].click(); await wait();
+  for (let i = 0; i < 7; i++) press('ArrowDown');
+  await new Promise(r => setTimeout(r, 250));
+  const track = d.getElementById('columnTrack');
+  const deepY = parseFloat((track.style.transform.match(/-?[\d.]+/) || [0])[0])
+    + d.querySelector('.item.is-on').offsetTop;
+  say('selected row parks at the top at every depth', Math.abs(deepY) <= 1, 'true');
 
   const fails = log.filter(l => l.startsWith('FAIL')).length;
   document.getElementById('out').textContent =

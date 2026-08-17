@@ -11,6 +11,14 @@
   initial-value: #FFC800;
 }
 
+/* The crosspoint: the one fixed x where the active category parks and the
+   item column hangs. Registered so JS can read it back as resolved pixels. */
+@property --crossx {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
 :root {
   --key: #FFC800;
 
@@ -25,6 +33,7 @@
   --cat:  64px;   /* category icon edge          */
   --catf: 82px;   /* active category icon edge   */
   --row:  46px;   /* item row height             */
+  --crossx: calc(var(--catf) + 28px);   /* the crosspoint — NEVER moves */
 
   --ease:      cubic-bezier(.22, .61, .36, 1);
   --ease-back: cubic-bezier(.34, 1.28, .64, 1);
@@ -211,30 +220,29 @@ body {
 
 /* ---------- the cross ---------- */
 
-/* Both halves centre vertically, so the empty space splits above and below
-   instead of pooling in one dead band under the item column. */
 .cross {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
   gap: clamp(20px, 4vw, 56px);
-  align-items: center;
+  align-items: stretch;
 }
 
 /* ---------- vertical axis: items ---------- */
 
-/* --crossx is the x of the active category. The column hangs from exactly
-   there, so the two axes actually cross. */
+/* The column hangs from --crossx — the same fixed x the active category parks
+   on. Both are constants, so the column never moves horizontally at all;
+   only the bar slides. That is what makes the two axes a cross. */
 .column {
   flex: 0 0 auto;
   width: clamp(180px, 21vw, 260px);
-  margin-left: var(--crossx, 0px);
+  margin-left: var(--crossx);
   overflow: hidden;
   position: relative;
   padding-top: 4px;
-  align-self: center;
+  /* hangs from the top, directly below the active category — never centred */
+  align-self: flex-start;
   max-height: 100%;
-  transition: margin-left .46s var(--ease);
   /* the list fades out as it runs past the bottom, so it reads as continuing */
   mask-image: linear-gradient(to bottom, #000 0 72%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, #000 0 72%, transparent 100%);

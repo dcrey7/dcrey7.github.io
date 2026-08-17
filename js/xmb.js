@@ -172,29 +172,32 @@ export function initXmb() {
   }
 
   /* ---------- movement ---------- */
-  /* The crosspoint. The bar slides so the active category always lands on the
-     same x, and that x is published as --crossx so the item column can hang
-     directly beneath it. That alignment is what makes this a cross rather than
-     a bar with a list next to it.
+  /* The crosspoint --crossx is a CONSTANT defined in CSS. The bar slides so
+     the active category always parks exactly there — no clamping. On the
+     first category the space left of the crosspoint is simply empty, the way
+     a real XMB leaves it. The column reads the same constant, so the two
+     always align and the column itself never moves horizontally.
 
-     One category width of inset keeps the previous category visible. Clamped
-     at 0 so the first category never leaves a gap on the left. */
+     Clamping was the bug: it parked the first category at the page edge and
+     every other one 106px in, so the column jumped between two positions. */
+  function crossx() {
+    return parseFloat(getComputedStyle(document.documentElement)
+      .getPropertyValue('--crossx')) || 0;
+  }
+
   function slideBar() {
     const el = barEl.children[catI];
     if (!el) return;
-    const inset = el.offsetWidth + 24;
-    const x = Math.min(0, Math.round(inset - el.offsetLeft));
-    barEl.style.transform = `translateX(${x}px)`;
-    /* Where the active category actually ended up, after the clamp. */
-    document.documentElement.style.setProperty('--crossx', (el.offsetLeft + x) + 'px');
+    barEl.style.transform = `translateX(${Math.round(crossx() - el.offsetLeft)}px)`;
   }
 
+  /* Same rule vertically: the selected item always parks at the very top of
+     the column — directly below the active category — for every index. Items
+     you have passed slide up out of view. */
   function slideColumn() {
     const el = colTrack.children[itemOf[catI]];
     if (!el) return;
-    const row = parseFloat(getComputedStyle(document.documentElement)
-      .getPropertyValue('--row')) || 46;
-    colTrack.style.transform = `translateY(${Math.min(0, Math.round(row - el.offsetTop))}px)`;
+    colTrack.style.transform = `translateY(${-el.offsetTop}px)`;
   }
 
   function setItem(i, quiet) {
