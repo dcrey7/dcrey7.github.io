@@ -30,10 +30,14 @@
   --glass:      rgba(255, 255, 255, .06);
   --glass-line: rgba(255, 255, 255, .12);
 
-  --cat:  64px;   /* category icon edge          */
-  --catf: 82px;   /* active category icon edge   */
-  --row:  46px;   /* item row height             */
-  --crossx: calc(var(--catf) + 28px);   /* the crosspoint — NEVER moves */
+  /* One fluid base size; every other dimension of the cross derives from it,
+     so the whole thing scales continuously with the viewport — no per-
+     breakpoint re-declarations. */
+  --cat:  clamp(46px, 4.6vw, 66px);     /* category icon edge          */
+  --catf: calc(var(--cat) * 1.28);      /* active category icon edge   */
+  --imark: calc(var(--cat) * .74);      /* item icon edge              */
+  --row:  calc(var(--imark) + 15px);    /* item row height             */
+  --crossx: calc(var(--catf) + 2vw);    /* the crosspoint — NEVER moves */
 
   --ease:      cubic-bezier(.22, .61, .36, 1);
   --ease-back: cubic-bezier(.34, 1.28, .64, 1);
@@ -232,11 +236,15 @@ body {
 
 /* The column hangs from --crossx — the same fixed x the active category parks
    on. Both are constants, so the column never moves horizontally at all;
-   only the bar slides. That is what makes the two axes a cross. */
+   only the bar slides. That is what makes the two axes a cross.
+
+   Aligned by CENTRE, not left edge: the item icon's centre line sits on the
+   category icon's centre line, so the margin is crossx plus half the size
+   difference. The extra 4px of item padding (ring room) is subtracted back. */
 .column {
   flex: 0 0 auto;
-  width: clamp(180px, 21vw, 260px);
-  margin-left: var(--crossx);
+  width: clamp(200px, 24vw, 300px);
+  margin-left: calc(var(--crossx) + (var(--catf) - var(--imark)) / 2 - 4px);
   overflow: hidden;
   position: relative;
   padding-top: 4px;
@@ -261,8 +269,10 @@ body {
   min-height: var(--row);
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 6px 10px 6px 0;
+  gap: 13px;
+  /* 4px of left padding is ring room — without it the column's overflow
+     clipped the selected icon's yellow ring into a hard vertical line */
+  padding: 6px 10px 6px 4px;
   background: none;
   border: 0;
   cursor: pointer;
@@ -282,22 +292,22 @@ body {
 
 .item__mark {
   flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+  width: var(--imark);
+  height: var(--imark);
+  border-radius: 12px;
   display: grid;
   place-items: center;
   overflow: hidden;
   background: color-mix(in oklab, var(--key) 62%, var(--void));
   font-family: 'Anton', sans-serif;
-  font-size: .78rem;
+  font-size: calc(var(--imark) * .36);
   color: #fff;
 }
 .item__mark img { width: 72%; height: 72%; object-fit: contain; }
 .item.is-on .item__mark { box-shadow: 0 0 0 2px var(--yellow); }
 
 .item__name {
-  font-size: .78rem;
+  font-size: .84rem;
   letter-spacing: .04em;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -442,15 +452,12 @@ body.booting .xmb, body.booting .topbar { opacity: 0; }
 /* ---------- breakpoints ---------- */
 
 @media (max-width: 1023px) {
-  :root { --cat: 56px; --catf: 70px; --row: 42px; }
-  .cross { grid-template-columns: minmax(160px, 30%) 1fr; }
+  .cross { gap: clamp(16px, 3vw, 32px); }
 }
 
 /* Phones: the cross stacks. Categories across the top, items in a row of
    their own beneath, detail below that — the same two axes, folded. */
 @media (max-width: 759px) {
-  :root { --cat: 48px; --catf: 60px; --row: 38px; }
-
   .brand span, .clock { display: none; }
   .topbar { padding-block: 12px; }
 
