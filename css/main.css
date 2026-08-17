@@ -262,8 +262,11 @@ body {
   transform-origin: left center;
   transform: perspective(700px) rotateY(-38deg) translateZ(-14px);
 }
+/* Bigger AND middle-aligned in one move: scale grows the card symmetrically
+   around its centre, so its centre line stays on the deck's centre line.
+   (A layout size change would shift the grid — transforms only, as ever.) */
 .cat.is-on .cat__icon {
-  transform: perspective(700px) translateY(-3px) translateZ(16px);
+  transform: perspective(700px) translateZ(18px) scale(1.16);
   box-shadow:
     0 0 0 2px var(--yellow),
     0 16px 40px -12px color-mix(in oklab, var(--key) 85%, transparent);
