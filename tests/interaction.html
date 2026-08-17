@@ -1,66 +1,101 @@
-<!DOCTYPE html><meta charset="utf-8"><title>t</title>
-<iframe id="f" src="/?skip" style="width:1200px;height:800px;border:0"></iframe>
+<!DOCTYPE html><meta charset="utf-8"><title>xmb interaction tests</title>
+<style>body{font:13px/1.5 monospace;background:#111;color:#ddd;padding:16px}
+iframe{position:absolute;left:-9999px;width:1440px;height:900px;border:0}</style>
+<iframe id="f" src="/?skip"></iframe>
 <pre id="out">running…</pre>
 <script>
 const log = [];
-const f = document.getElementById('f');
 const say = (name, got, want) =>
-  log.push(`${got === want ? 'PASS' : 'FAIL'}  ${name}: got "${got}" want "${want}"`);
+  log.push(`${String(got) === String(want) ? 'PASS' : 'FAIL'}  ${name}: got "${got}" want "${want}"`);
 
-f.onload = () => setTimeout(async () => {
+document.getElementById('f').onload = () => setTimeout(async () => {
+  const f = document.getElementById('f');
   const w = f.contentWindow, d = f.contentDocument;
-  const label = () => d.getElementById('railLabel').textContent;
+
+  const wait = () => new Promise(r => setTimeout(r, 130));
+  const press = k => w.dispatchEvent(new w.KeyboardEvent('keydown', { key: k, bubbles: true }));
+  const cat   = () => d.querySelector('.cat.is-on .cat__label').textContent;
+  const item  = () => d.querySelector('.item.is-on .item__name').textContent;
   const hero  = () => d.querySelector('.hero__title').textContent;
   const key   = () => d.documentElement.style.getPropertyValue('--key').trim();
-  const tab   = () => d.querySelector('.tab.is-on').textContent;
-  const wait  = () => new Promise(r => setTimeout(r, 120));
-  const press = k => w.dispatchEvent(new w.KeyboardEvent('keydown', { key: k, bubbles: true }));
+  const nItems= () => d.querySelectorAll('.item').length;
 
-  say('initial tile', label(), 'AI ENGINEER');
-  say('initial tab', tab(), 'WORK');
+  /* --- the two axes --- */
+  say('starts on ABOUT', cat(), 'ABOUT');
+  say('about has 3 items', nItems(), 3);
 
   press('ArrowRight'); await wait();
-  say('ArrowRight moves', label(), 'VISTIQ.AI');
-  say('hero follows', hero(), 'VISTIQ.AI');
+  say('right moves category', cat(), 'WORK');
+  say('work has 5 items', nItems(), 5);
+  say('first job selected', item(), 'VISTIQ.AI');
+  say('hero follows item', hero(), 'VISTIQ.AI');
   say('key colour follows', key(), '#2F6BFF');
 
-  press('ArrowRight'); press('ArrowRight'); await wait();
-  say('ArrowRight x2', label(), 'EXL SERVICES');
-
-  press('ArrowLeft'); await wait();
-  say('ArrowLeft moves back', label(), 'AXA FRANCE');
-
   press('ArrowDown'); await wait();
-  say('ArrowDown switches tab', tab(), 'PLAY');
-  say('play rail loaded', label(), 'AI ENGINEER');
+  say('down moves item', item(), 'AXA FRANCE');
+  say('hero follows down', hero(), 'AXA FRANCE');
+  say('colour follows down', key(), '#1B34C8');
+  say('category unchanged', cat(), 'WORK');
 
-  press('ArrowRight'); await wait();
-  say('play tile 1', label(), 'KICKY AI');
-  say('badge renders', d.querySelector('.hero__badge').textContent.includes('MISSION PASSED'), true);
-  say('action button', d.querySelector('.btn').getAttribute('href'),
-      'https://www.youtube.com/watch?v=knL8shghyBU');
+  press('ArrowDown'); press('ArrowDown'); await wait();
+  say('down x2', item(), 'MATHCO');
 
   press('ArrowUp'); await wait();
-  say('ArrowUp returns tab', tab(), 'WORK');
-  say('work focus remembered', label(), 'AXA FRANCE');
+  say('up moves back', item(), 'EXL SERVICES');
 
-  /* clicking a tile focuses it */
-  d.querySelectorAll('.tile')[6].click(); await wait();
-  say('click focuses tile', label(), 'PEOPLE SAY');
-  say('16 quote cards', d.querySelectorAll('#shelf .card').length, 16);
+  /* --- each category remembers its own item --- */
+  press('ArrowRight'); await wait();
+  say('right to PLAY', cat(), 'PLAY');
+  say('play has 8 items', nItems(), 8);
+  press('ArrowDown'); await wait();
+  say('play item 2', item(), 'MEMORY BRIDGEAI');
+  say('badge renders', d.querySelector('.hero__badge').textContent.includes('MISSION PASSED'), 'true');
+  say('action href', d.querySelector('.btn').getAttribute('href').includes('linkedin.com'), 'true');
 
-  /* left edge does not run off the end */
-  press('ArrowLeft'); press('ArrowLeft'); press('ArrowLeft');
-  press('ArrowLeft'); press('ArrowLeft'); press('ArrowLeft');
-  press('ArrowLeft'); press('ArrowLeft'); await wait();
-  say('clamps at start', label(), 'AI ENGINEER');
+  press('ArrowLeft'); await wait();
+  say('back to WORK', cat(), 'WORK');
+  say('WORK remembered its item', item(), 'EXL SERVICES');
 
-  for (let i = 0; i < 20; i++) press('ArrowRight');
+  press('ArrowRight'); await wait();
+  say('PLAY remembered its item', item(), 'MEMORY BRIDGEAI');
+
+  /* --- the long category --- */
+  for (let i = 0; i < 3; i++) { press('ArrowRight'); await wait(); }
+  say('reached CONTACT', cat(), 'CONTACT');
+  press('ArrowLeft'); await wait();
+  say('back to TROPHIES', cat(), 'TROPHIES');
+  press('ArrowLeft'); await wait();
+  say('PEOPLE has 16 items', nItems(), 16);
+
+  /* --- clamping --- */
+  for (let i = 0; i < 25; i++) press('ArrowDown');
   await wait();
-  say('clamps at end', label(), 'GET IN TOUCH');
+  say('item clamps at end', item(), 'DEVESH SINGH');
+  for (let i = 0; i < 25; i++) press('ArrowUp');
+  await wait();
+  say('item clamps at start', item(), 'PHILIPPE FRAISSE');
+
+  /* --- category wraps, matching a console bar --- */
+  for (let i = 0; i < 3; i++) { press('ArrowRight'); await wait(); }
+  say('category wraps past the end', cat(), 'ABOUT');
+
+  /* --- clicking --- */
+  d.querySelectorAll('.cat')[4].click(); await wait();
+  say('click selects category', cat(), 'TROPHIES');
+  d.querySelectorAll('.item')[2].click(); await wait();
+  say('click selects item', item(), '2');
+
+  /* --- no logo file exists yet, so every mark must fall back cleanly --- */
+  d.querySelectorAll('.cat')[1].click(); await wait();
+  await new Promise(r => setTimeout(r, 400));
+  const ka = d.getElementById('keyart').textContent.trim();
+  const selectedMark = d.querySelector('.item.is-on .item__glyph').textContent.trim();
+  say('key art matches the selected item', ka, selectedMark);
+  say('key art holds exactly one mark', d.getElementById('keyart').childNodes.length, 1);
+  say('no stray logo images left', d.querySelectorAll('#keyart img').length, 0);
 
   const fails = log.filter(l => l.startsWith('FAIL')).length;
   document.getElementById('out').textContent =
     log.join('\n') + `\n\n${log.length - fails}/${log.length} passed`;
-}, 700);
+}, 800);
 </script>

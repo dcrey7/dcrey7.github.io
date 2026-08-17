@@ -3,7 +3,7 @@
 import { emit, REDUCED } from './config.js';
 
 export function initBoot() {
-  const bar   = document.getElementById('bar');
+  const bar   = document.getElementById('bar-fill');
   const start = document.getElementById('start');
   const boot  = document.getElementById('boot');
   let ready = false, done = false, pct = 0;

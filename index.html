@@ -6,7 +6,7 @@
 <title>ABHISHEK THOMAS — AI Engineer</title>
 <meta name="description" content="Abhishek Thomas — AI engineer in Paris. LLM evals, RAG, agents. Five years turning data science into shipped systems.">
 <meta property="og:title" content="ABHISHEK THOMAS — AI Engineer">
-<meta property="og:description" content="A portfolio that boots like a console: one rail, one screen, no scrolling.">
+<meta property="og:description" content="A portfolio built as a console cross media bar: categories across, items down.">
 <meta property="og:image" content="https://dcrey7.github.io/assets/afaicon.png">
 <meta property="og:url" content="https://dcrey7.github.io/">
 <meta name="theme-color" content="#08090B">
@@ -27,26 +27,30 @@
     <img src="assets/afaicon.png" alt="">
     <span>DCREY7</span>
   </div>
-  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
   <div class="sys">
     <button class="sysbtn" id="sndBtn" aria-pressed="false" aria-label="Sound off">♪</button>
     <time class="clock" id="clock"></time>
   </div>
 </header>
 
-<main class="home">
+<main class="xmb">
 
-  <div class="railwrap">
-    <div class="rail" id="rail" role="tablist" aria-label="Tiles">
-      <div class="rail__track" id="railTrack"></div>
-    </div>
-    <p class="rail__label" id="railLabel"></p>
-    <div class="dots" id="dots" aria-hidden="true"></div>
+  <!-- horizontal axis: categories -->
+  <div class="barwrap">
+    <div class="bar" id="bar" role="tablist" aria-label="Categories"></div>
   </div>
 
-  <section class="hero" id="hero" aria-live="polite"></section>
+  <!-- the cross: vertical axis on the left, detail on the right -->
+  <div class="cross">
+    <div class="column" id="column" aria-label="Items">
+      <div class="column__track" id="columnTrack"></div>
+    </div>
 
-  <div class="shelf" id="shelf" aria-label="Details"></div>
+    <div class="detail">
+      <section class="hero" id="hero" aria-live="polite"></section>
+      <div class="shelf" id="shelf" aria-label="Details"></div>
+    </div>
+  </div>
 
 </main>
 
@@ -54,9 +58,9 @@
   <img class="boot__mark" src="assets/afaicon.png" alt="afaicon — hand-drawn yellow smiley">
   <h1 class="boot__title">ABHISHEK THOMAS</h1>
   <p class="boot__sub">AI ENGINEER · PARIS</p>
-  <div class="loadbar" aria-hidden="true"><i id="bar"></i></div>
+  <div class="loadbar" aria-hidden="true"><i id="bar-fill"></i></div>
   <button class="boot__start" id="start">PRESS START</button>
-  <p class="boot__hint" id="tip">← → browse · ↑ ↓ switch · enter opens</p>
+  <p class="boot__hint" id="tip">← → categories · ↑ ↓ items · enter opens</p>
 </div>
 
 <script type="module" src="js/main.js"></script>

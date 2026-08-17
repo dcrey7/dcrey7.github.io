@@ -1,17 +1,21 @@
-/* Boot order: home screen renders → boot gate → sound → clock. */
+/* Boot order: cross media bar renders → boot gate → sound → clock. */
 
-import { initHome } from './home.js';
+import { initXmb } from './xmb.js';
 import { initBoot } from './boot.js';
 import { initSound } from './sound.js';
 
-const home = initHome();
+const xmb = initXmb();
 initBoot();
 initSound(document.getElementById('sndBtn'));
 
-/* Deep link: ?tab=play&i=1 opens the rail on a given tile. */
+/* Deep link: ?cat=play&i=1 opens a category on a given item. */
 const q = new URLSearchParams(location.search);
-if (q.has('tab')) home.setTab(q.get('tab') === 'play' ? 1 : 0);
-if (q.has('i'))   home.setFocus(Number(q.get('i')) || 0, true);
+if (q.has('cat')) {
+  const names = ['about', 'work', 'play', 'people', 'trophies', 'contact'];
+  const n = names.indexOf(q.get('cat'));
+  if (n >= 0) xmb.setCat(n, true);
+}
+if (q.has('i')) xmb.setItem(Number(q.get('i')) || 0, true);
 
 /* The clock is pure console theatre, but it is the detail that sells it. */
 const clock = document.getElementById('clock');

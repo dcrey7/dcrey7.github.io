@@ -1,9 +1,9 @@
 /* ABHISHEK THOMAS — portfolio v4
-   PlayStation 5 home screen, painted in the afaicon palette.
+   A Cross Media Bar wearing the PlayStation 5's skin.
 
-   Everything on screen derives from one colour: --key, the focused tile's
-   key colour. Registering it with @property lets the background crossfade
-   when focus moves, which is the whole PS5 effect. */
+   Horizontal = categories, vertical = the items inside one. Everything on
+   screen derives from --key, the selected item's colour. Registering it with
+   @property is what lets the background crossfade instead of snapping. */
 
 @property --key {
   syntax: "<color>";
@@ -22,11 +22,11 @@
   --glass:      rgba(255, 255, 255, .06);
   --glass-line: rgba(255, 255, 255, .12);
 
-  --tile:  92px;   /* rail tile edge          */
-  --tilef: 112px;  /* focused tile edge       */
-  --gap:   14px;
+  --cat:  64px;   /* category icon edge          */
+  --catf: 82px;   /* active category icon edge   */
+  --row:  46px;   /* item row height             */
 
-  --ease: cubic-bezier(.22, .61, .36, 1);
+  --ease:      cubic-bezier(.22, .61, .36, 1);
   --ease-back: cubic-bezier(.34, 1.28, .64, 1);
 
   transition: --key .45s var(--ease);
@@ -35,21 +35,11 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Focus rebuilds the hero, the cards and the key art from scratch, so those
-   nodes have no previous state and a transition has nothing to interpolate.
+/* Selecting rebuilds the hero, the cards and the key art from scratch, so
+   those nodes have no previous state for a transition to interpolate from.
    They get keyframes instead, staggered by --i, which run on creation. */
-@keyframes rise {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: none; }
-}
-@keyframes bloom {
-  from { opacity: 0; transform: translateX(26px) scale(.96); }
-  to   { opacity: .07; transform: none; }
-}
-@keyframes slidein {
-  from { opacity: 0; transform: translateX(-14px); }
-  to   { opacity: 1; transform: none; }
-}
+@keyframes rise  { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes bloom { from { opacity: 0; transform: translateX(26px) scale(.96); } to { opacity: .07; transform: none; } }
 
 html, body { height: 100%; }
 
@@ -64,10 +54,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- background: the colour field + its grain ---------- */
+/* ---------- background ---------- */
 
-/* The glow sits behind the hero, not the corner: with no key art, this is
-   what stops the middle of the screen reading as empty. */
 .field {
   position: fixed;
   inset: 0;
@@ -82,8 +70,7 @@ body {
     color-mix(in oklab, var(--key) 12%, var(--void));
 }
 
-/* The key art. There are no game posters here, so the tile's own mark is
-   blown up and ghosted into the right of the screen — the type is the art. */
+/* The key art: the item's own mark or logo, blown up and ghosted. */
 .keyart {
   position: fixed;
   z-index: -2;
@@ -91,7 +78,7 @@ body {
   top: 44%;
   transform: translateY(-50%);
   font-family: 'Anton', sans-serif;
-  font-size: clamp(8rem, 32vh, 24rem);
+  font-size: clamp(8rem, 30vh, 22rem);
   line-height: .78;
   letter-spacing: -.05em;
   color: #fff;
@@ -101,14 +88,8 @@ body {
   white-space: nowrap;
   animation: bloom .7s var(--ease) both;
 }
-.keyart img {
-  width: clamp(9rem, 34vh, 26rem);
-  display: block;
-}
+.keyart img { width: clamp(9rem, 32vh, 24rem); display: block; }
 
-@media (max-width: 759px) { .keyart { opacity: .05; right: -6vw; top: 40%; } }
-
-/* The signature: fine grain so the flat fields read as printed ink. */
 .grain {
   position: fixed;
   inset: 0;
@@ -125,246 +106,247 @@ body {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: clamp(16px, 4vw, 44px);
-  padding: clamp(14px, 2.2vh, 24px) clamp(16px, 4vw, 52px);
+  padding: clamp(14px, 2.2vh, 22px) clamp(16px, 4vw, 52px);
 }
+.brand { display: flex; align-items: center; gap: 9px; }
+.brand img { width: 24px; height: 24px; }
+.brand span { font-size: .68rem; letter-spacing: .22em; color: var(--chrome-dim); }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex: 0 0 auto;
-}
-.brand img { width: 26px; height: 26px; }
-.brand span {
-  font-size: .7rem;
-  letter-spacing: .22em;
-  color: var(--chrome-dim);
-}
-
-.tabs { display: flex; gap: clamp(14px, 2.6vw, 30px); }
-
-.tab {
-  background: none;
-  border: 0;
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 300;
-  font-size: clamp(.95rem, 2.1vw, 1.3rem);
-  letter-spacing: .1em;
-  color: var(--chrome-dim);
-  padding: 4px 0;
-  transition: color .2s var(--ease);
-}
-.tab.is-on { color: var(--chrome); font-weight: 600; }
-.tab:hover { color: var(--chrome); }
-
-.sys {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: clamp(10px, 2vw, 20px);
-}
-
+.sys { margin-left: auto; display: flex; align-items: center; gap: clamp(10px, 2vw, 18px); }
 .sysbtn {
-  background: none;
-  border: 0;
-  cursor: pointer;
-  color: var(--chrome-dim);
-  font-size: 1.05rem;
-  line-height: 1;
-  padding: 6px;
+  background: none; border: 0; cursor: pointer;
+  color: var(--chrome-dim); font-size: 1.05rem; line-height: 1; padding: 6px;
   transition: color .2s var(--ease);
 }
 .sysbtn:hover { color: var(--chrome); }
 .sysbtn[aria-pressed="true"] { color: var(--yellow); }
-
 .clock {
   font-family: 'Space Mono', monospace;
-  font-size: .78rem;
-  color: var(--chrome-dim);
-  font-variant-numeric: tabular-nums;
+  font-size: .74rem; color: var(--chrome-dim); font-variant-numeric: tabular-nums;
 }
 
-/* ---------- the home screen ---------- */
+/* ---------- layout ---------- */
 
-.home {
+.xmb {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 0 clamp(16px, 4vw, 52px) clamp(14px, 2.4vh, 26px);
+  padding: 0 clamp(16px, 4vw, 52px) clamp(14px, 2.4vh, 24px);
 }
 
-/* ---------- rail ---------- */
+/* ---------- horizontal axis: categories ---------- */
 
-.railwrap { flex: 0 0 auto; }
-
-/* The rail is a window; the track slides inside it. Scrolling was the bug —
-   when every tile fits, there is no overflow, so scrollTo() does nothing and
-   the rail never moves. A translated track always moves. */
-.rail {
+.barwrap {
+  flex: 0 0 auto;
   overflow: hidden;
-  padding: 26px 0;
-  margin: -26px 0;   /* the padding is only breathing room for the focus glow */
-  min-height: calc(var(--tilef) + 20px);
+  padding: 20px 0 14px;
+  margin-top: -20px;
 }
 
-.rail__track {
+.bar {
   display: flex;
-  align-items: center;
-  gap: var(--gap);
+  align-items: flex-start;
+  gap: clamp(14px, 2.4vw, 30px);
   width: max-content;
-  /* Makes the track the offsetParent, so tile.offsetLeft is measured from the
-     track itself and the slide maths cannot be thrown off by an ancestor. */
   position: relative;
   will-change: transform;
   transition: transform .46s var(--ease);
 }
 
-.tile {
+.cat {
   flex: 0 0 auto;
-  width: var(--tile);
-  height: var(--tile);
-  border-radius: 12px;
+  width: var(--catf);
+  background: none;
   border: 0;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  opacity: .4;
+  transition: opacity .28s var(--ease);
+}
+.cat:hover { opacity: .75; }
+.cat.is-on { opacity: 1; }
+
+.cat__icon {
+  width: var(--cat);
+  height: var(--cat);
+  border-radius: 14px;
   display: grid;
   place-items: center;
-  background: color-mix(in oklab, var(--key) 62%, var(--void));
-  opacity: .45;
-  transition:
-    width  .34s var(--ease-back),
-    height .34s var(--ease-back),
-    transform .34s var(--ease-back),
-    opacity .28s var(--ease),
-    box-shadow .28s var(--ease);
+  overflow: hidden;
+  background: color-mix(in oklab, var(--key) 55%, var(--void));
+  transition: width .3s var(--ease-back), height .3s var(--ease-back),
+              box-shadow .28s var(--ease), transform .3s var(--ease-back);
 }
-
-.tile img {
-  width: 68%;
-  height: 68%;
-  object-fit: contain;
-}
-
-/* The mark is the key art — set big, cropped by the tile, sized by how many
-   characters it has so a three-letter mark stays as loud as a one-letter one. */
-.tile__mark {
-  font-family: 'Anton', sans-serif;
-  font-size: calc(var(--tile) * var(--markscale, .6));
-  line-height: .8;
-  letter-spacing: -.04em;
-  color: rgba(255, 255, 255, .93);
-  white-space: nowrap;
-  transform: translateY(2%);
-}
-
-.tile--pinned { border-radius: 50%; }
-
-/* The afaicon is yellow, so it needs a dark face rather than an olive one. */
-.tile--icon { background: color-mix(in oklab, var(--key) 16%, var(--void)); }
-
-.tile:hover { opacity: .8; }
-
-.tile.is-focus {
-  width: var(--tilef);
-  height: var(--tilef);
-  opacity: 1;
-  transform: translateY(-4px);
+.cat.is-on .cat__icon {
+  width: var(--catf);
+  height: var(--catf);
+  transform: translateY(-3px);
   box-shadow:
     0 0 0 2px var(--yellow),
-    0 18px 46px -10px color-mix(in oklab, var(--key) 85%, transparent);
+    0 16px 40px -12px color-mix(in oklab, var(--key) 85%, transparent);
 }
-.tile.is-focus .tile__mark { font-size: calc(var(--tilef) * var(--markscale, .6)); }
-
-.tile:focus-visible { outline: 2px solid var(--chrome); outline-offset: 3px; }
-
-.rail__label {
-  font-size: .74rem;
-  letter-spacing: .2em;
-  color: var(--chrome);
-  margin-top: 2px;
-  min-height: 1.1em;
-  animation: slidein .36s var(--ease) both;
+.cat__icon img { width: 66%; height: 66%; object-fit: contain; }
+.cat__mark {
+  font-family: 'Anton', sans-serif;
+  font-size: calc(var(--cat) * .5);
+  line-height: 1;
+  color: rgba(255, 255, 255, .93);
 }
+.cat.is-on .cat__mark { font-size: calc(var(--catf) * .5); }
 
-/* Phones only — on desktop the rail already shows where you are. */
-.dots { display: none; gap: 5px; margin-top: 10px; }
-.dots i {
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  background: var(--glass-line);
-  transition: background .2s var(--ease), width .2s var(--ease);
+.cat__label {
+  font-size: .6rem;
+  letter-spacing: .18em;
+  color: var(--chrome-dim);
+  white-space: nowrap;
 }
-.dots i.is-on { background: var(--yellow); width: 14px; border-radius: 2px; }
+.cat.is-on .cat__label { color: var(--chrome); font-weight: 600; }
+.cat:focus-visible { outline: 2px solid var(--chrome); outline-offset: 3px; }
 
-/* ---------- hero ---------- */
+/* ---------- the cross ---------- */
 
-/* The hero sits low, just above the shelf — the way a game logo does on the
-   PS5 home screen. The space above it is the glow, and that is deliberate. */
-.hero {
+/* Both halves of the cross centre vertically, so the empty space splits above
+   and below instead of pooling in one dead band under the item column. */
+.cross {
   flex: 1 1 auto;
   min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(190px, 22%) 1fr;
+  gap: clamp(20px, 4vw, 56px);
+  align-items: center;
+}
+
+/* ---------- vertical axis: items ---------- */
+
+.column {
+  overflow: hidden;
+  position: relative;
+  padding-top: 4px;
+  align-self: center;
+  max-height: 100%;
+  /* the list fades out as it runs past the bottom, so it reads as continuing */
+  mask-image: linear-gradient(to bottom, #000 0 72%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 72%, transparent 100%);
+}
+
+.column__track {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  transition: transform .4s var(--ease);
+}
+
+.item {
+  flex: 0 0 auto;
+  min-height: var(--row);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 6px 10px 6px 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  color: var(--chrome-dim);
+  opacity: .5;
+  transition: opacity .24s var(--ease), color .24s var(--ease), transform .24s var(--ease);
+}
+.item:hover { opacity: .85; }
+.item.is-on {
+  opacity: 1;
+  color: var(--chrome);
+  transform: translateX(6px);
+}
+
+.item__mark {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--key) 62%, var(--void));
+  font-family: 'Anton', sans-serif;
+  font-size: .78rem;
+  color: #fff;
+}
+.item__mark img { width: 72%; height: 72%; object-fit: contain; }
+.item.is-on .item__mark { box-shadow: 0 0 0 2px var(--yellow); }
+
+.item__name {
+  font-size: .78rem;
+  letter-spacing: .04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.item.is-on .item__name { font-weight: 600; }
+.item:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+/* ---------- detail ---------- */
+
+.detail {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: clamp(12px, 2.4vh, 22px);
+  padding-bottom: 4px;
+}
+
+.hero {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   gap: 8px;
-  padding: clamp(10px, 2vh, 22px) 0 clamp(18px, 4.5vh, 52px);
+  min-height: 0;
 }
-
-/* Each line arrives a beat after the one above it. */
 .hero > * {
   animation: rise .44s var(--ease) both;
   animation-delay: calc(var(--i, 0) * 55ms);
 }
 
 .hero__badge {
-  font-size: .68rem;
-  letter-spacing: .2em;
-  color: var(--yellow);
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  font-size: .66rem; letter-spacing: .2em; color: var(--yellow);
+  display: flex; align-items: center; gap: 10px;
 }
-.hero__badge .stars { letter-spacing: .1em; }
-
 .hero__sub {
-  font-size: .74rem;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  color: var(--chrome-dim);
+  font-size: .72rem; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--chrome-dim);
 }
-
 .hero__title {
   font-family: 'Anton', sans-serif;
   font-weight: 400;
-  font-size: clamp(3rem, 9.5vw, 7.2rem);
-  line-height: .84;
+  font-size: clamp(2.2rem, 6.4vw, 5.4rem);
+  line-height: .88;
   letter-spacing: -.02em;
   text-transform: uppercase;
-  max-width: 15ch;
+  max-width: 16ch;
   text-wrap: balance;
 }
-
-.hero__meta {
-  font-family: 'Space Mono', monospace;
-  font-size: .74rem;
-  color: var(--chrome-dim);
+.hero__meta { font-family: 'Space Mono', monospace; font-size: .72rem; color: var(--chrome-dim); }
+.hero__body {
+  font-size: .88rem; line-height: 1.55; color: #C9CDD4;
+  max-width: 52ch;
 }
 
 .btn {
   align-self: flex-start;
-  margin-top: 6px;
-  display: inline-block;
-  padding: 11px 22px;
+  margin-top: 4px;
+  padding: 10px 20px;
   border-radius: 999px;
   background: var(--chrome);
   color: var(--void);
-  font-size: .78rem;
-  font-weight: 600;
-  letter-spacing: .08em;
+  font-size: .76rem; font-weight: 600; letter-spacing: .08em;
   text-decoration: none;
   transition: transform .18s var(--ease), background .18s var(--ease);
 }
@@ -376,19 +358,18 @@ body {
 .shelf {
   flex: 0 0 auto;
   display: flex;
-  gap: 12px;
+  gap: 11px;
   overflow-x: auto;
   scrollbar-width: none;
-  padding-bottom: 4px;
   overscroll-behavior-x: contain;
 }
 .shelf::-webkit-scrollbar { display: none; }
 
 .card {
   flex: 0 0 auto;
-  width: clamp(210px, 25vw, 280px);
-  padding: 15px 17px;
-  border-radius: 13px;
+  width: clamp(200px, 23vw, 265px);
+  padding: 14px 16px;
+  border-radius: 12px;
   background: var(--glass);
   border: 1px solid var(--glass-line);
   backdrop-filter: blur(14px);
@@ -402,146 +383,98 @@ body {
   animation: rise .42s var(--ease) both;
   animation-delay: calc(180ms + var(--i, 0) * 45ms);
 }
-a.card:hover {
-  background: rgba(255, 255, 255, .11);
-  transform: translateY(-3px);
-}
+a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px); }
 a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
 
-.card__avatar {
-  width: 30px; height: 30px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: color-mix(in oklab, var(--key) 55%, var(--void));
-  font-size: .64rem;
-  font-weight: 600;
-  letter-spacing: .04em;
-  margin-bottom: 3px;
-}
-
-.card__kicker {
-  font-size: .58rem;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--yellow);
-}
-.card__title { font-size: .88rem; font-weight: 600; letter-spacing: .01em; }
-.card__sub   { font-size: .68rem; color: var(--chrome-dim); }
-.card__body  { font-size: .78rem; line-height: 1.5; color: #C9CDD4; }
-
-.card--big .card__title {
-  font-family: 'Anton', sans-serif;
-  font-size: 2.6rem;
-  line-height: 1;
-  color: var(--yellow);
-}
+.card__kicker { font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: var(--yellow); }
+.card__title  { font-size: .86rem; font-weight: 600; }
+.card__body   { font-size: .76rem; line-height: 1.5; color: #C9CDD4; }
 
 /* ---------- boot ---------- */
 
 .boot {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
+  position: fixed; inset: 0; z-index: 10;
   background: var(--void);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  text-align: center;
-  padding: 24px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; text-align: center; padding: 24px;
   transition: opacity .5s var(--ease), visibility .5s;
 }
 body:not(.booting) .boot { opacity: 0; visibility: hidden; }
 
-.boot__mark {
-  width: clamp(76px, 16vw, 120px);
-  animation: pulse 2.4s ease-in-out infinite;
-}
+.boot__mark { width: clamp(76px, 16vw, 120px); animation: pulse 2.4s ease-in-out infinite; }
 @keyframes pulse { 50% { transform: scale(1.05); } }
 
-.boot__title {
-  font-family: 'Anton', sans-serif;
-  font-weight: 400;
-  font-size: clamp(1.7rem, 6vw, 3rem);
-  letter-spacing: -.01em;
-}
-.boot__sub {
-  font-size: .68rem;
-  letter-spacing: .26em;
-  color: var(--chrome-dim);
-}
+.boot__title { font-family: 'Anton', sans-serif; font-weight: 400; font-size: clamp(1.7rem, 6vw, 3rem); }
+.boot__sub { font-size: .66rem; letter-spacing: .26em; color: var(--chrome-dim); }
 
-.loadbar {
-  width: min(240px, 60vw);
-  height: 2px;
-  background: var(--glass-line);
-  overflow: hidden;
-}
-.loadbar i {
-  display: block;
-  height: 100%;
-  width: 0;
-  background: var(--yellow);
-  transition: width .1s linear;
-}
+.loadbar { width: min(240px, 60vw); height: 2px; background: var(--glass-line); overflow: hidden; }
+.loadbar i { display: block; height: 100%; width: 0; background: var(--yellow); transition: width .1s linear; }
 
 .boot__start {
-  margin-top: 6px;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: .8rem;
-  font-weight: 600;
-  letter-spacing: .24em;
-  color: var(--chrome);
-  opacity: 0;
-  padding: 10px 18px;
+  margin-top: 6px; background: none; border: 0; cursor: pointer;
+  font-family: inherit; font-size: .78rem; font-weight: 600; letter-spacing: .24em;
+  color: var(--chrome); opacity: 0; padding: 10px 18px;
   transition: opacity .3s var(--ease);
 }
 .boot__start.ready { opacity: 1; animation: blink 1.5s steps(2, start) infinite; }
 @keyframes blink { 50% { opacity: .25; } }
 
-.boot__hint {
-  font-family: 'Space Mono', monospace;
-  font-size: .64rem;
-  color: var(--chrome-dim);
-}
+.boot__hint { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--chrome-dim); }
 
-body.booting .home,
-body.booting .topbar { opacity: 0; }
-.home, .topbar { transition: opacity .6s var(--ease) .1s; }
+body.booting .xmb, body.booting .topbar { opacity: 0; }
+.xmb, .topbar { transition: opacity .6s var(--ease) .1s; }
 
 /* ---------- breakpoints ---------- */
 
 @media (max-width: 1023px) {
-  :root { --tile: 76px; --tilef: 94px; --gap: 12px; }
+  :root { --cat: 56px; --catf: 70px; --row: 42px; }
+  .cross { grid-template-columns: minmax(160px, 30%) 1fr; }
 }
 
+/* Phones: the cross stacks. Categories across the top, items in a row of
+   their own beneath, detail below that — the same two axes, folded. */
 @media (max-width: 759px) {
-  :root { --tile: 58px; --tilef: 74px; --gap: 10px; }
+  :root { --cat: 48px; --catf: 60px; --row: 38px; }
 
-  .topbar { gap: 14px; padding-inline: 16px; }
   .brand span, .clock { display: none; }
+  .topbar { padding-block: 12px; }
 
-  .hero { text-align: center; align-items: center; }
-  .hero__title { max-width: 100%; }
-  .btn { align-self: center; }
+  .cross {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
 
-  .rail { justify-content: flex-start; }
-  .rail__label { text-align: center; }
-  .dots { display: flex; justify-content: center; }
+  .column {
+    flex: 0 0 auto;
+    align-self: stretch;
+    max-height: calc(var(--row) * 3.1);
+    mask-image: linear-gradient(to bottom, #000 0 62%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0 62%, transparent 100%);
+  }
 
-  .card { width: min(78vw, 300px); }
-  .card--big .card__title { font-size: 2.1rem; }
+  /* Must grow, or the detail sits directly under the list and leaves the
+     bottom half of the phone empty with the key art crashing into the text. */
+  .detail { flex: 1 1 auto; min-height: 0; justify-content: flex-end; gap: 10px; }
+
+  /* the bar runs off both edges on a phone, so fade it rather than cut it */
+  .barwrap {
+    mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+  }
+  .hero__title { font-size: clamp(1.9rem, 8.6vw, 3rem); max-width: 100%; }
+  .hero__body { font-size: .82rem; }
+  .card { width: min(76vw, 290px); }
+  /* Small enough that the glyphs fit the viewport — cropped, a big letter
+     just reads as a grey rectangle. */
+  .keyart { opacity: .06; right: 4vw; top: 40%; font-size: clamp(5rem, 17vh, 9rem); }
+  .keyart img { width: clamp(6rem, 20vh, 10rem); }
 }
 
-/* Short landscape phones: give the hero less room, keep the shelf reachable. */
 @media (max-height: 560px) {
-  .hero__title { font-size: clamp(1.6rem, 5vw, 2.6rem); }
-  .hero { gap: 6px; padding: 6px 0; }
+  .hero__title { font-size: clamp(1.5rem, 4.6vw, 2.4rem); }
+  .hero { gap: 5px; }
 }
 
 /* ---------- motion ---------- */
