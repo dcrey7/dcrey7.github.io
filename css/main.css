@@ -356,7 +356,9 @@ body {
   text-align: left;
   color: var(--chrome-dim);
   opacity: .5;
-  transition: opacity .24s var(--ease), color .24s var(--ease), transform .24s var(--ease);
+  position: relative;   /* the drum stacks rows by distance via z-index */
+  transition: opacity .3s var(--ease), color .24s var(--ease),
+              transform .38s var(--ease-back);
 }
 .item:hover { opacity: .85; }
 /* No nudge on the selected row: the column must sit exactly under the active
