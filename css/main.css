@@ -1,173 +1,518 @@
-:root{
-  --ink:#0a0a0c;
-  --paper:#f2efe6;
-  --yellow:#ffc805;
-  --red:#a31a12;
-  --mono:'Space Mono', ui-monospace, monospace;
-  --display:'Anton', 'Arial Narrow', sans-serif;
-  --script:'Yellowtail', cursive;
-  --pad:clamp(16px, 4vw, 48px);
-  --cw:min(340px, 82vw);       /* rail card width */
-  --cwp:min(400px, 86vw);      /* project card width */
+/* ABHISHEK THOMAS — portfolio v4
+   PlayStation 5 home screen, painted in the afaicon palette.
+
+   Everything on screen derives from one colour: --key, the focused tile's
+   key colour. Registering it with @property lets the background crossfade
+   when focus moves, which is the whole PS5 effect. */
+
+@property --key {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #FFC800;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;overflow:hidden;background:var(--ink)}
-body{font-family:var(--mono);color:var(--paper);-webkit-font-smoothing:antialiased}
-button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
-a{color:inherit}
-:focus-visible{outline:2px solid var(--yellow);outline-offset:3px}
 
-/* ---- backdrop canvases ---- */
-#gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
-#coin{position:fixed;inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
-body.nogl{background:linear-gradient(215deg,#131a3a,#3a1030,#1a2c14,#131a3a);
-  background-size:360% 360%;animation:noglbg 24s ease infinite}
-@keyframes noglbg{0%,100%{background-position:0% 30%}50%{background-position:100% 70%}}
+:root {
+  --key: #FFC800;
 
-/* ---- HUD ---- */
-.hud{position:fixed;z-index:30;display:flex;align-items:center;gap:10px}
-.hud--tl{top:calc(14px + env(safe-area-inset-top));left:var(--pad)}
-.hud--tr{top:calc(14px + env(safe-area-inset-top));right:var(--pad)}
-.hud--bl{bottom:calc(16px + env(safe-area-inset-bottom));left:var(--pad)}
-.hud--br{bottom:calc(16px + env(safe-area-inset-bottom));right:var(--pad)}
-.hud img{width:26px;height:26px;image-rendering:pixelated}
-.chip{font-size:11px;letter-spacing:.08em;padding:6px 10px;background:rgba(10,10,12,.55);
-  border:1px solid rgba(242,239,230,.28);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  text-transform:uppercase;white-space:nowrap;text-decoration:none;display:inline-block}
-.chip--solid{background:var(--paper);color:var(--ink);border-color:var(--paper);font-weight:700}
-button.chip:hover,a.chip:hover{border-color:var(--yellow);color:var(--yellow)}
-button.chip--solid:hover{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+  --void:       #08090B;
+  --chrome:     #EDEFF3;
+  --chrome-dim: #8A9099;
+  --yellow:     #FFC800;
 
-.segs{position:fixed;top:calc(4px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
-  z-index:30;display:flex;gap:4px;width:min(420px, 56vw)}
-.segs button{flex:1;height:3px;background:rgba(242,239,230,.25);transition:background .4s;padding:0}
-.segs button.on{background:var(--paper)}
-.segs button:hover{background:var(--yellow)}
-.navbtns{display:flex;flex-direction:column;gap:8px}
-.navbtns .chip{padding:8px 12px}
+  --glass:      rgba(255, 255, 255, .06);
+  --glass-line: rgba(255, 255, 255, .12);
 
-/* ---- deck & slides ---- */
-#deck{position:relative;z-index:10;height:100%;transition:transform .85s cubic-bezier(.77,0,.18,1)}
-.slide{height:100%;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
-  padding:calc(48px + env(safe-area-inset-top)) var(--pad) calc(72px + env(safe-area-inset-bottom));
-  position:relative;gap:clamp(10px,2.2vh,24px)}
-.slide::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:linear-gradient(100deg, rgba(10,10,12,.68) 0%, rgba(10,10,12,.3) 48%, rgba(10,10,12,0) 74%)}
-#s0::before{background:radial-gradient(ellipse at 50% 45%, rgba(10,10,12,.6) 0%, rgba(10,10,12,.15) 75%)}
+  --tile:  92px;   /* rail tile edge          */
+  --tilef: 112px;  /* focused tile edge       */
+  --gap:   14px;
 
-.eyebrow{font-size:clamp(10px,1.4vw,13px);letter-spacing:.28em;text-transform:uppercase;opacity:.75}
-.mega{font-family:var(--display);font-weight:400;text-transform:uppercase;
-  font-size:clamp(2.4rem, 9.5vw, 8rem);line-height:.92;letter-spacing:.01em}
-.mega em{font-style:normal;color:var(--yellow)}
-.sub{font-size:clamp(12px,1.6vw,16px);line-height:1.55;max-width:52ch;opacity:.85}
+  --ease: cubic-bezier(.22, .61, .36, 1);
 
-/* ---- boot ---- */
-#s0{align-items:center;text-align:center;justify-content:center}
-.keyart{width:clamp(120px, 22vw, 220px);overflow:hidden}
-.keyart img{width:100%;display:block;animation:kenburns 7s ease-in-out infinite alternate}
-@keyframes kenburns{from{transform:scale(1)}to{transform:scale(1.14) translate(2%, -3%)}}
-.boot-title{font-family:var(--display);text-transform:uppercase;font-size:clamp(1.6rem,5vw,3.2rem);letter-spacing:.04em}
-.boot-title span{color:var(--yellow)}
-.loadbar{width:min(420px,70vw);height:6px;border:1px solid rgba(242,239,230,.4);padding:1px}
-.loadbar i{display:block;height:100%;width:0%;background:var(--yellow)}
-.tip{font-size:11px;letter-spacing:.06em;opacity:.65;min-height:2.6em;max-width:min(460px,80vw)}
-#start{display:none;animation:blink 1.1s steps(2,start) infinite;letter-spacing:.3em;font-weight:700}
-#start.ready{display:block}
-@keyframes blink{to{visibility:hidden}}
-.scan{position:absolute;inset:0;pointer-events:none;opacity:.5;
-  background:repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,.28) 2px 4px)}
-
-/* ---- hero ---- */
-.avail{display:inline-flex;align-items:center;gap:8px}
-.avail::before{content:'';width:8px;height:8px;border-radius:50%;background:#58e06b;box-shadow:0 0 10px #58e06b}
-
-/* ---- rails (XMB rows) ---- */
-.railwrap{width:calc(100% + 2*var(--pad));margin-inline:calc(-1*var(--pad))}
-.rail{display:flex;gap:clamp(12px,1.6vw,20px);overflow-x:auto;scroll-snap-type:x mandatory;
-  padding:18px calc(50% - var(--cw)/2);scrollbar-width:none}
-.rail::-webkit-scrollbar{display:none}
-.rail--flow{perspective:1100px;padding-inline:calc(50% - var(--cwp)/2)}
-.rcard{scroll-snap-align:center;flex:0 0 var(--cw);border:1px solid rgba(242,239,230,.22);
-  background:rgba(10,10,12,.5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  padding:clamp(16px,2vw,24px);display:flex;flex-direction:column;gap:10px;
-  transition:transform .45s cubic-bezier(.2,.8,.2,1), opacity .45s, border-color .3s;opacity:.55}
-.rcard.focus{transform:scale(1.04);opacity:1;border-color:rgba(255,200,5,.6)}
-.rail--flow .rcard{flex-basis:var(--cwp)}
-.rail--flow .rcard.near-l{transform:rotateY(30deg) scale(.86)}
-.rail--flow .rcard.near-r{transform:rotateY(-30deg) scale(.86)}
-.rail--flow .rcard.far-l{transform:rotateY(42deg) scale(.76);opacity:.35}
-.rail--flow .rcard.far-r{transform:rotateY(-42deg) scale(.76);opacity:.35}
-.rail--flow .rcard.focus{transform:rotateY(0) scale(1.02)}
-.dots{display:flex;gap:6px;justify-content:center;width:100%;margin-top:2px}
-.dots i{width:6px;height:6px;border-radius:50%;background:rgba(242,239,230,.25);transition:background .3s}
-.dots i.on{background:var(--yellow)}
-
-/* card content */
-.rcard header{display:flex;flex-direction:column;gap:2px}
-.rcard header b{font-family:var(--display);font-weight:400;text-transform:uppercase;
-  font-size:clamp(1.2rem,2.6vw,1.8rem);letter-spacing:.03em;line-height:1}
-.rcard header span{font-size:11px;text-transform:uppercase;letter-spacing:.1em;opacity:.8}
-.wcard .meta{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow)}
-.wcard ul{list-style:none;display:flex;flex-direction:column;gap:6px}
-.wcard li{font-size:11.5px;line-height:1.5;opacity:.85;padding-left:12px;position:relative}
-.wcard li::before{content:'▸';position:absolute;left:0;color:var(--yellow)}
-.wcard .stack{font-size:9.5px;letter-spacing:.06em;opacity:.55;text-transform:uppercase}
-.pcard .tag{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--yellow)}
-.pcard p{font-size:12px;line-height:1.55;opacity:.85}
-.plinks{display:flex;gap:10px;flex-wrap:wrap}
-.plinks a{border:1px solid rgba(242,239,230,.4);padding:7px 12px;font-size:11px;
-  letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:.25s}
-.plinks a:hover{background:var(--yellow);color:var(--ink);border-color:var(--yellow)}
-.qcard .qhead{display:flex;align-items:center;gap:12px}
-.qav{width:40px;height:40px;border-radius:50%;background:var(--yellow);color:var(--ink);
-  display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
-.qwho b{display:block;font-size:13px}
-.qwho span{font-size:10px;opacity:.65;text-transform:uppercase;letter-spacing:.06em}
-.qcard q{font-size:12.5px;line-height:1.6;quotes:'“' '”'}
-.qrel{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);opacity:.9}
-
-/* wanted stars */
-.wanted{display:flex;align-items:center;gap:5px}
-.wanted span{color:var(--yellow);font-size:clamp(16px,2.2vw,24px);
-  text-shadow:0 0 12px rgba(255,200,5,.55);opacity:0;transform:scale(0)}
-.slide.active .rcard.focus .wanted span,
-.slide.active > .wanted span{animation:starpop .45s cubic-bezier(.2,1.6,.4,1) forwards}
-.slide.active .wanted span:nth-child(1){animation-delay:.15s}
-.slide.active .wanted span:nth-child(2){animation-delay:.32s}
-.slide.active .wanted span:nth-child(3){animation-delay:.49s}
-.slide.active .wanted span:nth-child(4){animation-delay:.66s}
-.slide.active .wanted span:nth-child(5){animation-delay:.83s}
-@keyframes starpop{0%{opacity:0;transform:scale(0) rotate(-90deg)}
-  70%{opacity:1;transform:scale(1.45) rotate(8deg)}100%{opacity:1;transform:scale(1)}}
-.wanted b{margin-left:8px;color:var(--yellow);font-family:var(--display);font-weight:400;
-  text-transform:uppercase;font-size:clamp(.8rem,1.6vw,1rem);letter-spacing:.14em}
-
-/* ---- trophies ---- */
-.trophies{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,2vw,24px);width:100%;max-width:1020px}
-.tro{border-top:2px solid var(--yellow);padding-top:14px}
-.tro b{font-family:var(--display);font-weight:400;font-size:clamp(2rem,5.4vw,4.4rem);display:block;line-height:1}
-.tro span{font-size:clamp(9px,1.2vw,12px);letter-spacing:.14em;text-transform:uppercase;opacity:.75;line-height:1.5;display:block;margin-top:8px}
-
-/* ---- contact ---- */
-#s6 .script{font-family:var(--script);font-size:clamp(2.4rem,7vw,5rem);color:#ff4fa3;
-  transform:rotate(-4deg);text-shadow:0 0 14px rgba(255,79,163,.85), 0 0 44px rgba(255,79,163,.5)}
-#s6 .mega{font-size:clamp(2.8rem,12vw,10rem)}
-.btnrow{display:flex;gap:12px;flex-wrap:wrap}
-.btn{border:1px solid var(--paper);padding:12px 20px;text-transform:uppercase;font-size:12px;
-  letter-spacing:.14em;text-decoration:none;transition:.25s}
-.btn--fill{background:var(--yellow);color:var(--ink);border-color:var(--yellow);font-weight:700}
-.btn:hover{background:var(--paper);color:var(--ink)}
-.social{display:flex;gap:10px;flex-wrap:wrap}
-
-/* ---- responsive ---- */
-@media (max-width:760px){
-  .trophies{grid-template-columns:1fr 1fr}
-  .hud--bl{display:none}
-  .mega{font-size:clamp(2.2rem, 11vw, 4rem)}
+  transition: --key .45s var(--ease);
+  color-scheme: dark;
 }
-@media (prefers-reduced-motion:reduce){
-  #deck{transition:none}
-  .keyart img,#start{animation:none}
-  .rcard{transition:none}
-  .wanted span{opacity:1;transform:none;animation:none !important}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--void);
+  color: var(--chrome);
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-weight: 300;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- background: the colour field + its grain ---------- */
+
+/* The glow sits behind the hero, not the corner: with no key art, this is
+   what stops the middle of the screen reading as empty. */
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(80% 62% at 26% 62%,
+      color-mix(in oklab, var(--key) 72%, var(--void)) 0%, transparent 68%),
+    radial-gradient(70% 50% at 88% 10%,
+      color-mix(in oklab, var(--key) 34%, var(--void)) 0%, transparent 60%),
+    radial-gradient(120% 80% at 50% 118%,
+      color-mix(in oklab, var(--key) 26%, var(--void)) 0%, transparent 70%),
+    color-mix(in oklab, var(--key) 12%, var(--void));
+}
+
+/* The key art. There are no game posters here, so the tile's own mark is
+   blown up and ghosted into the right of the screen — the type is the art. */
+.keyart {
+  position: fixed;
+  z-index: -2;
+  right: 5vw;
+  top: 44%;
+  transform: translateY(-50%);
+  font-family: 'Anton', sans-serif;
+  font-size: clamp(8rem, 32vh, 24rem);
+  line-height: .78;
+  letter-spacing: -.05em;
+  color: #fff;
+  opacity: .07;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+.keyart img {
+  width: clamp(9rem, 34vh, 26rem);
+  display: block;
+}
+
+@media (max-width: 759px) { .keyart { opacity: .05; right: -6vw; top: 40%; } }
+
+/* The signature: fine grain so the flat fields read as printed ink. */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .1;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 4vw, 44px);
+  padding: clamp(14px, 2.2vh, 24px) clamp(16px, 4vw, 52px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 0 0 auto;
+}
+.brand img { width: 26px; height: 26px; }
+.brand span {
+  font-size: .7rem;
+  letter-spacing: .22em;
+  color: var(--chrome-dim);
+}
+
+.tabs { display: flex; gap: clamp(14px, 2.6vw, 30px); }
+
+.tab {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 300;
+  font-size: clamp(.95rem, 2.1vw, 1.3rem);
+  letter-spacing: .1em;
+  color: var(--chrome-dim);
+  padding: 4px 0;
+  transition: color .2s var(--ease);
+}
+.tab.is-on { color: var(--chrome); font-weight: 600; }
+.tab:hover { color: var(--chrome); }
+
+.sys {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2vw, 20px);
+}
+
+.sysbtn {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--chrome-dim);
+  font-size: 1.05rem;
+  line-height: 1;
+  padding: 6px;
+  transition: color .2s var(--ease);
+}
+.sysbtn:hover { color: var(--chrome); }
+.sysbtn[aria-pressed="true"] { color: var(--yellow); }
+
+.clock {
+  font-family: 'Space Mono', monospace;
+  font-size: .78rem;
+  color: var(--chrome-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- the home screen ---------- */
+
+.home {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 clamp(16px, 4vw, 52px) clamp(14px, 2.4vh, 26px);
+}
+
+/* ---------- rail ---------- */
+
+.railwrap { flex: 0 0 auto; }
+
+.rail {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 10px 0;
+  min-height: calc(var(--tilef) + 20px);
+  overscroll-behavior-x: contain;
+}
+.rail::-webkit-scrollbar { display: none; }
+
+.tile {
+  flex: 0 0 auto;
+  width: var(--tile);
+  height: var(--tile);
+  border-radius: 12px;
+  border: 0;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--key) 62%, var(--void));
+  opacity: .5;
+  transition:
+    width  .24s var(--ease),
+    height .24s var(--ease),
+    opacity .24s var(--ease),
+    box-shadow .24s var(--ease);
+}
+
+.tile img {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+}
+
+/* The mark is the key art — set big, cropped by the tile, sized by how many
+   characters it has so a three-letter mark stays as loud as a one-letter one. */
+.tile__mark {
+  font-family: 'Anton', sans-serif;
+  font-size: calc(var(--tile) * var(--markscale, .6));
+  line-height: .8;
+  letter-spacing: -.04em;
+  color: rgba(255, 255, 255, .93);
+  white-space: nowrap;
+  transform: translateY(2%);
+}
+
+.tile--pinned { border-radius: 50%; }
+
+/* The afaicon is yellow, so it needs a dark face rather than an olive one. */
+.tile--icon { background: color-mix(in oklab, var(--key) 16%, var(--void)); }
+
+.tile:hover { opacity: .8; }
+
+.tile.is-focus {
+  width: var(--tilef);
+  height: var(--tilef);
+  opacity: 1;
+  box-shadow:
+    0 0 0 2px var(--yellow),
+    0 14px 40px -10px color-mix(in oklab, var(--key) 70%, transparent);
+}
+.tile.is-focus .tile__mark { font-size: calc(var(--tilef) * var(--markscale, .6)); }
+
+.tile:focus-visible { outline: 2px solid var(--chrome); outline-offset: 3px; }
+
+.rail__label {
+  font-size: .74rem;
+  letter-spacing: .2em;
+  color: var(--chrome);
+  margin-top: 2px;
+  min-height: 1.1em;
+}
+
+/* Phones only — on desktop the rail already shows where you are. */
+.dots { display: none; gap: 5px; margin-top: 10px; }
+.dots i {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--glass-line);
+  transition: background .2s var(--ease), width .2s var(--ease);
+}
+.dots i.is-on { background: var(--yellow); width: 14px; border-radius: 2px; }
+
+/* ---------- hero ---------- */
+
+/* The hero sits low, just above the shelf — the way a game logo does on the
+   PS5 home screen. The space above it is the glow, and that is deliberate. */
+.hero {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: clamp(10px, 2vh, 22px) 0 clamp(18px, 4.5vh, 52px);
+}
+
+.hero__badge {
+  font-size: .68rem;
+  letter-spacing: .2em;
+  color: var(--yellow);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero__badge .stars { letter-spacing: .1em; }
+
+.hero__sub {
+  font-size: .74rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--chrome-dim);
+}
+
+.hero__title {
+  font-family: 'Anton', sans-serif;
+  font-weight: 400;
+  font-size: clamp(3rem, 9.5vw, 7.2rem);
+  line-height: .84;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+  max-width: 15ch;
+  text-wrap: balance;
+}
+
+.hero__meta {
+  font-family: 'Space Mono', monospace;
+  font-size: .74rem;
+  color: var(--chrome-dim);
+}
+
+.btn {
+  align-self: flex-start;
+  margin-top: 6px;
+  display: inline-block;
+  padding: 11px 22px;
+  border-radius: 999px;
+  background: var(--chrome);
+  color: var(--void);
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-decoration: none;
+  transition: transform .18s var(--ease), background .18s var(--ease);
+}
+.btn:hover { transform: translateY(-2px); background: var(--yellow); }
+.btn:focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; }
+
+/* ---------- shelf ---------- */
+
+.shelf {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+  overscroll-behavior-x: contain;
+}
+.shelf::-webkit-scrollbar { display: none; }
+
+.card {
+  flex: 0 0 auto;
+  width: clamp(210px, 25vw, 280px);
+  padding: 15px 17px;
+  border-radius: 13px;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-decoration: none;
+  color: inherit;
+  transition: background .18s var(--ease), transform .18s var(--ease);
+}
+a.card:hover {
+  background: rgba(255, 255, 255, .11);
+  transform: translateY(-3px);
+}
+a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+.card__avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in oklab, var(--key) 55%, var(--void));
+  font-size: .64rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  margin-bottom: 3px;
+}
+
+.card__kicker {
+  font-size: .58rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--yellow);
+}
+.card__title { font-size: .88rem; font-weight: 600; letter-spacing: .01em; }
+.card__sub   { font-size: .68rem; color: var(--chrome-dim); }
+.card__body  { font-size: .78rem; line-height: 1.5; color: #C9CDD4; }
+
+.card--big .card__title {
+  font-family: 'Anton', sans-serif;
+  font-size: 2.6rem;
+  line-height: 1;
+  color: var(--yellow);
+}
+
+/* ---------- boot ---------- */
+
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: var(--void);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  padding: 24px;
+  transition: opacity .5s var(--ease), visibility .5s;
+}
+body:not(.booting) .boot { opacity: 0; visibility: hidden; }
+
+.boot__mark {
+  width: clamp(76px, 16vw, 120px);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse { 50% { transform: scale(1.05); } }
+
+.boot__title {
+  font-family: 'Anton', sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.7rem, 6vw, 3rem);
+  letter-spacing: -.01em;
+}
+.boot__sub {
+  font-size: .68rem;
+  letter-spacing: .26em;
+  color: var(--chrome-dim);
+}
+
+.loadbar {
+  width: min(240px, 60vw);
+  height: 2px;
+  background: var(--glass-line);
+  overflow: hidden;
+}
+.loadbar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--yellow);
+  transition: width .1s linear;
+}
+
+.boot__start {
+  margin-top: 6px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .24em;
+  color: var(--chrome);
+  opacity: 0;
+  padding: 10px 18px;
+  transition: opacity .3s var(--ease);
+}
+.boot__start.ready { opacity: 1; animation: blink 1.5s steps(2, start) infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+
+.boot__hint {
+  font-family: 'Space Mono', monospace;
+  font-size: .64rem;
+  color: var(--chrome-dim);
+}
+
+body.booting .home,
+body.booting .topbar { opacity: 0; }
+.home, .topbar { transition: opacity .6s var(--ease) .1s; }
+
+/* ---------- breakpoints ---------- */
+
+@media (max-width: 1023px) {
+  :root { --tile: 76px; --tilef: 94px; --gap: 12px; }
+}
+
+@media (max-width: 759px) {
+  :root { --tile: 58px; --tilef: 74px; --gap: 10px; }
+
+  .topbar { gap: 14px; padding-inline: 16px; }
+  .brand span, .clock { display: none; }
+
+  .hero { text-align: center; align-items: center; }
+  .hero__title { max-width: 100%; }
+  .btn { align-self: center; }
+
+  .rail { justify-content: flex-start; }
+  .rail__label { text-align: center; }
+  .dots { display: flex; justify-content: center; }
+
+  .card { width: min(78vw, 300px); }
+  .card--big .card__title { font-size: 2.1rem; }
+}
+
+/* Short landscape phones: give the hero less room, keep the shelf reachable. */
+@media (max-height: 560px) {
+  .hero__title { font-size: clamp(1.6rem, 5vw, 2.6rem); }
+  .hero { gap: 6px; padding: 6px 0; }
+}
+
+/* ---------- motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  :root { transition: none; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

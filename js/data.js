@@ -1,9 +1,31 @@
 /* ALL site content. Source of truth: profile/resume.typ +
-   profile/recommendations.md in the parent workspace. Edit here, not in HTML. */
+   profile/recommendations.md in the parent workspace. Edit here, not in HTML.
+
+   Two presentation fields travel with each entry:
+     key  — the tile's key colour. Everything else (background field, glow,
+            tile face) is derived from it in CSS with color-mix().
+     mark — 1-3 characters set in Anton and cropped by the tile. There is no
+            key art anywhere on this site; the type is the art. */
+
+export const ABOUT = {
+  key: '#FFC800', mark: null,
+  title: 'AI ENGINEER',
+  sub: 'ABHISHEK THOMAS',
+  meta: 'PARIS · OPEN TO WORK',
+  cards: [
+    { kicker: 'NOW', title: 'Vistiq.AI, Paris',
+      body: 'Making LLMs behave — evals, retrieval, and agents on an AI-native SaaS.' },
+    { kicker: 'BEFORE', title: 'Amazon → MathCo → EXL → AXA',
+      body: '5+ years turning data science into systems that shipped and stayed up.' },
+    { kicker: 'ALSO', title: 'Football, GPUs, hackathons',
+      body: 'Masters in Data Science & AI, emlyon 2026. I build small things that win prizes.' }
+  ]
+};
 
 export const WORK = [
   {
     company: 'Vistiq.AI', role: 'AI Engineer', where: 'Paris', dates: '2026 —',
+    key: '#2F6BFF', mark: 'V',
     bullets: [
       'LLM evals for long-context retrieval — measured answer accuracy +15%',
       'RAG over financial corpora — inference cost −40% via retrieval, caching, routing',
@@ -13,6 +35,7 @@ export const WORK = [
   },
   {
     company: 'AXA France', role: 'Data Scientist', where: 'Paris', dates: '2025 — 26',
+    key: '#1B34C8', mark: 'AXA',
     bullets: [
       'Production OCR + KV extraction — fine-tuned Qwen 3.5 4B (Unsloth), +4% accuracy',
       'GLiNER2 with LoRA distillation of GPT-4o mini — operational cost −85%',
@@ -22,6 +45,7 @@ export const WORK = [
   },
   {
     company: 'EXL Services', role: 'Senior Data Scientist', where: 'Bangalore', dates: '2022 — 24',
+    key: '#6D28D9', mark: 'EXL',
     bullets: [
       'Production LightGBM models — GINI +6% on large-scale data',
       'Back-testing, drift detection & compliance monitoring frameworks',
@@ -30,7 +54,8 @@ export const WORK = [
     stack: 'LightGBM · SHAP · PySpark · MLflow · Power BI'
   },
   {
-    company: 'TheMathCompany', role: 'Data Scientist', where: 'Bangalore', dates: '2021 — 22',
+    company: 'MathCo', role: 'Data Scientist', where: 'Bangalore', dates: '2021 — 22',
+    key: '#0EA5A4', mark: 'MC',
     bullets: [
       'Marketing-mix models (lag, adstock) — channel ROI +3%',
       'Dash & Streamlit apps for KPIs, funnels, engagement',
@@ -40,6 +65,7 @@ export const WORK = [
   },
   {
     company: 'Amazon', role: 'Risk Analyst', where: 'Bangalore', dates: '2019 — 21',
+    key: '#FF9900', mark: 'AMZ',
     bullets: [
       'Fraud & anomaly scoring (XGBoost, KNN) — transaction risk −12%',
       'Power BI dashboards for cross-functional stakeholders',
@@ -52,6 +78,7 @@ export const WORK = [
 export const PROJECTS = [
   {
     name: 'KICKY AI', tag: 'build-small hackathon', passed: true,
+    key: '#16A34A', mark: 'K',
     desc: 'Zero-label football shot analysis. SAM3 + LocateAnything-3B auto-labels distilled into a fast RF-DETR-Seg detector; on-device VLM coach (MiniCPM-V) + BlazePose. Detects goals, shooting foot, shot speed.',
     links: [
       { label: '▶ demo', href: 'https://www.youtube.com/watch?v=knL8shghyBU' },
@@ -60,21 +87,25 @@ export const PROJECTS = [
   },
   {
     name: 'MEMORY BRIDGEAI', tag: 'treble hackathon — winner ×3 awards', passed: true,
+    key: '#DC2626', mark: 'MB',
     desc: 'Voice-AI agent that calls patients over real phone lines (Twilio PSTN) to reinforce memories. LiveKit · Speechmatics · Backboard.io.',
     links: [{ label: 'the story', href: 'https://www.linkedin.com/posts/dcrey7_hackathon-voiceai-ai-activity-7434207452876800000-Da2X' }]
   },
   {
     name: 'JOBAMATRIX', tag: 'agentic system',
+    key: '#EA580C', mark: 'JM',
     desc: 'End-to-end agentic job-application system — 290 tests, SQLite, Playwright automation, parallel agent orchestration, MCP.',
     links: [{ label: 'github', href: 'https://github.com/dcrey7/jobomatrix-v2' }]
   },
   {
     name: 'RIZZUME', tag: 'ai resume builder',
+    key: '#0891B2', mark: 'RZ',
     desc: 'Real-time PDF resume builder with dual LLM back-end (Ollama + Cerebras), keyword matching and AI tailoring.',
     links: [{ label: 'live app', href: 'https://rizzume--dcrey7.replit.app/' }]
   },
   {
     name: 'ACTIVE GLINER', tag: 'research',
+    key: '#7C3AED', mark: 'GL',
     desc: 'Active-learning framework for span-based NER — paper + code.',
     links: [
       { label: 'paper', href: 'https://drive.google.com/file/d/1eo1z6MbX-gSsD8jMPwdCOveldRVPxqrF/view' },
@@ -83,16 +114,19 @@ export const PROJECTS = [
   },
   {
     name: 'NOTME', tag: 'mistral game jam — finalist',
+    key: '#E11D48', mark: 'NM',
     desc: 'Voice imposter detection game built for the Mistral AI Game Jam.',
     links: [{ label: '🤗 space', href: 'https://huggingface.co/spaces/dcrey7/NotMe' }]
   },
   {
     name: 'MEDICAL RAG', tag: 'mistral × alan — finalist',
+    key: '#059669', mark: 'MR',
     desc: 'RAG + fine-tuning on French medical MCQs.',
     links: [{ label: 'slides', href: 'https://github.com/dcrey7/mistral_alan_hackathon/blob/main/Mistral%20ppt%20hackathon%20_compressed.pdf' }]
   },
   {
     name: 'FIFA ELO', tag: 'unique method award',
+    key: '#CA8A04', mark: 'FE',
     desc: 'Elo ratings + Bayesian optimization for EURO 2024 — FIFA–EXL hackathon.',
     links: [{ label: 'github', href: 'https://github.com/dcrey7/FIFA_EURO_2024' }]
   }
@@ -148,4 +182,11 @@ export const CONTACT = {
     { label: 'HUGGING FACE', href: 'https://huggingface.co/dcrey7' }
   ],
   where: 'PARIS · NETHERLANDS · GERMANY · REMOTE'
+};
+
+/* Colours for the four tiles pinned to the right of every rail. */
+export const SYSTEM_KEYS = {
+  people:   { key: '#8B5CF6', mark: '16' },
+  trophies: { key: '#F59E0B', mark: '★'  },
+  contact:  { key: '#EC4899', mark: '✉'  }
 };

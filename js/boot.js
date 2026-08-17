@@ -1,45 +1,47 @@
-/* Boot sequence: fake progress, rotating tips, PRESS START gate. */
-import { emit } from './config.js';
+/* Boot gate: a short load bar, then PRESS START. Console splash, nothing more. */
 
-const TIPS = [
-  'TIP: SCROLL, SWIPE OR USE ↑↓ TO MOVE BETWEEN SCREENS',
-  'TIP: ←→ BROWSES CARDS INSIDE A SCREEN',
-  'TIP: TURN SOUND ON (TOP RIGHT) FOR THE FULL EXPERIENCE',
-  'TIP: THE INK FOLLOWS YOUR CURSOR. GO ON, STIR IT.',
-  'LOADING PARIS… LOADING GPUs… LOADING FOOTBALL…'
-];
+import { emit, REDUCED } from './config.js';
 
-export function initBoot(goNext){
-  const bar = document.getElementById('bar');
-  const tipEl = document.getElementById('tip');
-  const startEl = document.getElementById('start');
-  const s0 = document.getElementById('s0');
-  let booted = false, tipI = 0, pct = 0;
+export function initBoot() {
+  const bar   = document.getElementById('bar');
+  const start = document.getElementById('start');
+  const boot  = document.getElementById('boot');
+  let ready = false, done = false, pct = 0;
 
-  const tipTimer = setInterval(() => {
-    tipI = (tipI + 1) % TIPS.length;
-    tipEl.textContent = TIPS[tipI];
-  }, 1800);
-  const progTimer = setInterval(() => {
-    pct = Math.min(100, pct + 2.4 + Math.random() * 3);
+  const timer = setInterval(() => {
+    pct = Math.min(100, pct + 3 + Math.random() * 5);
     bar.style.width = pct + '%';
-    if(pct >= 100) finish(false);
-  }, 60);
+    if (pct >= 100) arm();
+  }, REDUCED ? 20 : 55);
 
-  function finish(silent){
-    if(booted) return;
-    booted = true;
-    clearInterval(progTimer); clearInterval(tipTimer);
-    bar.style.width = '100%';
-    startEl.classList.add('ready');
-    if(!silent) emit('start');
+  /* ?skip lands straight on the home screen — used for deep links and shots. */
+  if (new URLSearchParams(location.search).has('skip')) {
+    queueMicrotask(() => { arm(); enter(); });
   }
 
-  startEl.addEventListener('click', () => goNext());
-  s0.addEventListener('click', () => { booted ? goNext() : finish(false); });
+  function arm() {
+    if (ready) return;
+    ready = true;
+    clearInterval(timer);
+    bar.style.width = '100%';
+    start.classList.add('ready');
+  }
+
+  function enter() {
+    if (done) return;
+    if (!ready) { arm(); return; }
+    done = true;
+    document.body.classList.remove('booting');
+    emit('start');
+    setTimeout(() => boot.remove(), 600);
+  }
+
+  start.addEventListener('click', enter);
+  boot.addEventListener('click', enter);
   addEventListener('keydown', e => {
-    if(e.key === 'Enter' && !booted) finish(false);
+    if (done) return;
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enter(); }
   });
 
-  return { isBooted: () => booted, forceBoot: () => finish(true) };
+  return { enter };
 }

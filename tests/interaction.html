@@ -1,0 +1,66 @@
+<!DOCTYPE html><meta charset="utf-8"><title>t</title>
+<iframe id="f" src="/?skip" style="width:1200px;height:800px;border:0"></iframe>
+<pre id="out">running…</pre>
+<script>
+const log = [];
+const f = document.getElementById('f');
+const say = (name, got, want) =>
+  log.push(`${got === want ? 'PASS' : 'FAIL'}  ${name}: got "${got}" want "${want}"`);
+
+f.onload = () => setTimeout(async () => {
+  const w = f.contentWindow, d = f.contentDocument;
+  const label = () => d.getElementById('railLabel').textContent;
+  const hero  = () => d.querySelector('.hero__title').textContent;
+  const key   = () => d.documentElement.style.getPropertyValue('--key').trim();
+  const tab   = () => d.querySelector('.tab.is-on').textContent;
+  const wait  = () => new Promise(r => setTimeout(r, 120));
+  const press = k => w.dispatchEvent(new w.KeyboardEvent('keydown', { key: k, bubbles: true }));
+
+  say('initial tile', label(), 'AI ENGINEER');
+  say('initial tab', tab(), 'WORK');
+
+  press('ArrowRight'); await wait();
+  say('ArrowRight moves', label(), 'VISTIQ.AI');
+  say('hero follows', hero(), 'VISTIQ.AI');
+  say('key colour follows', key(), '#2F6BFF');
+
+  press('ArrowRight'); press('ArrowRight'); await wait();
+  say('ArrowRight x2', label(), 'EXL SERVICES');
+
+  press('ArrowLeft'); await wait();
+  say('ArrowLeft moves back', label(), 'AXA FRANCE');
+
+  press('ArrowDown'); await wait();
+  say('ArrowDown switches tab', tab(), 'PLAY');
+  say('play rail loaded', label(), 'AI ENGINEER');
+
+  press('ArrowRight'); await wait();
+  say('play tile 1', label(), 'KICKY AI');
+  say('badge renders', d.querySelector('.hero__badge').textContent.includes('MISSION PASSED'), true);
+  say('action button', d.querySelector('.btn').getAttribute('href'),
+      'https://www.youtube.com/watch?v=knL8shghyBU');
+
+  press('ArrowUp'); await wait();
+  say('ArrowUp returns tab', tab(), 'WORK');
+  say('work focus remembered', label(), 'AXA FRANCE');
+
+  /* clicking a tile focuses it */
+  d.querySelectorAll('.tile')[6].click(); await wait();
+  say('click focuses tile', label(), 'PEOPLE SAY');
+  say('16 quote cards', d.querySelectorAll('#shelf .card').length, 16);
+
+  /* left edge does not run off the end */
+  press('ArrowLeft'); press('ArrowLeft'); press('ArrowLeft');
+  press('ArrowLeft'); press('ArrowLeft'); press('ArrowLeft');
+  press('ArrowLeft'); press('ArrowLeft'); await wait();
+  say('clamps at start', label(), 'AI ENGINEER');
+
+  for (let i = 0; i < 20; i++) press('ArrowRight');
+  await wait();
+  say('clamps at end', label(), 'GET IN TOUCH');
+
+  const fails = log.filter(l => l.startsWith('FAIL')).length;
+  document.getElementById('out').textContent =
+    log.join('\n') + `\n\n${log.length - fails}/${log.length} passed`;
+}, 700);
+</script>

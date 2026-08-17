@@ -1,150 +1,112 @@
 # Portfolio v4 — locked design decisions
 
-Updated 2026-07-05 after brainstorm session. This is the build contract;
-`updates/` logs how each piece lands.
+Updated 2026-08-17. This is the build contract; `updates/` logs how each piece
+lands. It replaces the reel/XMB contract of 2026-07-05, which was rejected for
+being unreadable on a phone.
 
-## Navigation — full XMB (decided)
-Vertical = sections. Horizontal = carousel inside rows that have more
-content. No scrolling anywhere; every state fills the viewport.
+## The conceit — a PlayStation 5 home screen
 
-```
-                        ▲▼  section
-  [00] BOOT      cover-collage screen (see below) → PRESS START
-  [01] HELLO     who i am
-  [02] WORK      ◄ Vistiq · AXA · MathCo · …resume.typ ►
-  [03] PROJECTS  ◄ Kicky · Jobamatrix · BridgeAI · GLiNER · NotMe · FIFA ►  (Cover Flow)
-  [04] PEOPLE    ◄ 16 recommendation cards ►  + interactive boids flock
-  [05] TROPHIES  numbers & awards
-  [06] CONTACT   say hello — interactive water
-                        ◄►  row browse (drag/swipe/wheel-over-row)
-```
+The site is a console home screen painted in the afaicon palette. Not a Sony
+clone, not the PS4 blue menu. Research: `../moodboards/playstation-home-ui/`.
 
-## Background — interactive fluid (SHIPPED 2026-07-05)
-Real stable-fluids sim (WebGL2, RGBA16F ping-pong FBOs: advect →
-splat → divergence → 20× Jacobi pressure → gradient subtract → dye
-advect → composite). Cursor injects force + scene-colored dye; two
-lissajous "stirrers" keep it alive when idle; every screen change
-throws a 5-splat ink burst; scene palettes recolor bg + new dye.
-Cloud shader stays as the WebGL1 / reduced-motion fallback; CSS
-gradient when no WebGL at all.
-
-## Per-section hero effects (decided)
-- HELLO — fluid + 3D afaicon coin (shipped; face orientation fixed)
-- WORK — glass cards (liquid-glass shader lineage from portfolio-3)
-- PROJECTS — **Cover Flow**: KDE cover-switch/iTunes style; center card
-  faces camera, neighbors tilt ±55°, glossy floor reflection
-- PEOPLE — **boids**: separation/alignment/cohesion flock; birds
-  scatter from the cursor; click a bird → it delivers a recommendation
-  card
-- CONTACT — **water**: heightfield ripples + pool caustics; Vice City
-  neon script reflected in the water; tap = ripples (Evan Wallace
-  WebGL-Water reference)
-- One heavy sim active per screen; sims pause off-screen; half-res on
-  mobile.
-
-## GTA touches (user, 2026-07-05)
-- **Wanted stars** — 5 stars pop in staggered on MISSION PASSED
-  (SHIPPED). Reuse grammar for ratings/achievements elsewhere.
-- **Cover-collage boot screen** (QUEUED): screen divided into polygon
-  panels by black gutters like the GTA V/VI key art — each panel runs
-  its own cheap mini-shader (one scene color each), afaicon logo badge
-  center, stars scattered:
+There is **one screen**. Nothing navigates anywhere; moving focus along the
+rail changes what the screen is.
 
 ```
-  ┌─────────┬───────────────┬─────────┐
-  │ fluid   │  clouds gold  │ voxel ★ │
-  │ cyan    ├──────┬────────┴─────────┤
-  ├─────────┤ AFA  │   caustics pink  │
-  │ grid    │ICON  ├─────────┬────────┤
-  │ green ★ │badge │scanlines│ stars  │
-  └─────────┴──────┴─────────┴────────┘
-   black gutters ≈ GTA cover panels
+┌──────────────────────────────────────────────────────────┐
+│ ☻ DCREY7    WORK  PLAY                    ♪   11:27     │  topbar
+│                                                          │
+│  ┌──────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐  ┊ (16)(★)(✉)     │  rail
+│  │  V   │ │AXA │ │EXL │ │ MC │ │AMZ │  ┊  pinned         │
+│  └──────┘ └────┘ └────┘ └────┘ └────┘                    │
+│    VISTIQ.AI                                             │  label
+│                                       ██                 │
+│                                      ████  ← key art     │
+│    AI ENGINEER                        ██                 │
+│    VISTIQ.AI                                             │  hero
+│    Paris · 2026 —                                        │
+│    [ ▶ demo ]                                            │
+│                                                          │
+│  ┌────────────┐┌────────────┐┌────────────┐              │  shelf
+│  │ LLM evals  ││ RAG −40%   ││ MCP agents │              │
+│  └────────────┘└────────────┘└────────────┘              │
+└──────────────────────────────────────────────────────────┘
 ```
 
-## Content backlog (fills the rows)
-Jobamatrix (agentic job system, 290 tests) · Memory BridgeAI (Treble
-winner ×3) · Active GLiNER (paper+repo) · NotMe (Mistral Game Jam
-finalist) · Mistral×Alan RAG finalist · FIFA Elo award · 2 merged OSS
-PRs (GLiNER, HF Gemma) · full work history from `profile/resume.typ` ·
-all 16 recommendations from `profile/recommendations.md`.
+Four bands: **topbar · rail · hero · shelf**. The same four at 390px, 768px
+and 1440px. There is no second layout to maintain — that was the failure of
+both portfolio-3 and the v4 reel prototype.
 
-## Screen-by-screen wireframes
+## Non-negotiables
 
-### [02] WORK — XMB row, glass cards
-```
-┌──────────────────────────────────────────────┐
-│ ▓ DCREY7.EXE      ▂▂▂▂▂▂▂         SOUND: ON  │
-│  CURRENTLY — VISTIQ.AI, PARIS                │
-│  LLMS, CHEAPER & SHARPER                     │
-│                                              │
-│  ◄ ┌────────────┐ ┌─────────┐ ┌───────── ►   │
-│    │ ▐VISTIQ.AI▌│ │  AXA    │ │ MATHCO       │
-│    │ evals·rag  │ │ ai lab  │ │ analytics    │
-│    │ ·agents    │ │ 2025-26 │ │ 2021-22      │
-│    └────────────┘ └─────────┘ └─────────     │
-│     focused card grows + refracts the fluid  │
-│ [02] WORK          ● ○ ○ ○     row position  │
-└──────────────────────────────────────────────┘
-```
+1. **No separate detail page.** The shelf below the hero is the detail. A tile
+   that has somewhere to go gets one button; everything else is cards.
+2. **No image assets for content.** Every entry carries a `key` colour and a
+   1–3 character `mark`. Background, glow and tile face derive from `key` with
+   `color-mix()`; the mark, set in Anton, is the art — on the tile and blown
+   up to 32vh behind the hero. Adding a project must never mean commissioning
+   artwork.
+3. **No third-party JavaScript.** No three.js, no GSAP, no shader libraries.
+   Native ES modules, no build step.
+4. **Yellow means focus, nothing else.** `#FFC800` is the focus ring, the card
+   kicker and the active dot. It is never decoration.
+5. **Every feature states its phone behaviour before it is built.**
+6. Sound is opt-in. `prefers-reduced-motion` kills animation but keeps the
+   colour change.
 
-### [03] PROJECTS — Cover Flow deck
+## Tokens
+
 ```
-              ┌───────────┐
-   ╱▌  ╱▌     │ KICKY AI  │     ▐╲  ▐╲
-  ╱ ▌ ╱ ▌     │ ★★★★★     │     ▐ ╲ ▐ ╲
-  ╲ ▌ ╲ ▌     │ MISSION   │     ▐ ╱ ▐ ╱      neighbors tilt ±55°
-   ╲▌  ╲▌     │ PASSED    │     ▐╱  ▐╱
-  ═══════════ └───────────┘ ═══════════════
-   ¸.·˙˙·.¸  glossy reflection  ¸.·˙˙·.¸
-  ◄ jobamatrix · KICKY · bridgeai · gliner · notme · fifa ►
-    drag/wheel flips the deck · click opens mission-stats view
+--void       #08090B   near-black base
+--chrome     #EDEFF3   primary text
+--chrome-dim #8A9099   secondary text
+--yellow     #FFC800   focus only
+--key        per entry, registered with @property so it crossfades
 ```
 
-### [04] PEOPLE — boids deliver the quotes
+Type: **Anton** display (hero title, tile marks, key art) · **Archivo 300/500/600**
+chrome (tabs, labels, buttons, card body) · **Space Mono** meta (dates, clock).
+Three faces, three jobs. Yellowtail is gone.
+
+Tile sizes: 92px desktop / 76px tablet / 58px phone. Focused tile is ~1.2× and
+pushes the rail.
+
+## The rails
+
 ```
-┌──────────────────────────────────────────────┐
-│      ⋀     ⋀ ⋀        ⋀        birds flock   │
-│    ⋀    ⋀       ⋀  ⋀     ⋀    around a home  │
-│  PEOPLE SAY          ⋀        point, scatter │
-│                               when cursor    │
-│  click/tap a bird → it dives  dives in       │
-│  and drops its card:                         │
-│    ┌───────────────────────┐                 │
-│    │ ⓅⒻ Philippe Fraisse   │  ◄ 16 cards ►   │
-│    │ Head of AI Lab · AXA  │                 │
-│    │ "…solutions autonom…" │                 │
-│    └───────────────────────┘                 │
-│ [04] PEOPLE                                  │
-└──────────────────────────────────────────────┘
+WORK  [☻ ABOUT] [VISTIQ] [AXA] [EXL] [MATHCO] [AMAZON]     ┊ pinned
+PLAY  [☻ ABOUT] [KICKY] [BRIDGEAI] [JOBAMATRIX] [RIZZUME]
+                [GLINER] [NOTME] [MEDICAL RAG] [FIFA ELO]  ┊ pinned
+
+pinned = [16 PEOPLE] [★ TROPHIES] [✉ CONTACT]   round, both rails
 ```
 
-### [06] CONTACT — Vice neon over tappable water
+Each tab remembers its own focus.
+
+## Input
+
 ```
-┌──────────────────────────────────────────────┐
-│         ~ say hello ~     (pink neon script) │
-│   GET IN TOUCH█                              │
-│   [ abhishek01789@gmail.com ]                │
-│   GITHUB · LINKEDIN · HUGGING FACE           │
-│ ┈┈┈┈┈┈┈┈┈┈┈ water line ┈┈┈┈┈┈┈┈┈┈┈┈          │
-│   ollǝɥ ʎɐs   ← reflection wobbles in waves  │
-│     ◦))  ((◦   tap = ripple rings + caustic  │
-│                light-nets on the pool floor  │
-└──────────────────────────────────────────────┘
+                desktop                    phone
+tile      ◄►    ← →  ·  wheel over rail    horizontal swipe
+tab       ▲▼    ↑ ↓                        vertical swipe
+open            enter · click focused tile tap focused tile
+back            esc
+deep link       ?skip&tab=play&i=1         (also used for screenshots)
 ```
 
-### Input legend
-```
-              desktop                mobile / iPad
-section ▲▼    wheel · ↑↓ · space     vertical swipe
-row     ◄►    drag · wheel over row  horizontal swipe
-open          click · enter          tap
-fluid ink     cursor move            finger drag (even mid-swipe)
-easter eggs   T = coin rain          long-press = big ink blob
-```
+## Content
 
-## References
-- Fluid: Pavel Dobryakov WebGL-Fluid-Simulation (pattern followed)
-- Water/caustics: https://madebyevan.com/webgl-water/
-- Boids: https://threejs.org/examples/#webgl_gpgpu_birds (GPU version;
-  CPU-instanced ~150 birds is enough here)
-- Cover Flow: iTunes 2006 / KWin cover-switch
+All of it lives in `js/data.js`. `js/tiles.js` turns it into the rail model.
+Adding a job or project means adding one object with a `key` and a `mark`.
+
+## Tests
+
+`tests/interaction.html` drives the real page in an iframe and asserts focus,
+tabs, clamping, colour propagation and card counts. Open it on the dev server,
+or run it headless — see README.
+
+## Changelog
+
+- 2026-08-17 — Rewritten for the PS5 home screen. Replaces the reel/XMB
+  contract; fluid simulation, cloud shader and 3D coin removed.
+- 2026-07-05 — Original reel/XMB contract (superseded).

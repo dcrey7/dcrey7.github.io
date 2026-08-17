@@ -1,38 +1,24 @@
-/* Boot order: deck (renders content) → boot gate → backdrop (fluid, else
-   clouds, else CSS gradient) → sound → coin. */
-import { REDUCED, MOBILE } from './config.js';
-import { initDeck } from './deck.js';
-import { initBoot } from './boot.js';
-import { initFluid } from './fluid.js';
-import { initClouds } from './clouds.js';
-import { initSound } from './sound.js';
-import { initCoin } from './coin.js';
+/* Boot order: home screen renders → boot gate → sound → clock. */
 
-const deckApi = initDeck();
-initBoot(() => deckApi.go(1));
+import { initHome } from './home.js';
+import { initBoot } from './boot.js';
+import { initSound } from './sound.js';
+
+const home = initHome();
+initBoot();
 initSound(document.getElementById('sndBtn'));
 
-/* backdrop */
-const canvas = document.getElementById('gl');
-function sizeCanvas(){
-  const m = MOBILE();
-  const dpr = Math.min(devicePixelRatio || 1, m ? 1 : 1.5);
-  canvas.width = innerWidth * dpr * (m ? 0.7 : 0.8);
-  canvas.height = innerHeight * dpr * (m ? 0.7 : 0.8);
-}
-sizeCanvas();
-addEventListener('resize', sizeCanvas);
+/* Deep link: ?tab=play&i=1 opens the rail on a given tile. */
+const q = new URLSearchParams(location.search);
+if (q.has('tab')) home.setTab(q.get('tab') === 'play' ? 1 : 0);
+if (q.has('i'))   home.setFocus(Number(q.get('i')) || 0, true);
 
-const gl2 = canvas.getContext('webgl2', { antialias: false, alpha: false });
-let running = false;
-if(gl2 && !REDUCED) running = initFluid(canvas, gl2);
-if(!running){
-  const gl = gl2 || canvas.getContext('webgl', { antialias: false, alpha: false });
-  if(gl) running = initClouds(canvas, gl);
+/* The clock is pure console theatre, but it is the detail that sells it. */
+const clock = document.getElementById('clock');
+function tick() {
+  clock.textContent = new Date().toLocaleTimeString([], {
+    hour: '2-digit', minute: '2-digit', hour12: false
+  });
 }
-if(!running){
-  canvas.style.display = 'none';
-  document.body.classList.add('nogl');
-}
-
-initCoin().catch(err => console.warn('coin disabled:', err));
+tick();
+setInterval(tick, 10_000);

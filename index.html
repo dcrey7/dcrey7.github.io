@@ -4,87 +4,58 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ABHISHEK THOMAS — AI Engineer</title>
-<meta name="description" content="Abhishek Thomas — AI engineer in Paris. LLM evals, RAG, agents, and playful WebGL. 5+ years turning data science into shipped systems.">
+<meta name="description" content="Abhishek Thomas — AI engineer in Paris. LLM evals, RAG, agents. Five years turning data science into shipped systems.">
 <meta property="og:title" content="ABHISHEK THOMAS — AI Engineer">
-<meta property="og:description" content="A full-screen, no-scroll portfolio: fluid ink, a spinning coin, mission-passed projects.">
+<meta property="og:description" content="A portfolio that boots like a console: one rail, one screen, no scrolling.">
 <meta property="og:image" content="https://dcrey7.github.io/assets/afaicon.png">
 <meta property="og:url" content="https://dcrey7.github.io/">
-<meta name="theme-color" content="#0a0a0c">
+<meta name="theme-color" content="#08090B">
 <link rel="icon" href="assets/afaicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Yellowtail&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@300;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
-<script type="importmap">
-{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
-</script>
 </head>
-<body>
-<canvas id="gl" aria-hidden="true"></canvas>
+<body class="booting">
 
-<div class="segs" id="segs" role="tablist" aria-label="Screens"></div>
-<div class="hud hud--tl"><img src="assets/afaicon.png" alt=""><span class="chip">DCREY7.EXE</span></div>
-<div class="hud hud--tr"><button class="chip" id="sndBtn" aria-pressed="false">SOUND: OFF</button></div>
-<div class="hud hud--bl"><span class="chip" id="whereChip">[00] BOOT</span></div>
-<div class="hud hud--br navbtns">
-  <button class="chip" id="prevBtn" aria-label="Previous screen">▲</button>
-  <button class="chip chip--solid" id="nextBtn" aria-label="Next screen">▼</button>
-</div>
+<div class="field" aria-hidden="true"></div>
+<div class="keyart" id="keyart" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
 
-<main id="deck">
+<header class="topbar">
+  <div class="brand">
+    <img src="assets/afaicon.png" alt="">
+    <span>DCREY7</span>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
+  <div class="sys">
+    <button class="sysbtn" id="sndBtn" aria-pressed="false" aria-label="Sound off">♪</button>
+    <time class="clock" id="clock"></time>
+  </div>
+</header>
 
-  <section class="slide" id="s0" data-name="BOOT">
-    <div class="scan"></div>
-    <div class="keyart"><img src="assets/afaicon.png" alt="afaicon — hand-drawn yellow smiley"></div>
-    <h1 class="boot-title">ABHISHEK <span>THOMAS</span></h1>
-    <div class="loadbar" aria-hidden="true"><i id="bar"></i></div>
-    <p class="tip" id="tip">TIP: SCROLL, SWIPE OR USE ↑↓ TO MOVE BETWEEN SCREENS</p>
-    <button id="start">— PRESS START —</button>
-  </section>
+<main class="home">
 
-  <section class="slide" id="s1" data-name="HELLO">
-    <span class="chip avail">JUL '26 — OPEN TO WORK · PARIS</span>
-    <h2 class="mega">AI<br>ENGINEER<em>.</em></h2>
-    <p class="sub">Abhishek Thomas. 5+ years turning data science into shipped
-      systems — Amazon to AXA to AI-native startups. Currently making LLMs
-      behave at Vistiq.AI, Paris.</p>
-  </section>
+  <div class="railwrap">
+    <div class="rail" id="rail" role="tablist" aria-label="Tiles"></div>
+    <p class="rail__label" id="railLabel"></p>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+  </div>
 
-  <section class="slide" id="s2" data-name="WORK">
-    <span class="eyebrow">PROFESSIONAL EXPERIENCE — ◄► TO BROWSE</span>
-    <h2 class="mega">THE<br><em>GRIND</em></h2>
-    <div class="railwrap"><div class="rail" data-rail="work" tabindex="0" aria-label="Work history — scroll horizontally"></div></div>
-  </section>
+  <section class="hero" id="hero" aria-live="polite"></section>
 
-  <section class="slide" id="s3" data-name="PROJECTS">
-    <span class="eyebrow">SIDE QUESTS &amp; HACKATHONS — ◄► TO BROWSE</span>
-    <h2 class="mega">MISSIONS<em>.</em></h2>
-    <div class="railwrap"><div class="rail rail--flow" data-rail="projects" tabindex="0" aria-label="Projects — scroll horizontally"></div></div>
-  </section>
-
-  <section class="slide" id="s4" data-name="PEOPLE">
-    <span class="eyebrow">FROM 16 LINKEDIN RECOMMENDATIONS — ◄► TO BROWSE</span>
-    <h2 class="mega">PEOPLE<br><em>SAY</em></h2>
-    <div class="railwrap"><div class="rail" data-rail="people" tabindex="0" aria-label="Recommendations — scroll horizontally"></div></div>
-  </section>
-
-  <section class="slide" id="s5" data-name="TROPHIES">
-    <span class="eyebrow">TROPHY CABINET</span>
-    <h2 class="mega">THE<br><em>NUMBERS</em></h2>
-    <div class="trophies" data-fill="trophies"></div>
-  </section>
-
-  <section class="slide" id="s6" data-name="CONTACT">
-    <span class="script">say hello</span>
-    <h2 class="mega">GET IN<br>TOUCH<em>.</em></h2>
-    <div class="btnrow">
-      <a class="btn btn--fill" href="mailto:abhishek01789@gmail.com">abhishek01789@gmail.com</a>
-    </div>
-    <div class="social" data-fill="contact-links"></div>
-    <span class="eyebrow">PARIS · NETHERLANDS · GERMANY · REMOTE</span>
-  </section>
+  <div class="shelf" id="shelf" aria-label="Details"></div>
 
 </main>
+
+<div class="boot" id="boot">
+  <img class="boot__mark" src="assets/afaicon.png" alt="afaicon — hand-drawn yellow smiley">
+  <h1 class="boot__title">ABHISHEK THOMAS</h1>
+  <p class="boot__sub">AI ENGINEER · PARIS</p>
+  <div class="loadbar" aria-hidden="true"><i id="bar"></i></div>
+  <button class="boot__start" id="start">PRESS START</button>
+  <p class="boot__hint" id="tip">← → browse · ↑ ↓ switch · enter opens</p>
+</div>
 
 <script type="module" src="js/main.js"></script>
 </body>
