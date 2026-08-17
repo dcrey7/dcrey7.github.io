@@ -228,16 +228,24 @@ export function initXmb() {
 
   function setCat(i, quiet) {
     catI = (i + CATEGORIES.length) % CATEGORIES.length;
+    /* Coverflow deck, drawn with transforms over a constant layout pitch of
+       one card width. Each side card is pulled toward the selection so it
+       shows a KEEP sliver from under its neighbour; the selected card gets
+       CLEAR of open space on both sides. Transforms never touch offsetLeft,
+       so the crosspoint stays exact — animating layout margins did not. */
     const total = barEl.children.length;
+    const catw = barEl.children[0] ? barEl.children[0].offsetWidth : 0;
+    const KEEP = catw * .30, CLEAR = catw * .13;
     [...barEl.children].forEach((el, n) => {
-      el.classList.toggle('is-on', n === catI);
-      /* cover-switch: cards tilt toward the selection from both sides, and
-         stack by distance so each card tucks UNDER its neighbour toward it */
-      el.classList.toggle('cat--before', n < catI);
-      el.classList.toggle('cat--after', n > catI);
-      el.style.zIndex = total - Math.abs(n - catI);
-      el.setAttribute('aria-selected', String(n === catI));
-      el.tabIndex = n === catI ? 0 : -1;
+      const d = n - catI, k = Math.abs(d), dir = Math.sign(d);
+      el.classList.toggle('is-on', d === 0);
+      el.classList.toggle('cat--before', d < 0);
+      el.classList.toggle('cat--after', d > 0);
+      const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
+      el.style.transform = `translateX(${Math.round(tx)}px)`;
+      el.style.zIndex = total - k;
+      el.setAttribute('aria-selected', String(d === 0));
+      el.tabIndex = d === 0 ? 0 : -1;
     });
     buildColumn();
     slideBar();

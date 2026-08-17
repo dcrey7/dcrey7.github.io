@@ -46,13 +46,17 @@
   --catw: calc(var(--catf) * 1.6);      /* category card width — landscape,
                                            like the window thumbnails of a
                                            cover-switch alt-tab         */
-  --catov: calc(var(--catw) * -.16);    /* overlap: each card tucks under
-                                           its neighbour toward the selection */
   --imark: calc(var(--cat) * .74);      /* item card height            */
   --imarkw: calc(var(--imark) * 1.6);   /* item card width — same landscape
                                            ratio as the category cards  */
   --row:  calc(var(--imark) + 15px);    /* item row height             */
-  --crossx: calc(var(--catw) + var(--catov));  /* crosspoint = one slot pitch */
+  /* Coverflow deck ratios: each side card shows a .30 sliver, the selected
+     card gets .13 clearance on each side. The crosspoint is their sum — the
+     exact space one faded sliver + one clearance occupies left of the
+     selection. The deck is drawn purely with transforms over a constant
+     layout pitch (one card width), so alignment can never drift again:
+     animating layout margins was what broke it. */
+  --crossx: calc(var(--catw) * .43);
 
   --ease:      cubic-bezier(.22, .61, .36, 1);
   --ease-back: cubic-bezier(.34, 1.28, .64, 1);
@@ -212,10 +216,17 @@ body {
   padding: 0;
   position: relative;   /* stacking: JS sets z-index by distance from the
                            selection, so cards tuck under toward it */
-  opacity: .4;
-  transition: opacity .28s var(--ease);
 }
-.cat + .cat { margin-left: var(--catov); }
+/* The deck is drawn with transforms only — JS sets a translateX per card
+   (sliver + clearance geometry) and layout never moves. NO margins here:
+   an animating margin shifts offsetLeft mid-read and breaks the crosspoint. */
+.cat { transition: transform .42s var(--ease); will-change: transform; }
+
+/* Side cards are dimmed by BRIGHTNESS, never by opacity: a transparent card
+   lets the one behind show through, which dissolves the tucked-under
+   stacking into mush. Opaque + dark is how a real switcher does it. */
+.cat:not(.is-on) .cat__icon { filter: brightness(.42) saturate(.8); }
+.cat:not(.is-on):hover .cat__icon { filter: brightness(.68) saturate(.9); }
 .cat:hover { opacity: .75; }
 .cat.is-on { opacity: 1; }
 
@@ -231,7 +242,8 @@ body {
   place-items: center;
   overflow: hidden;
   background: color-mix(in oklab, var(--key) 55%, var(--void));
-  transition: box-shadow .28s var(--ease), transform .38s var(--ease-back);
+  transition: box-shadow .28s var(--ease), transform .38s var(--ease-back),
+              filter .28s var(--ease);
 }
 /* Per-card perspective, not a shared one: a shared vanishing point sits at
    the bar's centre, so distant cards barely foreshorten — every card gets
