@@ -24,7 +24,7 @@ const host = url => {
 const about = {
   id: 'about', label: 'ABOUT', mark: null, icon: true, key: ABOUT.key,
   items: [{
-    id: 'intro', icon: true, mark: '☻', key: ABOUT.key,
+    id: 'intro', mark: null, key: ABOUT.key,
     title: ABOUT.title, sub: ABOUT.sub, meta: ABOUT.meta, badge: null,
     body: 'Making LLMs behave at Vistiq.AI, Paris. 5+ years turning data science into shipped systems, Amazon to AXA to AI native startups. Masters in Data Science & AI, emlyon 2026.',
     action: null, cards: []

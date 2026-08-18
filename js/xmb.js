@@ -180,10 +180,13 @@ export function initXmb() {
       b.style.setProperty('--key', item.key);
       b.setAttribute('aria-current', String(i === itemOf[catI]));
 
-      const badge = document.createElement('span');
-      badge.className = 'item__mark';
-      markInto(badge, item, 'item__glyph');
-      b.appendChild(badge);
+      /* no mark, no icon, no logo: the name stands alone, no empty box */
+      if (item.mark || item.icon || item.logo) {
+        const badge = document.createElement('span');
+        badge.className = 'item__mark';
+        markInto(badge, item, 'item__glyph');
+        b.appendChild(badge);
+      }
 
       const name = document.createElement('span');
       name.className = 'item__name';
