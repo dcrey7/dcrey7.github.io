@@ -269,9 +269,11 @@ export const EDUCATION = [
    Create a free project at supabase.com, then paste its URL and anon key. */
 export const SUPA = { url: '', anon: '' };
 
-/* Paste YOUR Spotify playlist link here — the ♫ player top right plays it.
-   TEMPORARY placeholder playlist below until Abhishek supplies his own. */
-export const SPOTIFY = 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M';
+/* YOUR Spotify playlists (Share → Copy link). prev/next cycles this list.
+   TEMPORARY placeholder until Abhishek supplies his own. */
+export const SPOTIFY_PLAYLISTS = [
+  'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M'
+];
 
 export const CONTACT = {
   email: 'abhishek01789@gmail.com',

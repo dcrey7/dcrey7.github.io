@@ -1,13 +1,11 @@
-/* Boot order: cross media bar renders → boot gate → sound → clock. */
+/* Boot order: cross media bar renders → boot gate → player → clock. */
 
 import { initXmb } from './xmb.js';
 import { initBoot } from './boot.js';
-import { initSound } from './sound.js';
-import { SPOTIFY } from './data.js';
+import { SPOTIFY_PLAYLISTS } from './data.js';
 
 const xmb = initXmb();
 initBoot();
-initSound(document.getElementById('sndBtn'));
 
 /* Deep link: ?cat=play&i=1 opens a category on a given item. */
 const q = new URLSearchParams(location.search);
@@ -18,26 +16,63 @@ if (q.has('cat')) {
 }
 if (q.has('i')) xmb.setItem(Number(q.get('i')) || 0, true);
 
-/* The ♫ player: a Spotify playlist embed dropping from the top right.
-   The iframe is only mounted on first open, and the button only exists
-   when a playlist is configured in data.js. */
-const musBtn = document.getElementById('musBtn');
-const musicEl = document.getElementById('music');
-const playlistId = (SPOTIFY.match(/playlist\/([A-Za-z0-9]+)/) || [])[1];
-if (playlistId) {
-  musBtn.hidden = false;
-  musBtn.addEventListener('click', () => {
-    if (!musicEl.firstChild) {
-      const f = document.createElement('iframe');
-      f.src = `https://open.spotify.com/embed/playlist/${playlistId}?theme=0`;
-      f.allow = 'encrypted-media; fullscreen';
-      f.loading = 'lazy';
-      f.title = 'Playlist';
-      musicEl.appendChild(f);
-    }
-    const on = musicEl.classList.toggle('on');
-    musBtn.setAttribute('aria-pressed', on);
-  });
+/* ---------- the disc player ----------
+   A custom pill: spinning playlist cover, title, progress bar, play/pause
+   and prev/next cycling the playlists. Powered by Spotify's official
+   iframe embed controller (hidden); covers and titles come from Spotify's
+   public oEmbed endpoint. Spotify does not expose per-track names or track
+   skipping to websites, so the playlist is the unit here. */
+const pill = document.getElementById('pill');
+const ids = SPOTIFY_PLAYLISTS
+  .map(u => (u.match(/playlist\/([A-Za-z0-9]+)/) || [])[1])
+  .filter(Boolean);
+if (ids.length) {
+  pill.hidden = false;
+  const disc = document.getElementById('pillDisc');
+  const title = document.getElementById('pillTitle');
+  const prog = document.getElementById('pillProg');
+  const btnPlay = document.getElementById('pillPlay');
+  let ctrl = null, cur = 0, paused = true;
+
+  const meta = async n => {
+    try {
+      const r = await fetch('https://open.spotify.com/oembed?url=' +
+        encodeURIComponent('https://open.spotify.com/playlist/' + ids[n]));
+      const j = await r.json();
+      title.textContent = j.title || 'playlist';
+      if (j.thumbnail_url) disc.src = j.thumbnail_url;
+    } catch { title.textContent = 'playlist'; }
+  };
+  meta(0);
+
+  const apiScript = document.createElement('script');
+  apiScript.src = 'https://open.spotify.com/embed/iframe-api/v1';
+  apiScript.async = true;
+  document.head.appendChild(apiScript);
+  window.onSpotifyIframeApiReady = API => {
+    API.createController(document.getElementById('spotify-host'),
+      { uri: 'spotify:playlist:' + ids[0], width: 1, height: 1 },
+      c => {
+        ctrl = c;
+        c.addListener('playback_update', e => {
+          paused = e.data.isPaused;
+          btnPlay.textContent = paused ? '▶' : '⏸';
+          disc.classList.toggle('spin', !paused);
+          if (e.data.duration) {
+            prog.style.width = (e.data.position / e.data.duration * 100) + '%';
+          }
+        });
+      });
+  };
+
+  const load = n => {
+    cur = ((n % ids.length) + ids.length) % ids.length;
+    meta(cur);
+    if (ctrl) { ctrl.loadUri('spotify:playlist:' + ids[cur]); ctrl.play(); }
+  };
+  btnPlay.addEventListener('click', () => ctrl && ctrl.togglePlay());
+  document.getElementById('pillPrev').addEventListener('click', () => load(cur - 1));
+  document.getElementById('pillNext').addEventListener('click', () => load(cur + 1));
 }
 
 /* The clock is pure console theatre, but it is the detail that sells it. */

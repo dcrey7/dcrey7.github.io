@@ -254,24 +254,80 @@ body {
   color: var(--chrome-dim);
 }
 
-/* the ♫ player, dropping from the top right */
-#music {
-  position: fixed;
-  top: clamp(64px, 9vh, 110px);
-  right: 3vw;
-  width: clamp(320px, 24vw, 460px);
-  z-index: 40;
-  opacity: 0;
-  transform: translateY(-8px);
-  pointer-events: none;
-  transition: opacity .25s var(--ease), transform .25s var(--ease);
+/* ---------- the disc player pill ---------- */
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px 8px 8px;
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
-#music.on { opacity: 1; transform: none; pointer-events: auto; }
-#music iframe {
-  width: 100%;
-  height: clamp(300px, 44vh, 460px);
+.pill__disc {
+  width: clamp(34px, 2.6vw, 52px);
+  height: clamp(34px, 2.6vw, 52px);
+  border-radius: 50%;
+  object-fit: cover;
+}
+.pill__disc.spin { animation: discspin 6s linear infinite; }
+@keyframes discspin { to { transform: rotate(360deg); } }
+.pill__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: clamp(110px, 9vw, 190px);
+}
+.pill__meta b {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: var(--chrome);
+  max-width: clamp(110px, 9vw, 190px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pill__bar {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--glass-line);
+  overflow: hidden;
+}
+.pill__bar i { display: block; height: 100%; width: 0; background: var(--chrome); }
+.pill__btn {
+  background: none;
   border: 0;
-  border-radius: 14px;
+  cursor: pointer;
+  color: var(--chrome-dim);
+  font-size: .8rem;
+  padding: 4px;
+  transition: color .18s var(--ease);
+}
+.pill__btn:hover { color: var(--chrome); }
+.pill__btn--main {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--chrome);
+  color: var(--void);
+  font-size: .74rem;
+}
+.pill__btn--main:hover { background: var(--yellow); color: var(--void); }
+
+/* the hidden embed that actually plays the audio */
+#spotify-host {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 1px;
+  height: 1px;
+  opacity: .01;
+  pointer-events: none;
 }
 .sysbtn {
   background: none; border: 0; cursor: pointer;

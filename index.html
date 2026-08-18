@@ -24,8 +24,16 @@
 
 <header class="topbar">
   <div class="sys">
-    <button class="sysbtn" id="musBtn" aria-pressed="false" aria-label="Music" hidden>♫</button>
-    <button class="sysbtn" id="sndBtn" aria-pressed="false" aria-label="Sound off">♪</button>
+    <div class="pill" id="pill" hidden>
+      <img class="pill__disc" id="pillDisc" src="assets/afaicon.png" alt="">
+      <div class="pill__meta">
+        <b id="pillTitle">…</b>
+        <span class="pill__bar"><i id="pillProg"></i></span>
+      </div>
+      <button class="pill__btn" id="pillPrev" aria-label="Previous playlist">⏮</button>
+      <button class="pill__btn pill__btn--main" id="pillPlay" aria-label="Play">▶</button>
+      <button class="pill__btn" id="pillNext" aria-label="Next playlist">⏭</button>
+    </div>
     <time class="clock" id="clock"></time>
     <span class="who">
       <img src="assets/afaicon.png" alt="">
@@ -34,7 +42,7 @@
   </div>
 </header>
 
-<div id="music" aria-label="Playlist"></div>
+<div id="spotify-host" aria-hidden="true"></div>
 
 <main class="xmb">
 
