@@ -285,7 +285,11 @@ body {
   border: 3px solid rgba(255, 255, 255, .14);   /* the vinyl rim */
   box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .6);
 }
-.pill__disc.spin { animation: discspin 6s linear infinite; }
+/* the animation NEVER restarts: it is always applied and only its
+   play-state toggles, so the disc pauses at its current angle and
+   resumes from it, across pauses and song changes alike */
+.pill__disc { animation: discspin 6s linear infinite; animation-play-state: paused; }
+.pill__disc.spin { animation-play-state: running; }
 @keyframes discspin { to { transform: rotate(360deg); } }
 .pill__meta {
   display: flex;

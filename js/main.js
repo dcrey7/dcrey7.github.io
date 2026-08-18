@@ -89,7 +89,7 @@ if (listIds.length) {
   api.async = true;
   document.head.appendChild(api);
   window.onYouTubeIframeAPIReady = () => {
-    yt = new YT.Player('radio-host', {
+    yt = window.__yt = new YT.Player('radio-host', {
       width: 320, height: 180,
       playerVars: {
         listType: 'playlist', list: listIds[curList],
@@ -131,8 +131,10 @@ if (listIds.length) {
   };
 
   btnPlay.addEventListener('click', () => {
-    if (!yt) return;
-    if (yt.getPlayerState && yt.getPlayerState() === 1) {
+    if (!yt || !yt.getPlayerState) return;
+    const st = yt.getPlayerState();
+    /* playing OR buffering both count as "on", so pause always lands */
+    if (st === 1 || st === 3) {
       userPaused = true;
       yt.pauseVideo();
     } else {

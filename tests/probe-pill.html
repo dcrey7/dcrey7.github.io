@@ -1,0 +1,23 @@
+<!DOCTYPE html><meta charset="utf-8"><title>probe</title>
+<iframe id="f" src="../index.html?skip" style="width:1500px;height:900px;border:0"></iframe>
+<pre id="out"></pre>
+<script>
+const f = document.getElementById('f');
+f.addEventListener('load', () => setTimeout(() => {
+  const d = f.contentDocument, w = f.contentWindow, log = [];
+  const btn = d.getElementById('pillPlay');
+  const pill = d.getElementById('pill');
+  log.push('pill hidden attr: ' + pill.hidden);
+  const r = btn.getBoundingClientRect();
+  log.push('btn rect: ' + JSON.stringify({x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height)}));
+  const cx = r.x + r.width / 2, cy = r.y + r.height / 2;
+  const top = d.elementFromPoint(cx, cy);
+  log.push('elementFromPoint: ' + (top ? top.tagName + '#' + top.id + '.' + top.className : 'null'));
+  log.push('is the button or inside it: ' + (top === btn || (top && btn.contains(top))));
+  let got = 0;
+  btn.addEventListener('click', () => got++);
+  top && top.dispatchEvent(new w.MouseEvent('click', {bubbles: true}));
+  log.push('click reached button handler: ' + (got > 0));
+  document.getElementById('out').textContent = log.join('\n');
+}, 1400));
+</script>
