@@ -286,7 +286,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: clamp(180px, 17vw, 380px);
+  /* FIXED width: the block never resizes with the song name's length */
+  width: clamp(200px, 17vw, 380px);
 }
 .pill__meta b {
   font-size: .64rem;
@@ -336,15 +337,19 @@ body {
   cursor: pointer;
   color: var(--chrome-dim);
   font-size: .66rem;
-  padding: 2px;
+  padding: 2px 0;
   line-height: 1;
+  /* FIXED width so glyph swaps (▶/⏸) can never shift the row */
+  width: 1.6em;
+  text-align: center;
   transition: color .18s var(--ease);
 }
 .pill__btn:hover { color: var(--chrome); }
-/* bare icons only — no button chrome anywhere */
+/* bare icons only — no button chrome anywhere; same fixed footprint */
 .pill__btn--main {
   font-size: .8rem;
   color: var(--chrome);
+  width: 1.6em;
 }
 .pill__btn--main:hover { color: var(--yellow); }
 

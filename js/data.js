@@ -275,7 +275,10 @@ export const SUPA = { url: '', anon: '' };
    manage the songs in the YouTube app. The disc click cycles playlists.
    e.g. 'https://www.youtube.com/playlist?list=PL...'                       */
 export const YT_PLAYLISTS = [
-  'https://www.youtube.com/watch?v=ple35INEvSg&list=PLlmyYmqoMXCsDoF4-oS_cTnwT3Qli-ibh'
+  'https://www.youtube.com/watch?v=ple35INEvSg&list=PLlmyYmqoMXCsDoF4-oS_cTnwT3Qli-ibh',
+  'https://www.youtube.com/watch?v=E71acITolMs&list=PLDisKgcnAC4RsAAPyU2XABwQxOBsup9aH',
+  'https://www.youtube.com/watch?v=Jo8kz-ekR9g&list=PLxXDneBUCXERjmJJw4eijw45tfWr5ZLr-',
+  'https://www.youtube.com/playlist?list=PLMp52FesfEMkrsmgKg5-QIKs-Jad8b3sj'
 ];
 
 export const CONTACT = {
