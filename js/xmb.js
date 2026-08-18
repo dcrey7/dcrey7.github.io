@@ -432,17 +432,24 @@ export function initXmb() {
     }
   });
 
-  /* Wheel: horizontal intent changes category, vertical walks the items. */
+  /* Wheel: WHERE you scroll decides what moves. Over the category deck
+     the wheel walks the category cards, over the vertical menu it walks
+     the items, over the side rail it scrolls the text natively.
+     Anywhere else the wheel axis decides, as before. */
   let wheelAt = 0;
   addEventListener('wheel', e => {
-    if (e.target.closest('#shelf')) return;
+    if (e.target.closest('#shelf') || e.target.closest('.keyart-rail')) return;
     const now = performance.now();
     if (now - wheelAt < 220) return;
+    const overDeck = !!e.target.closest('.barwrap');
+    const overMenu = !!e.target.closest('.column');
     const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
     const d = horiz ? e.deltaX : e.deltaY;
     if (Math.abs(d) < 8) return;
     wheelAt = now;
-    if (horiz) setCat(catI + (d > 0 ? 1 : -1));
+    if (overDeck) setCat(catI + (d > 0 ? 1 : -1));
+    else if (overMenu) setItem(itemOf[catI] + (d > 0 ? 1 : -1));
+    else if (horiz) setCat(catI + (d > 0 ? 1 : -1));
     else setItem(itemOf[catI] + (d > 0 ? 1 : -1));
   }, { passive: true });
 

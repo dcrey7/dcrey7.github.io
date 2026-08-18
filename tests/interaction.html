@@ -172,6 +172,21 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   say('top fade removed at the first item',
       d.getElementById('column').classList.contains('column--athead'), 'true');
 
+  /* --- the wheel: where you scroll decides what moves --- */
+  const spin = (el, dy) => el.dispatchEvent(new w.WheelEvent('wheel',
+    { deltaY: dy, bubbles: true }));
+  /* the engine throttles the wheel to one step per 220ms */
+  const cool = () => new Promise(r => setTimeout(r, 260));
+  const catBefore = cat();
+  spin(d.querySelector('.bar'), 120); await cool();
+  say('wheel over the deck moves the category', cat() !== catBefore, 'true');
+  const catHold = cat(), itemBefore = item();
+  spin(d.querySelector('.column'), 120); await cool();
+  say('wheel over the menu moves the item', item() !== itemBefore, 'true');
+  say('wheel over the menu keeps the category', cat(), catHold);
+  spin(d.querySelector('.column'), -120); await cool();
+  say('wheel up walks back', item(), itemBefore);
+
   const fails = log.filter(l => l.startsWith('FAIL')).length;
   document.getElementById('out').textContent =
     log.join('\n') + `\n\n${log.length - fails}/${log.length} passed`;
