@@ -615,11 +615,11 @@ body[data-theme="beach"] .hero {
   will-change: transform;
   transition: transform .46s var(--ease);
   -webkit-mask-image: linear-gradient(to bottom,
-    rgb(0 0 0) calc(var(--catf) + 6px),
-    transparent calc(var(--catf) + 6px + var(--catf) * .39));
+    rgb(0 0 0) calc(var(--catf) + 16px),
+    transparent calc(var(--catf) + 16px + var(--catf) * .39));
   mask-image: linear-gradient(to bottom,
-    rgb(0 0 0) calc(var(--catf) + 6px),
-    transparent calc(var(--catf) + 6px + var(--catf) * .39));
+    rgb(0 0 0) calc(var(--catf) + 16px),
+    transparent calc(var(--catf) + 16px + var(--catf) * .39));
 }
 .rcard {
   position: absolute;
@@ -650,7 +650,7 @@ body[data-theme="beach"] .hero {
 .rcard__icon::after {
   content: '';
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 16px);
   left: 0;
   right: 0;
   height: 44%;
