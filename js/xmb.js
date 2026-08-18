@@ -397,27 +397,28 @@ export function initXmb() {
     const catw = barEl.children[0] ? barEl.children[0].offsetWidth : 0;
     const KEEP = catw * .30, CLEAR = 0;   /* no clearance — a continuous deck */
     /* Reflection clipping: where a card is tucked under its neighbour,
-       that covered part of its reflection is cut away, so transparent
-       reflections never stack and blend. The overlap is measured on
-       screen, then converted to the card's own units with the exact
-       inverse of the CSS projection (perspective 700, rotateY 38deg,
-       translateZ -14, selected scale 1.16 + translateZ 14). */
-    const P = 700, ZB = 14, TH = 38 * Math.PI / 180;
-    const cosT = Math.cos(TH), sinT = Math.sin(TH);
-    const projW = catw * cosT * P / (P + ZB + catw * sinT);
-    const selHalf = catw * (1.16 * P / (P - ZB) - 1) / 2;
-    const toLocal = s => Math.min(catw, Math.max(0,
-      (P + ZB) * s / (P * cosT - s * sinT)));
+       the covered part of its reflection is cut away, so transparent
+       reflections never stack and blend. The projection is solved from
+       the ACTUAL css transform order (translateZ is rotated too): for a
+       tilted card, local x lands on screen at
+         xs(x) = (c*x + b*s) * P / (P + b*c - s*x)
+       with P=700, b=14, angle 38deg, measured from the planted edge.
+       The near edge shifts inward by xs(0) and the far edge is slightly
+       magnified; the inverse of xs maps a screen overlap back to the
+       card's own units exactly. */
+    const P = 700, B = 14, TH = 38 * Math.PI / 180;
+    const cT = Math.cos(TH), sT = Math.sin(TH);
+    const xsMax = (cT * catw + B * sT) * P / (P + B * cT - sT * catw);
+    const selHalf = catw * (1.16 * P / (P - B) - 1) / 2;
+    const solveLocal = T => Math.min(catw, Math.max(0,
+      ((P + B * cT) * T - P * B * sT) / (P * cT + sT * T)));
     const els = [...barEl.children];
-    const txs = [], Ls = [], Rs = [];
+    const txs = [], org = [];   /* origin: the planted edge of each card */
     els.forEach((el, n) => {
       const d = n - catI, k = Math.abs(d), dir = Math.sign(d);
       const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
       txs[n] = tx;
-      const base = el.offsetLeft + tx;
-      if (d === 0) { Ls[n] = base - selHalf; Rs[n] = base + catw + selHalf; }
-      else if (d > 0) { Ls[n] = base; Rs[n] = base + projW; }
-      else { Rs[n] = base + catw; Ls[n] = base + catw - projW; }
+      org[n] = el.offsetLeft + tx + (d < 0 ? catw : 0);
     });
     els.forEach((el, n) => {
       const d = n - catI, k = Math.abs(d);
@@ -427,8 +428,18 @@ export function initXmb() {
       el.style.transform = `translateX(${Math.round(txs[n])}px)`;
       el.style.zIndex = total - k;
       let hl = 0, hr = 0;
-      if (d > 0) hl = toLocal(Math.max(0, Rs[n - 1] - Ls[n]));
-      if (d < 0) hr = toLocal(Math.max(0, Rs[n] - Ls[n + 1]));
+      if (d > 0) {
+        const occRight = (n - 1 === catI)
+          ? org[n - 1] + catw + selHalf
+          : org[n - 1] + xsMax;
+        hl = solveLocal(occRight - org[n]);
+      }
+      if (d < 0) {
+        const occLeft = (n + 1 === catI)
+          ? org[n + 1] - selHalf
+          : org[n + 1] - xsMax;
+        hr = solveLocal(org[n] - occLeft);
+      }
       el.style.setProperty('--rcl', Math.round(hl) + 'px');
       el.style.setProperty('--rcr', Math.round(hr) + 'px');
       el.setAttribute('aria-selected', String(d === 0));
