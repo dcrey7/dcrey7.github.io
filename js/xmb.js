@@ -15,6 +15,7 @@ const $ = s => document.querySelector(s);
 
 export function initXmb() {
   const barEl    = $('#bar');
+  const reflEl   = $('#reflbar');
   const colEl    = $('#column');
   const colTrack = $('#columnTrack');
   const heroEl   = $('#hero');
@@ -167,6 +168,17 @@ export function initXmb() {
 
       b.addEventListener('click', () => setCat(i));
       barEl.appendChild(b);
+    });
+    /* one reflection layer per card, painted solid, stacked like the deck */
+    reflEl.replaceChildren();
+    CATEGORIES.forEach(cat => {
+      const rc = document.createElement('span');
+      rc.className = 'rcard';
+      rc.style.setProperty('--key', cat.key);
+      const ric = document.createElement('i');
+      ric.className = 'rcard__icon';
+      rc.appendChild(ric);
+      reflEl.appendChild(rc);
     });
   }
 
@@ -348,7 +360,9 @@ export function initXmb() {
   function slideBar() {
     const el = barEl.children[catI];
     if (!el) return;
-    barEl.style.transform = `translateX(${Math.round(crossx() - el.offsetLeft)}px)`;
+    const tx = Math.round(crossx() - el.offsetLeft);
+    barEl.style.transform = `translateX(${tx}px)`;
+    reflEl.style.transform = `translateX(${tx}px)`;
   }
 
   /* Vertical rule (user-specified): on the FIRST item the selection sits
@@ -396,54 +410,26 @@ export function initXmb() {
     const total = barEl.children.length;
     const catw = barEl.children[0] ? barEl.children[0].offsetWidth : 0;
     const KEEP = catw * .30, CLEAR = 0;   /* no clearance — a continuous deck */
-    /* Reflection clipping: where a card is tucked under its neighbour,
-       the covered part of its reflection is cut away, so transparent
-       reflections never stack and blend. The projection is solved from
-       the ACTUAL css transform order (translateZ is rotated too): for a
-       tilted card, local x lands on screen at
-         xs(x) = (c*x + b*s) * P / (P + b*c - s*x)
-       with P=700, b=14, angle 38deg, measured from the planted edge.
-       The near edge shifts inward by xs(0) and the far edge is slightly
-       magnified; the inverse of xs maps a screen overlap back to the
-       card's own units exactly. */
-    const P = 700, B = 14, TH = 38 * Math.PI / 180;
-    const cT = Math.cos(TH), sT = Math.sin(TH);
-    const xsMax = (cT * catw + B * sT) * P / (P + B * cT - sT * catw);
-    const selHalf = catw * (1.16 * P / (P - B) - 1) / 2;
-    const solveLocal = T => Math.min(catw, Math.max(0,
-      ((P + B * cT) * T - P * B * sT) / (P * cT + sT * T)));
-    const els = [...barEl.children];
-    const txs = [], org = [];   /* origin: the planted edge of each card */
-    els.forEach((el, n) => {
+    [...barEl.children].forEach((el, n) => {
       const d = n - catI, k = Math.abs(d), dir = Math.sign(d);
-      const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
-      txs[n] = tx;
-      org[n] = el.offsetLeft + tx + (d < 0 ? catw : 0);
-    });
-    els.forEach((el, n) => {
-      const d = n - catI, k = Math.abs(d);
       el.classList.toggle('is-on', d === 0);
       el.classList.toggle('cat--before', d < 0);
       el.classList.toggle('cat--after', d > 0);
-      el.style.transform = `translateX(${Math.round(txs[n])}px)`;
+      const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
+      el.style.transform = `translateX(${Math.round(tx)}px)`;
       el.style.zIndex = total - k;
-      let hl = 0, hr = 0;
-      if (d > 0) {
-        const occRight = (n - 1 === catI)
-          ? org[n - 1] + catw + selHalf
-          : org[n - 1] + xsMax;
-        hl = solveLocal(occRight - org[n]);
-      }
-      if (d < 0) {
-        const occLeft = (n + 1 === catI)
-          ? org[n + 1] - selHalf
-          : org[n + 1] - xsMax;
-        hr = solveLocal(org[n] - occLeft);
-      }
-      el.style.setProperty('--rcl', Math.round(hl) + 'px');
-      el.style.setProperty('--rcr', Math.round(hr) + 'px');
       el.setAttribute('aria-selected', String(d === 0));
       el.tabIndex = d === 0 ? 0 : -1;
+      /* the reflection layer mirrors this card: same slot, same slide,
+         same tilt classes, same stacking — occlusion comes free */
+      const rc = reflEl.children[n];
+      if (rc) {
+        rc.className = 'rcard'
+          + (d === 0 ? ' is-on' : d < 0 ? ' rcard--before' : ' rcard--after');
+        rc.style.left = (el.offsetLeft + 120) + 'px';   /* reflbar slack */
+        rc.style.transform = el.style.transform;
+        rc.style.zIndex = el.style.zIndex;
+      }
     });
     buildColumn();
     slideBar();
