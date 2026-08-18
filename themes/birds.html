@@ -212,14 +212,14 @@ void main() {
   const N = 4200, K = 7, G = 2;
   const F = 820, ZOFF = 720;
   const BOUND = 1300;
-  const SEP2 = 13 * 13;
+  const SEP2 = 26 * 26;
   const BASE_MAX = 2.2, BASE_MIN = 1.35;   /* birds, not jets */
   /* Reynolds 1987: every rule is an ACCELERATION REQUEST, and they are
      granted in priority order out of one bounded budget (MAXA). Bounded
      acceleration is what turns jerks into smooth banking curves. */
-  const MAXA = .16;
-  const MAG_FLEE = MAXA, MAG_SEP = MAXA * .55, MAG_ALI = MAXA * .5,
-        MAG_COH = MAXA * .7, MAG_ROOST = MAXA * .55;
+  const MAXA = .19;
+  const MAG_FLEE = MAXA, MAG_SEP = MAXA * .7, MAG_ALI = MAXA * .5,
+        MAG_COH = MAXA * .45, MAG_ROOST = MAXA * .35;
   const FLEE_R2 = 200 * 200;
 
   const px = new Float32Array(N), py = new Float32Array(N), pz = new Float32Array(N);
@@ -262,7 +262,8 @@ void main() {
   const roosts = [];
   for (let g = 0; g < G; g++) {
     roosts.push({
-      x: (g - 1) * 500, y: 0, z: 0,
+      x: (g === 0 ? -280 : 280), y: -170, z: 0,
+      ox: g === 0 ? -280 : 280,
       th: Math.random() * Math.PI * 2,
       ph: (Math.random() - .5) * .8,
       spd: 1, spdTarget: 1, nextSpd: 0
@@ -270,11 +271,23 @@ void main() {
   }
   const grx = new Float32Array(G), gry = new Float32Array(G), grz = new Float32Array(G);
   const gspd = new Float32Array(G);
+  /* each group's actual centre of mass (previous frame): strays get
+     pulled back to the MASS, so clumps merge instead of multiplying */
+  const gcx = new Float32Array(G), gcy = new Float32Array(G), gcz = new Float32Array(G);
+  const gcn = new Float32Array(G);
+  const acx = new Float32Array(G), acy = new Float32Array(G), acz = new Float32Array(G);
+  const acn = new Float32Array(G);
   const falcon = { x: 0, y: -600, z: 900, tx: 0, ty: 0, tz: 0, next: 0 };
 
   let t = 0;
   function step() {
     t += 1 / 60;
+    for (let g = 0; g < G; g++) {
+      const n = acn[g] || 1;
+      gcx[g] = acx[g] / n; gcy[g] = acy[g] / n; gcz[g] = acz[g] / n;
+      gcn[g] = acn[g];
+      acx[g] = acy[g] = acz[g] = acn[g] = 0;
+    }
 
     for (let g = 0; g < G; g++) {
       const r = roosts[g];
@@ -294,8 +307,9 @@ void main() {
       r.y += Math.sin(r.ph) * rv * .7;
       r.z += Math.sin(r.th) * Math.cos(r.ph) * rv;
       /* soft containment: steer the heading back toward the middle */
-      if (r.x * r.x + r.z * r.z > 400 * 400 || r.y > -40 || r.y < -300) {
-        const back = Math.atan2(-r.z, -r.x);
+      const ddx = r.x - r.ox;
+      if (ddx * ddx + r.z * r.z > 300 * 300 || r.y > -40 || r.y < -300) {
+        const back = Math.atan2(-r.z, r.ox - r.x);
         let d = back - r.th;
         while (d > Math.PI) d -= Math.PI * 2;
         while (d < -Math.PI) d += Math.PI * 2;
@@ -380,7 +394,7 @@ void main() {
         }
       }
       /* rare defection: a thin stream of birds trades between flocks */
-      if (Math.random() < .0002) group[i] = (group[i] + 1 + (Math.random() * (G - 1) | 0)) % G;
+      if (Math.random() < .00003) group[i] = (group[i] + 1 + (Math.random() * (G - 1) | 0)) % G;
       const g = group[i];
 
       /* ---- prioritized acceleration allocation (Reynolds 1987) ----
@@ -400,22 +414,42 @@ void main() {
       if (fd2 < FLEE_R2 && fd2 > 1) {
         alloc(dfx, dfy, dfz, MAG_FLEE * (1 - Math.sqrt(fd2) / 200) * 1.6);
       }
-      alloc(sx, sy, sz, MAG_SEP);
+      /* urgency scaled requests (Reynolds): mild crowding asks for a
+         little, real crowding asks for everything — the budget left
+         over is what lets the flock still follow its roost */
+      const sepL = Math.sqrt(sx * sx + sy * sy + sz * sz);
+      alloc(sx, sy, sz, MAG_SEP * Math.min(1, sepL / 3));
+      /* a stray far from its group's mass rejoins BEFORE anything else:
+         this is what keeps two flocks two, not fifteen wisps */
+      const gdx = gcx[g] - px[i], gdy = gcy[g] - py[i], gdz = gcz[g] - pz[i];
+      const gdist2 = gdx * gdx + gdy * gdy + gdz * gdz;
+      if (gcn[g] > 20 && gdist2 > 480 * 480) {
+        alloc(gdx, gdy, gdz, MAXA * .45);
+      }
       if (found) {
         const inv = 1 / found;
-        alloc(ax * inv - vx[i], ay * inv - vy[i], az * inv - vz[i], MAG_ALI);
+        const dax = ax * inv - vx[i], day = ay * inv - vy[i], daz = az * inv - vz[i];
+        const aliL = Math.sqrt(dax * dax + day * day + daz * daz);
+        alloc(dax, day, daz, MAG_ALI * Math.min(1, aliL / 1.6));
         alloc(cx, cy, cz, MAG_COH * (wCoh / .009));
       }
       alloc(grx[g] - px[i], gry[g] - py[i], grz[g] - pz[i], MAG_ROOST);
       vx[i] += accx; vy[i] += accy; vz[i] += accz;
 
-      /* the flock stays in the SKY: lift builds as a bird nears the
-         ground band (world +y is screen-down) */
-      if (py[i] > 55) vy[i] -= (py[i] - 55) * .008;
-      /* the STAGE: soft walls keep the show inside the frame */
-      if (py[i] < -430) vy[i] += (-430 - py[i]) * .005;
-      if (px[i] > 700) vx[i] -= (px[i] - 700) * .004;
-      else if (px[i] < -700) vx[i] += (-700 - px[i]) * .004;
+      /* the STAGE, enforced in SCREEN space: wherever the bird is in
+         depth, its PROJECTED point stays inside the frame and above
+         the sea. World walls could not do this: near birds project
+         wider than far ones. */
+      const pzz = F / (ZOFF + pz[i]);
+      const sxp = px[i] * pzz;                 /* px from centre        */
+      const syp = (-py[i] - 40) * pzz;         /* px up from centre     */
+      const mxX = W * .5 - 70;
+      const topY = H * .5 - 60;
+      const botY = -(H * .20) + 44;            /* the sea line + margin */
+      if (sxp > mxX) vx[i] -= (sxp - mxX) * .012 / pzz;
+      else if (sxp < -mxX) vx[i] += (-mxX - sxp) * .012 / pzz;
+      if (syp > topY) vy[i] += (syp - topY) * .012 / pzz;
+      if (syp < botY) vy[i] -= (botY - syp) * .012 / pzz;
       if (pz[i] > 520) vz[i] -= (pz[i] - 520) * .004;
       else if (pz[i] < -200) vz[i] += (-200 - pz[i]) * .005;
       /* near-constant airspeed scaled by the flock's pulsing pace */
@@ -424,6 +458,7 @@ void main() {
       const cl = v > hi ? hi / v : v < lo ? lo / v : 1;
       vx[i] *= cl; vy[i] *= cl; vz[i] *= cl;
       px[i] += vx[i]; py[i] += vy[i]; pz[i] += vz[i];
+      acx[g] += px[i]; acy[g] += py[i]; acz[g] += pz[i]; acn[g]++;
       const o = i * 6;
       data[o] = px[i]; data[o + 1] = py[i]; data[o + 2] = pz[i];
       data[o + 3] = vx[i]; data[o + 4] = -vy[i];   /* screen heading */
@@ -458,6 +493,7 @@ void main() {
     gl.drawArrays(gl.POINTS, 0, N);
   }
 
+  window.__dbg = { px, py, pz, group, N, G };
   (function loop() {
     step();
     draw();
