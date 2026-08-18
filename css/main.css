@@ -612,6 +612,10 @@ body[data-theme="beach"] .hero {
     color-mix(in oklab, var(--key) 55%, var(--void)), transparent 88%);
   opacity: .38;
   pointer-events: none;
+  /* hidden cards: the covered part of the reflection is clipped away so
+     stacked reflections can never blend (values set by the engine) */
+  clip-path: inset(0 var(--rcr, 0px) 0 var(--rcl, 0px));
+  transition: clip-path .42s var(--ease);
 }
 
 .cat__label {

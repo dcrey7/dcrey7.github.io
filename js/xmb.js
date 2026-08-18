@@ -396,14 +396,41 @@ export function initXmb() {
     const total = barEl.children.length;
     const catw = barEl.children[0] ? barEl.children[0].offsetWidth : 0;
     const KEEP = catw * .30, CLEAR = 0;   /* no clearance — a continuous deck */
-    [...barEl.children].forEach((el, n) => {
+    /* Reflection clipping: where a card is tucked under its neighbour,
+       that covered part of its reflection is cut away, so transparent
+       reflections never stack and blend. The overlap is measured on
+       screen, then converted to the card's own units with the exact
+       inverse of the CSS projection (perspective 700, rotateY 38deg,
+       translateZ -14, selected scale 1.16 + translateZ 14). */
+    const P = 700, ZB = 14, TH = 38 * Math.PI / 180;
+    const cosT = Math.cos(TH), sinT = Math.sin(TH);
+    const projW = catw * cosT * P / (P + ZB + catw * sinT);
+    const selHalf = catw * (1.16 * P / (P - ZB) - 1) / 2;
+    const toLocal = s => Math.min(catw, Math.max(0,
+      (P + ZB) * s / (P * cosT - s * sinT)));
+    const els = [...barEl.children];
+    const txs = [], Ls = [], Rs = [];
+    els.forEach((el, n) => {
       const d = n - catI, k = Math.abs(d), dir = Math.sign(d);
+      const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
+      txs[n] = tx;
+      const base = el.offsetLeft + tx;
+      if (d === 0) { Ls[n] = base - selHalf; Rs[n] = base + catw + selHalf; }
+      else if (d > 0) { Ls[n] = base; Rs[n] = base + projW; }
+      else { Rs[n] = base + catw; Ls[n] = base + catw - projW; }
+    });
+    els.forEach((el, n) => {
+      const d = n - catI, k = Math.abs(d);
       el.classList.toggle('is-on', d === 0);
       el.classList.toggle('cat--before', d < 0);
       el.classList.toggle('cat--after', d > 0);
-      const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
-      el.style.transform = `translateX(${Math.round(tx)}px)`;
+      el.style.transform = `translateX(${Math.round(txs[n])}px)`;
       el.style.zIndex = total - k;
+      let hl = 0, hr = 0;
+      if (d > 0) hl = toLocal(Math.max(0, Rs[n - 1] - Ls[n]));
+      if (d < 0) hr = toLocal(Math.max(0, Rs[n] - Ls[n + 1]));
+      el.style.setProperty('--rcl', Math.round(hl) + 'px');
+      el.style.setProperty('--rcr', Math.round(hr) + 'px');
       el.setAttribute('aria-selected', String(d === 0));
       el.tabIndex = d === 0 ? 0 : -1;
     });
