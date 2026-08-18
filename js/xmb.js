@@ -15,7 +15,6 @@ const $ = s => document.querySelector(s);
 
 export function initXmb() {
   const barEl    = $('#bar');
-  const mirrorEl = $('#barMirror');
   const colEl    = $('#column');
   const colTrack = $('#columnTrack');
   const heroEl   = $('#hero');
@@ -148,7 +147,6 @@ export function initXmb() {
   /* ---------- the horizontal axis ---------- */
   function buildBar() {
     barEl.replaceChildren();
-    mirrorEl.replaceChildren();
     CATEGORIES.forEach((cat, i) => {
       const b = document.createElement('button');
       b.className = 'cat';
@@ -169,12 +167,6 @@ export function initXmb() {
 
       b.addEventListener('click', () => setCat(i));
       barEl.appendChild(b);
-    });
-    /* the mirror deck: inert clones, one per card */
-    [...barEl.children].forEach(c => {
-      const m = c.cloneNode(true);
-      m.tabIndex = -1;
-      mirrorEl.appendChild(m);
     });
   }
 
@@ -356,9 +348,7 @@ export function initXmb() {
   function slideBar() {
     const el = barEl.children[catI];
     if (!el) return;
-    const tx = Math.round(crossx() - el.offsetLeft);
-    barEl.style.transform = `translateX(${tx}px)`;
-    mirrorEl.style.transform = `translateX(${tx}px) scaleY(-1)`;
+    barEl.style.transform = `translateX(${Math.round(crossx() - el.offsetLeft)}px)`;
   }
 
   /* Vertical rule (user-specified): on the FIRST item the selection sits
@@ -417,15 +407,6 @@ export function initXmb() {
       el.setAttribute('aria-selected', String(d === 0));
       el.tabIndex = d === 0 ? 0 : -1;
     });
-    /* the mirror deck follows the real one, card for card */
-    if (mirrorEl.children.length === barEl.children.length) {
-      [...barEl.children].forEach((src, n) => {
-        const m = mirrorEl.children[n];
-        m.className = src.className;
-        m.style.transform = src.style.transform;
-        m.style.zIndex = src.style.zIndex;
-      });
-    }
     buildColumn();
     slideBar();
     setItem(itemOf[catI], true);

@@ -596,40 +596,22 @@ body[data-theme="beach"] .hero {
 
 /* Only the selected card is titled — the sides are anonymous thumbnails,
    exactly as the PS5 rail and an alt-tab switcher both do it. */
-/* The reflection is a MIRRORED CLONE of the whole deck. The clone is
-   flipped around the line just under the cards, flattened as one group
-   (opacity creates the group), then faded with one mask. Cards in the
-   clone occlude each other exactly like the real deck, so reflections
-   can never overlap or blend, on any background. */
-.bar--mirror {
+/* Every card stands on the same glossy floor. The reflection is a pseudo
+   element INSIDE the card's paint layer, so it scales, tilts, dims and
+   fades in the same frame as the card itself — box-reflect could not:
+   Chrome repaints it only after a composited animation ends (the lag). */
+.cat__icon::after {
+  content: '';
   position: absolute;
-  /* the whole clone deck sits one card height below the real one,
-     with a clear 22px air gap between card and reflection */
-  top: calc(20px + var(--catf) + 10px);
+  top: calc(100% + 6px);
   left: 0;
   right: 0;
+  height: 44%;
+  border-radius: inherit;
+  background: linear-gradient(to bottom,
+    color-mix(in oklab, var(--key) 55%, var(--void)), transparent 88%);
+  opacity: .38;
   pointer-events: none;
-  opacity: .42;
-  -webkit-mask-image: linear-gradient(to bottom,
-    rgba(0, 0, 0, .85), rgba(0, 0, 0, .25) calc(var(--catf) * .5),
-    transparent var(--catf));
-  mask-image: linear-gradient(to bottom,
-    rgba(0, 0, 0, .85), rgba(0, 0, 0, .25) calc(var(--catf) * .5),
-    transparent var(--catf));
-}
-.bar--mirror .cat { cursor: default; }
-.bar--mirror .cat__label { visibility: hidden; }
-/* A REAL floor mirror: each card keeps its own rotation and its own
-   perspective, only its face flips. Flipping the group instead would
-   invert the perspective convergence: the angle reads wrong. */
-.bar--mirror .cat--before .cat__icon {
-  transform: perspective(700px) rotateY(38deg) translateZ(-14px) scaleY(-1);
-}
-.bar--mirror .cat--after .cat__icon {
-  transform: perspective(700px) rotateY(-38deg) translateZ(-14px) scaleY(-1);
-}
-.bar--mirror .cat.is-on .cat__icon {
-  transform: perspective(700px) translateZ(14px) scale(1.16) scaleY(-1);
 }
 
 .cat__label {
