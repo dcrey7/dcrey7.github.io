@@ -603,21 +603,34 @@ body[data-theme="beach"] .hero {
    can never overlap or blend, on any background. */
 .bar--mirror {
   position: absolute;
-  top: 20px;   /* the barwrap's top padding: same box as the real bar */
+  /* the whole clone deck sits one card height below the real one,
+     with a clear 22px air gap between card and reflection */
+  top: calc(20px + var(--catf) + 10px);
   left: 0;
   right: 0;
   pointer-events: none;
-  opacity: .38;
-  /* the fold sits under the cards: flip origin at catf + 9 leaves an
-     18px air gap between a card and its reflection */
-  transform-origin: 50% calc(var(--catf) + 9px);
+  opacity: .42;
   -webkit-mask-image: linear-gradient(to bottom,
-    transparent calc(var(--catf) * .3), rgba(0, 0, 0, .95) var(--catf));
+    rgba(0, 0, 0, .85), rgba(0, 0, 0, .25) calc(var(--catf) * .5),
+    transparent var(--catf));
   mask-image: linear-gradient(to bottom,
-    transparent calc(var(--catf) * .3), rgba(0, 0, 0, .95) var(--catf));
+    rgba(0, 0, 0, .85), rgba(0, 0, 0, .25) calc(var(--catf) * .5),
+    transparent var(--catf));
 }
 .bar--mirror .cat { cursor: default; }
 .bar--mirror .cat__label { visibility: hidden; }
+/* A REAL floor mirror: each card keeps its own rotation and its own
+   perspective, only its face flips. Flipping the group instead would
+   invert the perspective convergence: the angle reads wrong. */
+.bar--mirror .cat--before .cat__icon {
+  transform: perspective(700px) rotateY(38deg) translateZ(-14px) scaleY(-1);
+}
+.bar--mirror .cat--after .cat__icon {
+  transform: perspective(700px) rotateY(-38deg) translateZ(-14px) scaleY(-1);
+}
+.bar--mirror .cat.is-on .cat__icon {
+  transform: perspective(700px) translateZ(14px) scale(1.16) scaleY(-1);
+}
 
 .cat__label {
   font-size: .6rem;

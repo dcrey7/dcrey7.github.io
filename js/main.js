@@ -2,7 +2,6 @@
 
 import { initXmb } from './xmb.js';
 import { initBoot } from './boot.js';
-import { bus } from './config.js';
 import { YT_PLAYLISTS } from './data.js';
 
 const xmb = initXmb();
@@ -157,12 +156,8 @@ if (listIds.length) {
     }
   }, 6000);
 
-  /* AUTOPLAY: PRESS START is the user gesture browsers require — the radio
-     opens with the FIRST song of the FIRST playlist, then goes random.
-     Any first click or key works as fallback. */
-  const tryPlay = () => { if (yt && yt.playVideo) yt.playVideo(); };
-  bus.addEventListener('start', tryPlay);
-  addEventListener('pointerdown', tryPlay, { once: true });
+  /* NO autoplay (user rule): the radio sits loaded and quiet until the
+     play button is pressed. */
   document.getElementById('pillPrev').addEventListener('click', () => yt && yt.previousVideo());
   document.getElementById('pillNext').addEventListener('click', () => yt && yt.nextVideo());
   /* the disc itself cycles between the playlists */
