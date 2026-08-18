@@ -22,7 +22,7 @@ const host = url => {
 
 /* ---------- ABOUT: one intro item, the afaicon is its image ---------- */
 const about = {
-  id: 'about', label: 'ABOUT', mark: null, icon: true, key: ABOUT.key,
+  id: 'about', label: 'ABOUT', mark: '☻', key: ABOUT.key,
   items: [{
     id: 'intro', mark: '☻', key: ABOUT.key,
     title: ABOUT.title, sub: ABOUT.sub, meta: ABOUT.meta, badge: null,
