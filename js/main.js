@@ -182,7 +182,11 @@ if (listIds.length) {
    The settings gear, top left, swaps the backdrop. Shader themes are the
    self-contained WebGL pages in themes/, embedded full screen behind the
    bar with their own UI hidden. The choice persists. */
-const THEME_SRC = { beach: 'themes/beach.html', lava: 'themes/lava.html' };
+const THEME_SRC = {
+  beach: 'themes/beach.html',
+  lava: 'themes/lava.html',
+  space: 'themes/space.html'
+};
 const gearBtn = document.getElementById('gearBtn');
 const themenu = document.getElementById('themenu');
 
@@ -199,7 +203,7 @@ function applyTheme(name) {
       /* same origin: hide the shader page's own panels and wordmark */
       try {
         const style = f.contentDocument.createElement('style');
-        style.textContent = '#ui, #debug { display: none !important; }';
+        style.textContent = '#ui, #debug, #game-container { display: none !important; }';
         f.contentDocument.head.appendChild(style);
       } catch { /* leave the page as it is */ }
     });
