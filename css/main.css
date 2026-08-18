@@ -432,7 +432,8 @@ body[data-theme="beach"] .who__names i,
 body[data-theme="beach"] .cat__label,
 body[data-theme="beach"] .item__name,
 body[data-theme="beach"] .pill__meta,
-body[data-theme="beach"] .keyart-rail {
+body[data-theme="beach"] .keyart-rail,
+body[data-theme="beach"] .hero {
   text-shadow: 0 1px 10px rgba(4, 8, 16, .8), 0 0 2px rgba(4, 8, 16, .6);
 }
 
@@ -537,8 +538,7 @@ body[data-theme="beach"] .keyart-rail {
    stacking into mush. Opaque + dark is how a real switcher does it. */
 .cat:not(.is-on) .cat__icon { filter: brightness(.42) saturate(.8); }
 .cat:not(.is-on):hover .cat__icon { filter: brightness(.68) saturate(.9); }
-.cat:hover { opacity: .75; }
-.cat.is-on { opacity: 1; }
+/* NEVER opacity on hover: a see-through card exposes the deck behind it */
 
 /* Cover-switch cards (Compiz Shift "Cover" / CoverflowAltTab grammar): every
    card the SAME size. The selected one faces the camera flat and slightly
@@ -573,6 +573,10 @@ body[data-theme="beach"] .keyart-rail {
     color-mix(in oklab, var(--key) 55%, var(--void)), transparent 88%);
   opacity: .38;
   pointer-events: none;
+  /* each reflection is clipped to its card's VISIBLE sliver, so tucked
+     reflections tile like the cards do and never blend into each other */
+  clip-path: inset(0 var(--rcr, 0px) 0 var(--rcl, 0px));
+  transition: clip-path .42s var(--ease);
 }
 /* Per-card perspective, not a shared one: a shared vanishing point sits at
    the bar's centre, so distant cards barely foreshorten — every card gets

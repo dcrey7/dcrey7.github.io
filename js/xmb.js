@@ -404,6 +404,13 @@ export function initXmb() {
       const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
       el.style.transform = `translateX(${Math.round(tx)}px)`;
       el.style.zIndex = total - k;
+      /* the reflection clips to the card's visible sliver (see main.css) */
+      const pitch = barEl.children[1]
+        ? barEl.children[1].offsetLeft - barEl.children[0].offsetLeft : catw;
+      const vis = Math.max(24, pitch - (catw - KEEP));
+      const hide = Math.max(0, Math.round(catw - vis));
+      el.style.setProperty('--rcl', d > 0 ? hide + 'px' : '0px');
+      el.style.setProperty('--rcr', d < 0 ? hide + 'px' : '0px');
       el.setAttribute('aria-selected', String(d === 0));
       el.tabIndex = d === 0 ? 0 : -1;
     });
