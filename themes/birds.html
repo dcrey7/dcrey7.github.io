@@ -3,11 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Birds</title>
+<title>Murmuration</title>
 <style>
   html, body { height: 100%; margin: 0; overflow: hidden; }
   body {
-    background: linear-gradient(to bottom, #DFE8F4 0%, #EFF3F9 55%, #E7EDF6 100%);
+    /* a murmuration sky: dusk, when starlings actually fly */
+    background: linear-gradient(to bottom,
+      #5C6C96 0%, #8A7FA6 38%, #C98F92 62%, #EFAF84 82%, #F7C98F 100%);
   }
   canvas { display: block; width: 100%; height: 100%; }
 </style>
@@ -15,112 +17,445 @@
 <body>
 <canvas id="gl"></canvas>
 <script>
-/* A murmuration: classic boids (separation, alignment, cohesion) plus a
-   roaming falcon the flock flees from, which is what produces the sharp
-   coordinated turns of a real starling cloud. Canvas 2D, zero deps. */
+/* A starling MURMURATION.
+
+   The model, from the literature and the GPU flocking demos:
+   - Reynolds' boids: separation, alignment, cohesion (leaderless).
+   - STARFLAG topological rule (Ballerini et al. 2008): each bird
+     coordinates with its ~7 NEAREST neighbours by rank; that is what
+     carries turning waves across the whole cloud.
+   - Reynolds' WANDER steering drives each flock's roost attractor:
+     smooth but unpredictable drift, never orbits, never circles.
+   - SEVERAL flocks (big, mid, small) that cross, merge at the edges
+     and trade defectors; a falcon that dives at one flock's centre.
+   - Each flock's airspeed PULSES: slow glides, sudden kicks, the
+     uneven pace of a real murmuration.
+
+   Performance: flat Float32Arrays, a counting-sort spatial grid (zero
+   allocation per frame), and ONE WebGL point-sprite draw call. */
 (() => {
   const canvas = document.getElementById('gl');
-  const ctx = canvas.getContext('2d');
-  const DPR = Math.min(2, devicePixelRatio || 1);
-  let W = 0, H = 0;
+  const gl = canvas.getContext('webgl', { alpha: true, antialias: false });
+  if (!gl) return;
 
+  const DPR = Math.min(1.5, devicePixelRatio || 1);
+  let W = 0, H = 0;
   function resize() {
     W = innerWidth; H = innerHeight;
-    canvas.width = W * DPR; canvas.height = H * DPR;
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    gl.viewport(0, 0, canvas.width, canvas.height);
   }
   resize();
   addEventListener('resize', resize);
 
-  const N = 260;
-  const birds = [];
+  /* ---------- render ----------
+     Pass 1: a fullscreen shader sky (sunset gradient + drifting FBM
+     clouds). Pass 2: every bird as one point sprite, drawn as a tiny
+     V-glyph oriented to its heading, wings beating on its own phase. */
+  const SKY_VS = `
+attribute vec2 aXY;
+varying vec2 vUV;
+void main() {
+  vUV = aXY * .5 + .5;
+  gl_Position = vec4(aXY, 0.999, 1.0);
+}`;
+  const SKY_FS = `
+precision highp float;
+varying vec2 vUV;
+uniform float uTime;
+uniform float uAspect;
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float noise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x),
+             mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
+}
+float fbm(vec2 p) {
+  float v = 0.0, a = .5;
+  for (int k = 0; k < 5; k++) { v += a * noise(p); p = p * 2.03 + 17.7; a *= .55; }
+  return v;
+}
+float pier(vec2 uv) {
+  /* a stylized West Pier silhouette: deck band, peaked pavilion, legs */
+  float m = 0.0;
+  float x0 = .40, x1 = .58, deckY = .312, deckH = .02;
+  float inx = step(x0, uv.x) * step(uv.x, x1);
+  m = max(m, inx * step(deckY, uv.y) * step(uv.y, deckY + deckH));
+  float cx = abs(uv.x - .49) / .055;
+  float roofTop = deckY + deckH + .034 * max(0.0, 1.0 - cx);
+  m = max(m, step(cx, 1.0) * step(deckY + deckH, uv.y) * step(uv.y, roofTop));
+  float legs = inx * step(.288, uv.y) * step(uv.y, deckY)
+             * step(.55, fract(uv.x * 70.0));
+  m = max(m, legs);
+  return m;
+}
+void main() {
+  float y = vUV.y;
+  /* the Brighton golden hour: amber low, rose mid, dusty mauve high */
+  vec3 top = vec3(.50, .40, .47);
+  vec3 mid = vec3(.85, .57, .44);
+  vec3 low = vec3(.98, .74, .44);
+  vec3 hor = vec3(1.0, .88, .58);
+  vec3 col = mix(top, mid, smoothstep(.95, .55, y));
+  col = mix(col, low, smoothstep(.60, .34, y));
+  col = mix(col, hor, smoothstep(.40, .30, y));
+  /* the sun sits ON the horizon, right of the pier */
+  vec2 sp = vec2(.80, .305);
+  float sd = distance(vec2(vUV.x * uAspect, vUV.y), vec2(sp.x * uAspect, sp.y));
+  col += vec3(1.0, .85, .55) * .5 * exp(-sd * sd * 110.0);
+  col += vec3(1.0, .88, .62) * .16 * exp(-sd * 5.0);
+  /* cream and rose clouds, thicker up high */
+  vec2 q = vec2(vUV.x * uAspect, vUV.y);
+  float c1 = fbm(q * vec2(2.2, 4.6) + vec2(uTime * .012, 0.0));
+  float c2 = fbm(q * vec2(4.6, 9.0) + vec2(uTime * .027, 3.7));
+  float cl = smoothstep(.46, .74, c1 * .66 + c2 * .44) * smoothstep(.30, .45, y);
+  vec3 cloudLit = vec3(1.0, .80, .64);
+  vec3 cloudDim = vec3(.60, .44, .48);
+  vec3 cloud = mix(cloudLit, cloudDim, smoothstep(.1, .9, c2));
+  col = mix(col, cloud, cl * .6);
+  /* the sea below the horizon: darker mirror of the sky, sun glitter */
+  if (y < .30) {
+    vec3 sea = mix(vec3(.36, .27, .33), vec3(.85, .58, .40), smoothstep(.05, .30, y));
+    float glit = fbm(vec2(vUV.x * 90.0, y * 34.0 + uTime * .5));
+    float lane = exp(-abs(vUV.x - sp.x) * 8.0);
+    sea += vec3(1.0, .8, .5) * glit * glit * lane * .4 * smoothstep(.0, .3, y);
+    sea *= .96 + .04 * fbm(vec2(vUV.x * 24.0, y * 60.0));
+    col = sea;
+    /* the pier's soft dark reflection, fading with depth */
+    col = mix(col, vec3(.16, .12, .16),
+      step(.40, vUV.x) * step(vUV.x, .58) * smoothstep(.22, .295, y) * .4);
+  }
+  /* the pier itself, black against the gold */
+  col = mix(col, vec3(.05, .045, .07), pier(vUV));
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+  const VS = `
+attribute vec3 aPos;
+attribute vec3 aAux;     // heading x, heading y (screen), flap phase
+uniform vec2 uHalf;
+uniform float uF;
+uniform float uZoff;
+uniform float uDpr;
+varying float vDepth;
+varying vec2 vHead;
+varying float vPhase;
+void main() {
+  float pz = uF / (uZoff + aPos.z);
+  vec2 screen = vec2(aPos.x, -aPos.y - 40.0) * pz;
+  gl_Position = vec4(screen / uHalf, 0.0, 1.0);
+  gl_PointSize = clamp(7.0 * pz * uDpr, 1.5, 10.0);
+  vDepth = clamp(pz, 0.15, 1.15);
+  float hl = max(length(aAux.xy), 0.0001);
+  vHead = aAux.xy / hl;
+  vPhase = aAux.z;
+}`;
+  const FS = `
+precision mediump float;
+varying float vDepth;
+varying vec2 vHead;
+varying float vPhase;
+uniform float uTime;
+float seg(vec2 p, vec2 b) {
+  /* distance from p to the segment (0,0) -> b */
+  float h = clamp(dot(p, b) / dot(b, b), 0.0, 1.0);
+  return length(p - b * h);
+}
+void main() {
+  vec2 p = (gl_PointCoord - vec2(0.5)) * 2.0;
+  /* rotate so +x is the flight direction */
+  p = vec2(vHead.x * p.x + vHead.y * p.y, -vHead.y * p.x + vHead.x * p.y);
+  /* the wing beat: the V opens and closes on this bird's own clock */
+  float flap = 0.55 + 0.4 * sin(uTime * 9.0 + vPhase * 6.2831);
+  vec2 wingL = vec2(-0.62,  flap * 0.7);
+  vec2 wingR = vec2(-0.62, -flap * 0.7);
+  float d = min(seg(p, wingL), seg(p, wingR));
+  d = min(d, length(p - vec2(0.12, 0.0)) - 0.1);   /* the body */
+  float a = (1.0 - smoothstep(0.10, 0.30, d)) * (0.35 + 0.55 * vDepth);
+  if (a < 0.02) discard;
+  gl_FragColor = vec4(0.05, 0.055, 0.09, a);
+}`;
+  function shader(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  function program(vs, fs) {
+    const p = gl.createProgram();
+    gl.attachShader(p, shader(gl.VERTEX_SHADER, vs));
+    gl.attachShader(p, shader(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(p);
+    return p;
+  }
+  const skyProg = program(SKY_VS, SKY_FS);
+  const skyXY = gl.getAttribLocation(skyProg, 'aXY');
+  const skyTime = gl.getUniformLocation(skyProg, 'uTime');
+  const skyAspect = gl.getUniformLocation(skyProg, 'uAspect');
+  const skyBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, skyBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+
+  const prog = program(VS, FS);
+  const uHalf = gl.getUniformLocation(prog, 'uHalf');
+  const uF = gl.getUniformLocation(prog, 'uF');
+  const uZoff = gl.getUniformLocation(prog, 'uZoff');
+  const uDpr = gl.getUniformLocation(prog, 'uDpr');
+  const uTime = gl.getUniformLocation(prog, 'uTime');
+  const aPos = gl.getAttribLocation(prog, 'aPos');
+  const aAux = gl.getAttribLocation(prog, 'aAux');
+  const buf = gl.createBuffer();
+
+  /* ---------- simulation ---------- */
+  const N = 4200, K = 7, G = 2;
+  const F = 820, ZOFF = 720;
+  const BOUND = 1300;
+  const SEP2 = 13 * 13;
+  const BASE_MAX = 3.4, BASE_MIN = 2.1;    /* birds, not jets */
+  /* Reynolds 1987: every rule is an ACCELERATION REQUEST, and they are
+     granted in priority order out of one bounded budget (MAXA). Bounded
+     acceleration is what turns jerks into smooth banking curves. */
+  const MAXA = .24;
+  const MAG_FLEE = MAXA, MAG_SEP = MAXA * .55, MAG_ALI = MAXA * .5,
+        MAG_COH = MAXA * .7, MAG_ROOST = MAXA * .55;
+  const FLEE_R2 = 200 * 200;
+
+  const px = new Float32Array(N), py = new Float32Array(N), pz = new Float32Array(N);
+  const vx = new Float32Array(N), vy = new Float32Array(N), vz = new Float32Array(N);
+  const data = new Float32Array(N * 6);
+  const phase = new Float32Array(N);
+  const group = new Uint8Array(N);
   for (let i = 0; i < N; i++) {
-    const a = Math.random() * Math.PI * 2;
-    birds.push({
-      x: Math.random() * W, y: Math.random() * H,
-      vx: Math.cos(a) * 2, vy: Math.sin(a) * 2
-    });
+    const a = Math.random() * Math.PI * 2, b = Math.acos(2 * Math.random() - 1);
+    group[i] = i < N * .7 ? 0 : 1;
+    px[i] = (group[i] - 1) * 500 + (Math.random() - .5) * 500;
+    py[i] = (Math.random() - .5) * 400;
+    pz[i] = (Math.random() - .5) * 500;
+    vx[i] = Math.sin(b) * Math.cos(a) * 4;
+    vy[i] = Math.cos(b) * 2;
+    vz[i] = Math.sin(b) * Math.sin(a) * 4;
+    phase[i] = Math.random();
   }
 
-  /* the falcon wanders on a slow noise-ish path and dives now and then */
-  const falcon = { x: W * .3, y: H * .3, t: 0 };
+  /* uniform grid over the bounded world (counting sort, typed arrays) */
+  const CELL = 60;
+  const DIM = Math.ceil((BOUND * 2) / CELL);
+  const CELLS = DIM * DIM * DIM;
+  const cellCount = new Int32Array(CELLS + 1);
+  const cellStart = new Int32Array(CELLS + 1);
+  const cellBird = new Int32Array(N);
+  const cellOf = new Int32Array(N);
+  const bestD = new Float32Array(K);
+  const bestI = new Int32Array(K);
+  const clampW = v => v < -BOUND ? -BOUND : v > BOUND ? BOUND : v;
+  const cellIndex = i => {
+    const cx = ((clampW(px[i]) + BOUND) / CELL) | 0;
+    const cy = ((clampW(py[i]) + BOUND) / CELL) | 0;
+    const cz = ((clampW(pz[i]) + BOUND) / CELL) | 0;
+    return (cx * DIM + cy) * DIM + cz;
+  };
 
-  const VIEW = 46, SEP = 17, MAXV = 3.4, MINV = 1.6;
-  const W_SEP = .055, W_ALI = .045, W_COH = .0055, W_FLEE = .12, FLEE_R = 120;
-
-  /* spatial grid so 260 birds stay cheap */
-  const CELL = VIEW;
-  function step() {
-    falcon.t += .0035;
-    falcon.x = W * (.5 + .38 * Math.sin(falcon.t * 1.7) * Math.cos(falcon.t * .6));
-    falcon.y = H * (.45 + .3 * Math.sin(falcon.t * 1.1 + 1.7));
-
-    const grid = new Map();
-    birds.forEach((b, i) => {
-      const k = ((b.x / CELL) | 0) + ':' + ((b.y / CELL) | 0);
-      (grid.get(k) || grid.set(k, []).get(k)).push(i);
+  /* each flock's roost WANDERS (Reynolds steering): the heading gets a
+     small random jitter every frame — smooth motion that never orbits */
+  const roosts = [];
+  for (let g = 0; g < G; g++) {
+    roosts.push({
+      x: (g - 1) * 500, y: 0, z: 0,
+      th: Math.random() * Math.PI * 2,
+      ph: (Math.random() - .5) * .8,
+      spd: 1, spdTarget: 1, nextSpd: 0
     });
+  }
+  const grx = new Float32Array(G), gry = new Float32Array(G), grz = new Float32Array(G);
+  const gspd = new Float32Array(G);
+  const falcon = { x: 0, y: -600, z: 900, tx: 0, ty: 0, tz: 0, next: 0 };
 
-    for (const b of birds) {
-      let sx = 0, sy = 0, ax = 0, ay = 0, cx = 0, cy = 0, n = 0;
-      const gx = (b.x / CELL) | 0, gy = (b.y / CELL) | 0;
-      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
-        const cell = grid.get((gx + dx) + ':' + (gy + dy));
-        if (!cell) continue;
-        for (const j of cell) {
-          const o = birds[j];
-          if (o === b) continue;
-          const ddx = o.x - b.x, ddy = o.y - b.y;
-          const d2 = ddx * ddx + ddy * ddy;
-          if (d2 > VIEW * VIEW) continue;
-          n++;
-          cx += o.x; cy += o.y;
-          ax += o.vx; ay += o.vy;
-          if (d2 < SEP * SEP && d2 > 0) {
-            const d = Math.sqrt(d2);
-            sx -= ddx / d; sy -= ddy / d;
+  let t = 0;
+  function step() {
+    t += 1 / 60;
+
+    for (let g = 0; g < G; g++) {
+      const r = roosts[g];
+      r.th += (Math.random() - .5) * .14;
+      r.ph += (Math.random() - .5) * .06;
+      r.ph *= .985;
+      /* the pace pulses: a new target every few seconds, smooth glide
+         toward it — slow drifts, sudden kicks, uneven like the bird */
+      if (t > r.nextSpd) {
+        r.spdTarget = .7 + Math.random() * .5;
+        if (Math.random() < .22) r.spdTarget = 1.4;    /* the kick */
+        r.nextSpd = t + 2.5 + Math.random() * 5;
+      }
+      r.spd += (r.spdTarget - r.spd) * .012;
+      const rv = 1.6 * r.spd;
+      r.x += Math.cos(r.th) * Math.cos(r.ph) * rv;
+      r.y += Math.sin(r.ph) * rv * .7;
+      r.z += Math.sin(r.th) * Math.cos(r.ph) * rv;
+      /* soft containment: steer the heading back toward the middle */
+      if (r.x * r.x + r.z * r.z > 400 * 400 || r.y > -40 || r.y < -300) {
+        const back = Math.atan2(-r.z, -r.x);
+        let d = back - r.th;
+        while (d > Math.PI) d -= Math.PI * 2;
+        while (d < -Math.PI) d += Math.PI * 2;
+        r.th += d * .06;
+        r.ph += (-r.y * .001 - r.ph) * .1;
+      }
+      grx[g] = r.x; gry[g] = r.y; grz[g] = r.z;
+      gspd[g] = r.spd;
+    }
+
+    /* the falcon picks a flock and dives through its centre */
+    if (t > falcon.next) {
+      const g = (Math.random() * G) | 0;
+      falcon.tx = grx[g]; falcon.ty = gry[g]; falcon.tz = grz[g];
+      falcon.next = t + 4 + Math.random() * 4;
+      roosts[g].spdTarget = 1.4;             /* the hunted flock kicks */
+    }
+    const fdx = falcon.tx - falcon.x, fdy = falcon.ty - falcon.y, fdz = falcon.tz - falcon.z;
+    const fdd = Math.sqrt(fdx * fdx + fdy * fdy + fdz * fdz) || 1;
+    const fsp = Math.min(6.5, fdd);
+    falcon.x += fdx / fdd * fsp;
+    falcon.y += fdy / fdd * fsp;
+    falcon.z += fdz / fdd * fsp;
+    const fx = falcon.x, fy = falcon.y, fz = falcon.z;
+
+    /* counting sort into the grid */
+    cellCount.fill(0);
+    for (let i = 0; i < N; i++) {
+      const c = cellIndex(i);
+      cellOf[i] = c;
+      cellCount[c + 1]++;
+    }
+    cellStart[0] = 0;
+    for (let c = 0; c < CELLS; c++) cellStart[c + 1] = cellStart[c] + cellCount[c + 1];
+    const cursor = cellCount;
+    cursor.set(cellStart);
+    for (let i = 0; i < N; i++) cellBird[cursor[cellOf[i]]++] = i;
+
+    const wCoh = .009 + .007 * Math.sin(t * .31 + 1.2);
+    for (let i = 0; i < N; i++) {
+      /* K nearest among the surrounding cells: the topological rule */
+      let found = 0, worst = Infinity, scanned = 0;
+      const gx = ((clampW(px[i]) + BOUND) / CELL) | 0;
+      const gy = ((clampW(py[i]) + BOUND) / CELL) | 0;
+      const gz = ((clampW(pz[i]) + BOUND) / CELL) | 0;
+      for (let dx = -1; dx <= 1; dx++) {
+        const xx = gx + dx; if (xx < 0 || xx >= DIM) continue;
+        for (let dy = -1; dy <= 1; dy++) {
+          const yy = gy + dy; if (yy < 0 || yy >= DIM) continue;
+          for (let dz = -1; dz <= 1; dz++) {
+            const zz = gz + dz; if (zz < 0 || zz >= DIM) continue;
+            const c = (xx * DIM + yy) * DIM + zz;
+            for (let s = cellStart[c], e = cellStart[c + 1]; s < e; s++) {
+              if (scanned > 60) break;
+              const j = cellBird[s];
+              if (j === i) continue;
+              scanned++;
+              const ddx = px[j] - px[i], ddy = py[j] - py[i], ddz = pz[j] - pz[i];
+              const d2 = ddx * ddx + ddy * ddy + ddz * ddz;
+              if (found < K) {
+                bestD[found] = d2; bestI[found] = j; found++;
+                if (found === K) { worst = 0; for (let q = 0; q < K; q++) if (bestD[q] > worst) worst = bestD[q]; }
+              } else if (d2 < worst) {
+                let wi = 0, wd = -1;
+                for (let q = 0; q < K; q++) if (bestD[q] > wd) { wd = bestD[q]; wi = q; }
+                bestD[wi] = d2; bestI[wi] = j;
+                worst = 0; for (let q = 0; q < K; q++) if (bestD[q] > worst) worst = bestD[q];
+              }
+            }
           }
         }
       }
-      if (n) {
-        b.vx += W_SEP * sx + W_ALI * (ax / n - b.vx) + W_COH * (cx / n - b.x);
-        b.vy += W_SEP * sy + W_ALI * (ay / n - b.vy) + W_COH * (cy / n - b.y);
+      let sx = 0, sy = 0, sz = 0, ax = 0, ay = 0, az = 0, cx = 0, cy = 0, cz = 0;
+      for (let q = 0; q < found; q++) {
+        const j = bestI[q], d2 = bestD[q];
+        const ddx = px[j] - px[i], ddy = py[j] - py[i], ddz = pz[j] - pz[i];
+        ax += vx[j]; ay += vy[j]; az += vz[j];
+        cx += ddx; cy += ddy; cz += ddz;
+        if (d2 < SEP2 && d2 > 0) {
+          const inv = 1 / Math.sqrt(d2);
+          sx -= ddx * inv; sy -= ddy * inv; sz -= ddz * inv;
+        }
       }
-      /* flee the falcon: the whole neighbourhood snaps away together */
-      const fx = b.x - falcon.x, fy = b.y - falcon.y;
-      const fd2 = fx * fx + fy * fy;
-      if (fd2 < FLEE_R * FLEE_R && fd2 > 1) {
-        const fd = Math.sqrt(fd2);
-        b.vx += W_FLEE * (fx / fd) * (1 - fd / FLEE_R) * 6;
-        b.vy += W_FLEE * (fy / fd) * (1 - fd / FLEE_R) * 6;
-      }
-      /* soft walls: turn back inside the sky */
-      const M = 60, TURN = .18;
-      if (b.x < M) b.vx += TURN; if (b.x > W - M) b.vx -= TURN;
-      if (b.y < M) b.vy += TURN; if (b.y > H - M) b.vy -= TURN;
+      /* rare defection: a thin stream of birds trades between flocks */
+      if (Math.random() < .0002) group[i] = (group[i] + 1 + (Math.random() * (G - 1) | 0)) % G;
+      const g = group[i];
 
-      const v = Math.hypot(b.vx, b.vy) || 1;
-      const cl = v > MAXV ? MAXV / v : v < MINV ? MINV / v : 1;
-      b.vx *= cl; b.vy *= cl;
-      b.x += b.vx; b.y += b.vy;
+      /* ---- prioritized acceleration allocation (Reynolds 1987) ----
+         requests are granted most-urgent first until the budget runs
+         out; a fleeing bird spends everything on the escape */
+      let budget = MAXA, accx = 0, accy = 0, accz = 0;
+      const alloc = (rx, ry, rz, mag) => {
+        if (budget <= 0 || mag <= 0) return;
+        const L = Math.sqrt(rx * rx + ry * ry + rz * rz);
+        if (!L) return;
+        const m = mag < budget ? mag : budget;
+        accx += rx / L * m; accy += ry / L * m; accz += rz / L * m;
+        budget -= m;
+      };
+      const dfx = px[i] - fx, dfy = py[i] - fy, dfz = pz[i] - fz;
+      const fd2 = dfx * dfx + dfy * dfy + dfz * dfz;
+      if (fd2 < FLEE_R2 && fd2 > 1) {
+        alloc(dfx, dfy, dfz, MAG_FLEE * (1 - Math.sqrt(fd2) / 200) * 1.6);
+      }
+      alloc(sx, sy, sz, MAG_SEP);
+      if (found) {
+        const inv = 1 / found;
+        alloc(ax * inv - vx[i], ay * inv - vy[i], az * inv - vz[i], MAG_ALI);
+        alloc(cx, cy, cz, MAG_COH * (wCoh / .009));
+      }
+      alloc(grx[g] - px[i], gry[g] - py[i], grz[g] - pz[i], MAG_ROOST);
+      vx[i] += accx; vy[i] += accy; vz[i] += accz;
+
+      /* the flock stays in the SKY: lift builds as a bird nears the
+         ground band (world +y is screen-down) */
+      if (py[i] > 55) vy[i] -= (py[i] - 55) * .008;
+      /* the STAGE: soft walls keep the show inside the frame */
+      if (py[i] < -430) vy[i] += (-430 - py[i]) * .005;
+      if (px[i] > 700) vx[i] -= (px[i] - 700) * .004;
+      else if (px[i] < -700) vx[i] += (-700 - px[i]) * .004;
+      if (pz[i] > 520) vz[i] -= (pz[i] - 520) * .004;
+      else if (pz[i] < -200) vz[i] += (-200 - pz[i]) * .005;
+      /* near-constant airspeed scaled by the flock's pulsing pace */
+      const hi = BASE_MAX * gspd[g], lo = BASE_MIN * gspd[g];
+      const v = Math.sqrt(vx[i] * vx[i] + vy[i] * vy[i] + vz[i] * vz[i]) || 1;
+      const cl = v > hi ? hi / v : v < lo ? lo / v : 1;
+      vx[i] *= cl; vy[i] *= cl; vz[i] *= cl;
+      px[i] += vx[i]; py[i] += vy[i]; pz[i] += vz[i];
+      const o = i * 6;
+      data[o] = px[i]; data[o + 1] = py[i]; data[o + 2] = pz[i];
+      data[o + 3] = vx[i]; data[o + 4] = -vy[i];   /* screen heading */
+      data[o + 5] = phase[i];
     }
   }
 
   function draw() {
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = 'rgba(24, 30, 40, .88)';
-    for (const b of birds) {
-      const v = Math.hypot(b.vx, b.vy) || 1;
-      const ux = b.vx / v, uy = b.vy / v;
-      /* a swallow-ish dart: nose ahead, two swept wing points behind */
-      ctx.beginPath();
-      ctx.moveTo(b.x + ux * 5, b.y + uy * 5);
-      ctx.lineTo(b.x - ux * 3 - uy * 2.6, b.y - uy * 3 + ux * 2.6);
-      ctx.lineTo(b.x - ux * 1.2, b.y - uy * 1.2);
-      ctx.lineTo(b.x - ux * 3 + uy * 2.6, b.y - uy * 3 - ux * 2.6);
-      ctx.closePath();
-      ctx.fill();
-    }
+    gl.disable(gl.BLEND);
+    gl.useProgram(skyProg);
+    gl.uniform1f(skyTime, t);
+    gl.uniform1f(skyAspect, W / H);
+    gl.bindBuffer(gl.ARRAY_BUFFER, skyBuf);
+    gl.enableVertexAttribArray(skyXY);
+    gl.vertexAttribPointer(skyXY, 2, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.useProgram(prog);
+    gl.uniform2f(uHalf, W * .5, H * .5);
+    gl.uniform1f(uF, F);
+    gl.uniform1f(uZoff, ZOFF);
+    gl.uniform1f(uDpr, DPR);
+    gl.uniform1f(uTime, t);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.DYNAMIC_DRAW);
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 24, 0);
+    gl.enableVertexAttribArray(aAux);
+    gl.vertexAttribPointer(aAux, 3, gl.FLOAT, false, 24, 12);
+    gl.drawArrays(gl.POINTS, 0, N);
   }
 
   (function loop() {

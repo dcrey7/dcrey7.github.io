@@ -1322,6 +1322,8 @@ body.booting .pill, body.booting .who {
    key art's own animation pins its opacity) */
 body.booting .keyart-rail,
 body.booting .keyart { visibility: hidden; }
+/* the landing offers theme, mode and language; search waits for home */
+body.booting .settings:has(#searchBtn) { visibility: hidden; }
 .xmb, .topbar, .pill, .who { transition: opacity .6s var(--ease) .1s; }
 .topbar { z-index: 20; }   /* above the boot layer */
 .pill[hidden] { display: none; }

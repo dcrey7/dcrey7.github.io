@@ -38,9 +38,11 @@ export function initBoot() {
 
   start.addEventListener('click', enter);
   boot.addEventListener('click', enter);
+  /* PRESS ANY KEY means any key */
   addEventListener('keydown', e => {
     if (done) return;
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enter(); }
+    e.preventDefault();
+    enter();
   });
 
   return { enter };
