@@ -200,14 +200,10 @@ body {
   border-radius: 12px;
   position: relative;
   z-index: 1;
-  opacity: .78;
-  filter: saturate(.9);
-  transition: transform .28s var(--ease-back), opacity .2s var(--ease),
-              filter .2s var(--ease);
+  /* photos are always FULL solid (user rule): no see-through anywhere */
+  transition: transform .28s var(--ease-back);
 }
 .keyart--media img:hover {
-  opacity: 1;
-  filter: none;
   transform: scale(1.06);
   /* the hovered photo rises ABOVE its neighbours, never tangles with them */
   z-index: 10;
@@ -247,7 +243,17 @@ body {
   min-height: clamp(56px, 5vw, 92px);
 }
 /* the avatar card: afaicon, ABHISHEK stacked over @dcrey7, PS5-profile style */
-.who { display: flex; align-items: center; gap: 10px; }
+/* the avatar card, icon plus name, lives in the bottom right corner
+   (the icon is the future dark/light toggle) */
+.who {
+  position: fixed;
+  right: clamp(16px, 4vw, 52px);
+  bottom: clamp(14px, 2.4vh, 24px);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .who img { width: clamp(28px, 2.2vw, 44px); height: auto; }
 .who__names { display: flex; flex-direction: column; line-height: 1.25; }
 .who__names b {
@@ -270,7 +276,8 @@ body {
 .pill {
   position: fixed;
   right: clamp(16px, 4vw, 52px);
-  bottom: clamp(14px, 2.4vh, 24px);
+  /* the player rides at the same level as the category deck */
+  top: clamp(110px, 14vh, 190px);
   z-index: 40;
   display: flex;
   align-items: center;
@@ -1012,10 +1019,8 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
   position: fixed;
   z-index: 1;
   right: 3vw;
-  top: clamp(110px, 14vh, 190px);
-  bottom: clamp(120px, 14vh, 190px); /* definite height: links pin to the
-                                        top, the words centre in the middle,
-                                        and the player owns the corner below */
+  top: clamp(210px, 24vh, 330px);    /* the player owns the deck level above */
+  bottom: clamp(120px, 14vh, 190px); /* and the avatar owns the corner below */
   width: clamp(300px, 23vw, 620px);
   display: flex;
   flex-direction: column;
@@ -1025,12 +1030,39 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
   pointer-events: auto;
   font-family: 'Archivo', system-ui, sans-serif;
 }
-/* the right third is centre aligned; description and bullets sit in its
-   vertical MIDDLE (links stay pinned on top) */
+/* the right third is centre aligned; the links and the words cluster
+   together in its vertical MIDDLE — links right aligned above the text */
 .keyart-rail { text-align: center; align-items: center; }
+.keyart-rail > .rail-links {
+  margin-top: auto;
+  align-self: flex-end;
+  text-align: right;
+  justify-content: flex-end;
+}
 .keyart-rail > .side__desc,
-.keyart-rail > .hero__bullets { margin-block: auto; }
-.rail-links { justify-content: center; }
+.keyart-rail > .hero__bullets { margin-bottom: auto; }
+.keyart-rail > .side__desc:first-child,
+.keyart-rail > .hero__bullets:first-child { margin-top: auto; }
+.rail-links { justify-content: flex-end; }
+
+/* long descriptions scroll in place, with a slim scroller in the site's
+   chrome: thin, rounded, quiet until hovered */
+.keyart-rail .side__desc {
+  max-height: 44vh;
+  overflow-y: auto;
+  padding-right: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .28) transparent;
+}
+.keyart-rail .side__desc::-webkit-scrollbar { display: block; width: 6px; }
+.keyart-rail .side__desc::-webkit-scrollbar-track { background: transparent; }
+.keyart-rail .side__desc::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .24);
+  border-radius: 999px;
+}
+.keyart-rail .side__desc::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, .4);
+}
 .keyart-rail .hero__bullets { text-align: left; }   /* bullets read left */
 .keyart-rail::-webkit-scrollbar { display: none; }
 .keyart-rail > * {
@@ -1073,11 +1105,10 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
   position: relative;
   z-index: 1;
   cursor: zoom-in;
-  opacity: .85;
-  transition: transform .28s var(--ease-back), opacity .2s var(--ease);
+  /* photos are always FULL solid (user rule): no see-through anywhere */
+  transition: transform .28s var(--ease-back);
 }
 .mboard img:hover {
-  opacity: 1;
   transform: scale(1.05);
   z-index: 10;
   box-shadow: 0 22px 60px -20px rgba(0, 0, 0, .7);
@@ -1196,8 +1227,15 @@ body:not(.booting) .boot { opacity: 0; visibility: hidden; }
 
 .boot__hint { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--chrome-dim); }
 
-body.booting .xmb, body.booting .topbar { opacity: 0; }
-.xmb, .topbar { transition: opacity .6s var(--ease) .1s; }
+/* the landing page shows ONLY the boot screen: the player and the
+   avatar wait for the home screen, then everything fades in together */
+body.booting .xmb, body.booting .topbar,
+body.booting .pill, body.booting .who {
+  opacity: 0;
+  pointer-events: none;
+}
+.xmb, .topbar, .pill, .who { transition: opacity .6s var(--ease) .1s; }
+.pill[hidden] { display: none; }
 
 /* ---------- breakpoints ---------- */
 
