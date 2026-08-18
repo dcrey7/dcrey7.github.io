@@ -183,6 +183,62 @@ if (listIds.length) {
   }, 800);
 }
 
+/* ---------- themes ----------
+   The settings gear, top left, swaps the backdrop. Shader themes are the
+   self-contained WebGL pages in themes/, embedded full screen behind the
+   bar with their own UI hidden. The choice persists. */
+const THEME_SRC = { beach: 'themes/beach.html', lava: 'themes/lava.html' };
+const gearBtn = document.getElementById('gearBtn');
+const themenu = document.getElementById('themenu');
+
+function applyTheme(name) {
+  document.querySelectorAll('.themeframe').forEach(f => f.remove());
+  document.body.dataset.theme = name;
+  if (THEME_SRC[name]) {
+    const f = document.createElement('iframe');
+    f.className = 'themeframe';
+    f.src = THEME_SRC[name];
+    f.setAttribute('aria-hidden', 'true');
+    f.tabIndex = -1;
+    f.addEventListener('load', () => {
+      /* same origin: hide the shader page's own panels and wordmark */
+      try {
+        const style = f.contentDocument.createElement('style');
+        style.textContent = '#ui, #debug { display: none !important; }';
+        f.contentDocument.head.appendChild(style);
+      } catch { /* leave the page as it is */ }
+    });
+    document.body.prepend(f);
+  }
+  themenu.querySelectorAll('button').forEach(b =>
+    b.setAttribute('aria-current', String(b.dataset.theme === name)));
+  try { localStorage.setItem('xmb-theme', name); } catch {}
+}
+
+gearBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const open = themenu.hidden;
+  themenu.hidden = !open;
+  gearBtn.setAttribute('aria-expanded', String(open));
+});
+themenu.addEventListener('click', e => {
+  const b = e.target.closest('button[data-theme]');
+  if (!b) return;
+  applyTheme(b.dataset.theme);
+  themenu.hidden = true;
+  gearBtn.setAttribute('aria-expanded', 'false');
+});
+addEventListener('pointerdown', e => {
+  if (!themenu.hidden && !e.target.closest('.settings')) {
+    themenu.hidden = true;
+    gearBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+
+let storedTheme = 'default';
+try { storedTheme = localStorage.getItem('xmb-theme') || 'default'; } catch {}
+applyTheme(storedTheme);
+
 /* The clock is pure console theatre, but it is the detail that sells it. */
 const clock = document.getElementById('clock');
 function tick() {

@@ -383,6 +383,70 @@ body {
 }
 .sysbtn:hover { color: var(--chrome); }
 .sysbtn[aria-pressed="true"] { color: var(--yellow); }
+/* ---------- settings: the theme menu, top left ---------- */
+
+.settings { position: relative; z-index: 45; }
+.gear {
+  background: none; border: 0; cursor: pointer;
+  color: var(--chrome-dim); padding: 8px; line-height: 0;
+  transition: color .2s var(--ease), transform .4s var(--ease);
+}
+.gear:hover { color: var(--chrome); transform: rotate(45deg); }
+.gear[aria-expanded="true"] { color: var(--yellow); }
+.themenu[hidden] { display: none; }
+.themenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 176px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(6, 10, 20, .88);
+  border: 1px solid rgba(255, 255, 255, .08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 24px 60px -18px rgba(0, 0, 0, .8);
+}
+.themenu__head {
+  font-size: .58rem; letter-spacing: .3em; color: var(--chrome-dim);
+  padding: 4px 10px 8px;
+}
+.themenu button {
+  background: none; border: 0; cursor: pointer;
+  text-align: left;
+  font-family: 'Space Mono', monospace;
+  font-size: .72rem; letter-spacing: .12em;
+  color: var(--chrome);
+  padding: 9px 10px; border-radius: 8px;
+  transition: background .15s var(--ease), color .15s var(--ease);
+}
+.themenu button:hover { background: rgba(255, 255, 255, .08); }
+.themenu button[aria-current="true"] { color: var(--yellow); }
+
+/* the beach is bright: give the chrome a soft shadow so words survive */
+body[data-theme="beach"] .clock,
+body[data-theme="beach"] .who__names b,
+body[data-theme="beach"] .who__names i,
+body[data-theme="beach"] .cat__label,
+body[data-theme="beach"] .item__name,
+body[data-theme="beach"] .pill__meta,
+body[data-theme="beach"] .keyart-rail {
+  text-shadow: 0 1px 10px rgba(4, 8, 16, .8), 0 0 2px rgba(4, 8, 16, .6);
+}
+
+/* a shader theme runs full screen behind everything, untouchable */
+.themeframe {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
 /* day, date and time: dead centre of the top of the window */
 .clock {
   position: absolute;
