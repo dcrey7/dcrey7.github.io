@@ -35,27 +35,44 @@ if (listIds.length) {
   const prog = document.getElementById('pillProg');
   const timeEl = document.getElementById('pillTime');
   const btnPlay = document.getElementById('pillPlay');
-  /* every visit starts on a RANDOM playlist */
-  let yt = null, curList = Math.floor(Math.random() * listIds.length),
-      lastId = null, lastHop = 0, started = false;
+  /* the OPENER is always the first song of the first playlist; after it,
+     everything is random playlist + random song */
+  let yt = null, curList = 0, lastId = null, lastHop = 0,
+      phase = 0, wantRandomIndex = false;
+
+  const hopRandom = () => {
+    curList = Math.floor(Math.random() * listIds.length);
+    lastHop = Date.now();
+    wantRandomIndex = true;
+    yt.loadPlaylist({ listType: 'playlist', list: listIds[curList] });
+  };
 
   const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+  /* identical-footprint SVG icons — text glyphs render at differing sizes */
+  const ICON_PLAY =
+    '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M4 2l10 6-10 6z" fill="currentColor"/></svg>';
+  const ICON_PAUSE =
+    '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" fill="currentColor"/></svg>';
 
   const refresh = () => {
     if (!yt || !yt.getVideoData) return;
     const d = yt.getVideoData() || {};
+    /* never write blanks: mid-switch YouTube reports empty metadata for a
+       beat, and clearing the lines made the block jump */
     if (d.title) title.textContent = d.title;
-    artist.textContent = d.author || '';
+    if (d.author) artist.textContent = d.author;
     if (d.video_id && d.video_id !== lastId) {
       disc.src = `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
-      /* random hop BETWEEN playlists: when the song changes, sometimes jump
-         to another playlist (shuffled), so the mix crosses all of them */
-      if (lastId && listIds.length > 1 && Date.now() - lastHop > 30000 && Math.random() < .35) {
-        lastHop = Date.now();
-        const others = listIds.filter((_, i) => i !== curList);
-        const pick = others[Math.floor(Math.random() * others.length)];
-        curList = listIds.indexOf(pick);
-        yt.loadPlaylist({ listType: 'playlist', list: pick });
+      if (lastId && phase === 0) {
+        /* the opener just finished: enter the randomized era */
+        phase = 1;
+        hopRandom();
+      } else if (lastId && phase === 1 &&
+                 listIds.length > 1 && Date.now() - lastHop > 30000 &&
+                 Math.random() < .35) {
+        /* and keep hopping between playlists mid-mix */
+        hopRandom();
       }
       lastId = d.video_id;
     }
@@ -73,18 +90,22 @@ if (listIds.length) {
         controls: 0, disablekb: 1, playsinline: 1
       },
       events: {
-        onReady: () => { yt.setShuffle(true); refresh(); },
+        onReady: refresh,
         onStateChange: e => {
           const playing = e.data === YT.PlayerState.PLAYING;
           disc.classList.toggle('spin', playing);
-          btnPlay.textContent = playing ? '⏸' : '▶';
-          if (e.data === YT.PlayerState.CUED) yt.setShuffle(true);
-          /* end of a whole playlist: roll into a random one and keep going */
-          if (e.data === YT.PlayerState.ENDED) {
-            const pick = listIds[Math.floor(Math.random() * listIds.length)];
-            curList = listIds.indexOf(pick);
-            yt.loadPlaylist({ listType: 'playlist', list: pick });
+          btnPlay.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+          btnPlay.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+          /* after a random hop lands, jump to a random SONG inside it */
+          if (playing && wantRandomIndex) {
+            const pl = yt.getPlaylist && yt.getPlaylist();
+            if (pl && pl.length) {
+              wantRandomIndex = false;
+              yt.playVideoAt(Math.floor(Math.random() * pl.length));
+            }
           }
+          /* end of a whole playlist: roll into a random one and keep going */
+          if (e.data === YT.PlayerState.ENDED) { phase = 1; hopRandom(); }
           refresh();
         }
       }
@@ -98,18 +119,9 @@ if (listIds.length) {
   });
 
   /* AUTOPLAY: PRESS START is the user gesture browsers require — the radio
-     starts as the visitor enters, on a RANDOM SONG of the random playlist.
+     opens with the FIRST song of the FIRST playlist, then goes random.
      Any first click or key works as fallback. */
-  const tryPlay = () => {
-    if (!yt || !yt.playVideo) return;
-    const pl = yt.getPlaylist && yt.getPlaylist();
-    if (!started && pl && pl.length) {
-      started = true;
-      yt.playVideoAt(Math.floor(Math.random() * pl.length));
-    } else {
-      yt.playVideo();
-    }
-  };
+  const tryPlay = () => { if (yt && yt.playVideo) yt.playVideo(); };
   bus.addEventListener('start', tryPlay);
   addEventListener('pointerdown', tryPlay, { once: true });
   document.getElementById('pillPrev').addEventListener('click', () => yt && yt.previousVideo());

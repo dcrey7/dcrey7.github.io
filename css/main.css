@@ -308,6 +308,8 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  display: block;
+  min-height: 1em;   /* the line holds its height even while empty */
 }
 .pill__bar {
   display: block;
