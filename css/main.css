@@ -265,8 +265,13 @@ body {
 
 /* ---------- the disc player pill ---------- */
 
-/* NO pill, no box: the disc and clean elements float in the top bar */
+/* NO pill, no box: the disc and clean elements float, pinned to the
+   bottom right corner of the window */
 .pill {
+  position: fixed;
+  right: clamp(16px, 4vw, 52px);
+  bottom: clamp(14px, 2.4vh, 24px);
+  z-index: 40;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -888,8 +893,9 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
   z-index: 1;
   right: 3vw;
   top: clamp(110px, 14vh, 190px);
-  bottom: clamp(60px, 8vh, 120px);   /* definite height: links pin to the
-                                        top, the words centre in the middle */
+  bottom: clamp(120px, 14vh, 190px); /* definite height: links pin to the
+                                        top, the words centre in the middle,
+                                        and the player owns the corner below */
   width: clamp(300px, 23vw, 620px);
   display: flex;
   flex-direction: column;
