@@ -374,9 +374,21 @@ body {
 }
 .sysbtn:hover { color: var(--chrome); }
 .sysbtn[aria-pressed="true"] { color: var(--yellow); }
+/* day, date and time: dead centre of the top of the window */
 .clock {
-  font-family: 'Space Mono', monospace;
-  font-size: .74rem; color: var(--chrome-dim); font-variant-numeric: tabular-nums;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Archivo', sans-serif;
+  font-weight: 300;
+  font-size: clamp(.9rem, 1.05vw, 1.3rem);
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--chrome);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 /* ---------- layout ---------- */

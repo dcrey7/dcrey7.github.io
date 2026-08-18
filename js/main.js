@@ -38,7 +38,9 @@ if (listIds.length) {
   /* the OPENER is always the first song of the first playlist; after it,
      everything is random playlist + random song */
   let yt = null, curList = 0, lastId = null, lastHop = 0,
-      phase = 0, wantRandomIndex = false;
+      phase = 0, wantRandomIndex = false,
+      userPaused = false, startedOnce = false, errAt = 0, errStreak = 0,
+      stuckTicks = 0;
 
   const hopRandom = () => {
     /* always land on a DIFFERENT playlist than the current one */
@@ -94,20 +96,29 @@ if (listIds.length) {
         controls: 0, disablekb: 1, playsinline: 1
       },
       events: {
-        /* a private or dead playlist/video must never stall the radio:
-           on any player error, hop somewhere else and keep going */
-        onError: () => { phase = 1; hopRandom(); },
+        /* big playlists carry embed-blocked songs: skip them; if errors
+           chain, hop to another playlist. The radio must never stall. */
+        onError: () => {
+          const now = Date.now();
+          errStreak = now - errAt < 15000 ? errStreak + 1 : 1;
+          errAt = now;
+          if (errStreak >= 3) { errStreak = 0; phase = 1; hopRandom(); }
+          else if (yt && yt.nextVideo) yt.nextVideo();
+        },
         onReady: refresh,
         onStateChange: e => {
           const playing = e.data === YT.PlayerState.PLAYING;
           disc.classList.toggle('spin', playing);
           btnPlay.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
           btnPlay.setAttribute('aria-label', playing ? 'Pause' : 'Play');
-          /* after a random hop lands, jump to a random SONG inside it */
+          if (playing) { startedOnce = true; userPaused = false; }
+          /* after a random hop lands: shuffle the list and jump to a
+             random SONG inside it */
           if (playing && wantRandomIndex) {
             const pl = yt.getPlaylist && yt.getPlaylist();
             if (pl && pl.length) {
               wantRandomIndex = false;
+              yt.setShuffle(true);
               yt.playVideoAt(Math.floor(Math.random() * pl.length));
             }
           }
@@ -121,9 +132,28 @@ if (listIds.length) {
 
   btnPlay.addEventListener('click', () => {
     if (!yt) return;
-    if (yt.getPlayerState && yt.getPlayerState() === 1) yt.pauseVideo();
-    else yt.playVideo();
+    if (yt.getPlayerState && yt.getPlayerState() === 1) {
+      userPaused = true;
+      yt.pauseVideo();
+    } else {
+      userPaused = false;
+      yt.playVideo();
+    }
   });
+
+  /* watchdog: if the radio sits idle without the user pausing it, nudge it
+     back to life; a second stall in a row hops to another playlist */
+  setInterval(() => {
+    if (!yt || !yt.getPlayerState || !startedOnce || userPaused) return;
+    const st = yt.getPlayerState();
+    if (st === -1 || st === 0 || st === 5) {
+      stuckTicks += 1;
+      if (stuckTicks >= 2) { stuckTicks = 0; phase = 1; hopRandom(); }
+      else yt.playVideo();
+    } else {
+      stuckTicks = 0;
+    }
+  }, 6000);
 
   /* AUTOPLAY: PRESS START is the user gesture browsers require — the radio
      opens with the FIRST song of the FIRST playlist, then goes random.
@@ -154,9 +184,11 @@ if (listIds.length) {
 /* The clock is pure console theatre, but it is the detail that sells it. */
 const clock = document.getElementById('clock');
 function tick() {
-  clock.textContent = new Date().toLocaleTimeString([], {
-    hour: '2-digit', minute: '2-digit', hour12: false
-  });
+  const now = new Date();
+  const day = now.toLocaleDateString('en-GB', { weekday: 'short' });
+  const date = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  clock.textContent = day + ' ' + date + '  ·  ' + time;
 }
 tick();
 setInterval(tick, 10_000);
