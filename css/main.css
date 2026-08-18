@@ -268,6 +268,7 @@ body {
   -webkit-backdrop-filter: blur(14px);
 }
 .pill__disc {
+  background: #101623;   /* neutral dark vinyl until the track art loads */
   width: clamp(34px, 2.6vw, 52px);
   height: clamp(34px, 2.6vw, 52px);
   border-radius: 50%;

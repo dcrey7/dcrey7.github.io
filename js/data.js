@@ -274,7 +274,9 @@ export const SUPA = { url: '', anon: '' };
    title and channel, and prev/next skip real tracks. Nothing is hardcoded;
    manage the songs in the YouTube app. The disc click cycles playlists.
    e.g. 'https://www.youtube.com/playlist?list=PL...'                       */
-export const YT_PLAYLISTS = [];
+export const YT_PLAYLISTS = [
+  'https://www.youtube.com/watch?v=ple35INEvSg&list=PLlmyYmqoMXCsDoF4-oS_cTnwT3Qli-ibh'
+];
 
 export const CONTACT = {
   email: 'abhishek01789@gmail.com',
