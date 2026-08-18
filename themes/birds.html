@@ -168,7 +168,7 @@ void main() {
   /* rotate so +x is the flight direction */
   p = vec2(vHead.x * p.x + vHead.y * p.y, -vHead.y * p.x + vHead.x * p.y);
   /* the wing beat: the V opens and closes on this bird's own clock */
-  float flap = 0.55 + 0.4 * sin(uTime * 9.0 + vPhase * 6.2831);
+  float flap = 0.55 + 0.4 * sin(uTime * 6.5 + vPhase * 6.2831);
   vec2 wingL = vec2(-0.62,  flap * 0.7);
   vec2 wingR = vec2(-0.62, -flap * 0.7);
   float d = min(seg(p, wingL), seg(p, wingR));
@@ -213,11 +213,11 @@ void main() {
   const F = 820, ZOFF = 720;
   const BOUND = 1300;
   const SEP2 = 13 * 13;
-  const BASE_MAX = 3.4, BASE_MIN = 2.1;    /* birds, not jets */
+  const BASE_MAX = 2.2, BASE_MIN = 1.35;   /* birds, not jets */
   /* Reynolds 1987: every rule is an ACCELERATION REQUEST, and they are
      granted in priority order out of one bounded budget (MAXA). Bounded
      acceleration is what turns jerks into smooth banking curves. */
-  const MAXA = .24;
+  const MAXA = .16;
   const MAG_FLEE = MAXA, MAG_SEP = MAXA * .55, MAG_ALI = MAXA * .5,
         MAG_COH = MAXA * .7, MAG_ROOST = MAXA * .55;
   const FLEE_R2 = 200 * 200;
@@ -289,7 +289,7 @@ void main() {
         r.nextSpd = t + 2.5 + Math.random() * 5;
       }
       r.spd += (r.spdTarget - r.spd) * .012;
-      const rv = 1.6 * r.spd;
+      const rv = 1.05 * r.spd;
       r.x += Math.cos(r.th) * Math.cos(r.ph) * rv;
       r.y += Math.sin(r.ph) * rv * .7;
       r.z += Math.sin(r.th) * Math.cos(r.ph) * rv;
@@ -315,7 +315,7 @@ void main() {
     }
     const fdx = falcon.tx - falcon.x, fdy = falcon.ty - falcon.y, fdz = falcon.tz - falcon.z;
     const fdd = Math.sqrt(fdx * fdx + fdy * fdy + fdz * fdz) || 1;
-    const fsp = Math.min(6.5, fdd);
+    const fsp = Math.min(4.2, fdd);
     falcon.x += fdx / fdd * fsp;
     falcon.y += fdy / fdd * fsp;
     falcon.z += fdz / fdd * fsp;
