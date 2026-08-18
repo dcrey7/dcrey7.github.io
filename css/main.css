@@ -444,6 +444,84 @@ body[data-theme="beach"] .hero {
   text-shadow: 0 1px 10px rgba(4, 8, 16, .8), 0 0 2px rgba(4, 8, 16, .6);
 }
 
+/* ---------- search ---------- */
+
+.themenu--search { min-width: clamp(280px, 24vw, 420px); }
+.themenu--search input {
+  background: none;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .18);
+  outline: none;
+  font-family: 'Space Mono', monospace;
+  font-size: .78rem;
+  letter-spacing: .12em;
+  color: var(--chrome);
+  padding: 8px 10px 10px;
+  margin-bottom: 6px;
+}
+.themenu--search input::placeholder { color: var(--chrome-dim); }
+#searchResults { display: flex; flex-direction: column; }
+#searchResults .hit {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+}
+#searchResults .hit i {
+  font-style: normal;
+  font-size: .56rem;
+  letter-spacing: .22em;
+  color: var(--chrome-dim);
+}
+#searchResults .none {
+  font-size: .66rem;
+  color: var(--chrome-dim);
+  padding: 8px 10px;
+}
+
+/* leaving for a reload (language switch): a soft fade out */
+body.leaving { opacity: 0; transition: opacity .26s var(--ease); }
+
+/* ---------- light mode (acting toggle; final art comes later) ---------- */
+
+body.light {
+  --void:       #E9EDF4;
+  --chrome:     #15181D;
+  --chrome-dim: #5A6270;
+  --glass:      rgba(10, 20, 40, .05);
+  --glass-line: rgba(10, 20, 40, .14);
+}
+/* the light field CROSSFADES over the dark one: an overlay whose opacity
+   animates, because background gradients cannot transition smoothly */
+.field::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(80% 62% at 26% 62%, #C8D6F2 0%, transparent 68%),
+    radial-gradient(120% 80% at 50% 118%, #DEE7F7 0%, transparent 70%),
+    #EDF1F8;
+  opacity: 0;
+  transition: opacity .6s var(--ease);
+}
+body.light .field::after { opacity: 1; }
+body { transition: color .5s var(--ease); }
+body.light .grain { opacity: .04; }
+.grain { transition: opacity .6s var(--ease); }
+body.light .side__desc { color: #3A414C; }
+body.light .themenu {
+  background: rgba(250, 251, 253, .92);
+  border-color: rgba(10, 20, 40, .1);
+}
+body.light .themenu button:hover { background: rgba(10, 20, 40, .07); }
+body.light .keyart { color: #10131A; }
+
+/* ---------- translate (google element, kept invisible) ---------- */
+
+#gt-host { display: none; }
+.skiptranslate, .goog-te-banner-frame { display: none !important; }
+body { top: 0 !important; }
+
 /* a shader theme runs full screen behind everything, untouchable */
 .themeframe {
   position: fixed;
@@ -1200,7 +1278,9 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
 
 .boot {
   position: fixed; inset: 0; z-index: 10;
-  background: var(--void);
+  /* a scrim, not a wall: the picked theme shows through on the landing */
+  background: color-mix(in oklab, var(--void) 42%, transparent);
+  transition: background .6s var(--ease);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 14px; text-align: center; padding: 24px;
   transition: opacity .5s var(--ease), visibility .5s;
@@ -1229,12 +1309,21 @@ body:not(.booting) .boot { opacity: 0; visibility: hidden; }
 
 /* the landing page shows ONLY the boot screen: the player and the
    avatar wait for the home screen, then everything fades in together */
-body.booting .xmb, body.booting .topbar,
+/* the landing page keeps the TOP BAR alive (theme, mode, language,
+   search all work before PRESS START); only the bar, the player and
+   the avatar wait for the home screen */
+body.booting .xmb,
 body.booting .pill, body.booting .who {
   opacity: 0;
   pointer-events: none;
 }
+/* the content rail and key art are fixed elements outside .xmb: they
+   must not shine through the landing scrim (visibility, because the
+   key art's own animation pins its opacity) */
+body.booting .keyart-rail,
+body.booting .keyart { visibility: hidden; }
 .xmb, .topbar, .pill, .who { transition: opacity .6s var(--ease) .1s; }
+.topbar { z-index: 20; }   /* above the boot layer */
 .pill[hidden] { display: none; }
 
 /* ---------- breakpoints ---------- */

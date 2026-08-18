@@ -446,6 +446,9 @@ export function initXmb() {
   /* ---------- input ---------- */
   addEventListener('keydown', e => {
     if (document.body.classList.contains('booting')) return;
+    /* typing in a field (search, the ADD YOURS form) never drives the bar */
+    if (e.target instanceof Element
+        && e.target.matches('input, textarea, select')) return;
     if (lightbox.classList.contains('on')) {
       if (e.key === 'Escape' || e.key === 'Enter') lightbox.classList.remove('on');
       return;

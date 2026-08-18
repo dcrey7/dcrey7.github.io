@@ -26,6 +26,41 @@
   <time class="clock" id="clock"></time>
   <div class="sys">
     <div class="settings">
+      <button class="gear" id="searchBtn" aria-label="Search" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+      </button>
+      <div class="themenu themenu--search" id="searchPanel" hidden>
+        <input id="searchInput" type="search" placeholder="SEARCH EVERYTHING" autocomplete="off" spellcheck="false">
+        <div id="searchResults"></div>
+      </div>
+    </div>
+    <div class="settings">
+      <button class="gear" id="langBtn" aria-label="Language" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm7.93 9h-3.02a15.7 15.7 0 0 0-1.2-5.15A8.03 8.03 0 0 1 19.93 11zM12 4.04c.86 1.26 1.55 3.06 1.87 4.96h-3.74c.32-1.9 1.01-3.7 1.87-4.96zM4.26 13h3.02c.16 1.83.58 3.6 1.2 5.15A8.03 8.03 0 0 1 4.26 13zm3.02-2H4.26a8.03 8.03 0 0 1 4.22-5.15A15.7 15.7 0 0 0 7.28 11zM12 19.96c-.86-1.26-1.55-3.06-1.87-4.96h3.74c-.32 1.9-1.01 3.7-1.87 4.96zM14.12 13h-4.24a20 20 0 0 1 0-2h4.24a20 20 0 0 1 0 2zm.4 5.15c.62-1.55 1.04-3.32 1.2-5.15h3.02a8.03 8.03 0 0 1-4.22 5.15z"/></svg>
+      </button>
+      <div class="themenu" id="langMenu" hidden>
+        <span class="themenu__head">LANGUAGE</span>
+        <button data-lang="">ENGLISH</button>
+        <button data-lang="fr">FRANCAIS</button>
+        <button data-lang="de">DEUTSCH</button>
+        <button data-lang="es">ESPANOL</button>
+        <button data-lang="it">ITALIANO</button>
+        <button data-lang="pt">PORTUGUES</button>
+        <button data-lang="hi">HINDI</button>
+        <button data-lang="ml">മലയാളം</button>
+        <button data-lang="ja">日本語</button>
+        <button data-lang="ko">한국어</button>
+        <button data-lang="zh-CN">中文</button>
+        <button data-lang="ar">العربية</button>
+      </div>
+    </div>
+    <div class="settings">
+      <button class="gear" id="modeBtn" aria-label="Light mode">
+        <svg id="modeSun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM11 1h2v3h-2zm0 19h2v3h-2zM3.5 4.9 4.9 3.5l2.1 2.1-1.4 1.4zm13.5 13.6 1.4-1.4 2.1 2.1-1.4 1.4zM1 11h3v2H1zm19 0h3v2h-3zM3.5 19.1l2.1-2.1 1.4 1.4-2.1 2.1zM17 5.6l2.1-2.1 1.4 1.4-2.1 2.1z"/></svg>
+        <svg id="modeMoon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" style="display:none"><path fill="currentColor" d="M12.3 2a9.9 9.9 0 0 0-2.6.36 10 10 0 0 1 0 19.28A10 10 0 1 0 12.3 2z"/></svg>
+      </button>
+    </div>
+    <div class="settings">
       <button class="gear" id="gearBtn" aria-label="Settings" aria-expanded="false">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.23.41.47.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.03-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg>
       </button>
@@ -45,6 +80,7 @@
 </header>
 
 <div id="radio-host" aria-hidden="true"></div>
+<div id="gt-host" aria-hidden="true"></div>
 
 <div class="pill" id="pill" hidden>
   <img class="pill__disc" id="pillDisc" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">

@@ -3,6 +3,7 @@
 import { initXmb } from './xmb.js';
 import { initBoot } from './boot.js';
 import { YT_PLAYLISTS } from './data.js';
+import { CATEGORIES } from './menu.js';
 
 const xmb = initXmb();
 initBoot();
@@ -196,7 +197,11 @@ function applyTheme(name) {
   if (THEME_SRC[name]) {
     const f = document.createElement('iframe');
     f.className = 'themeframe';
-    f.src = THEME_SRC[name];
+    /* space is the one theme with two FACES: stars at night, a flock of
+       birds by day */
+    f.src = name === 'space' && document.body.classList.contains('light')
+      ? 'themes/birds.html'
+      : THEME_SRC[name];
     f.setAttribute('aria-hidden', 'true');
     f.tabIndex = -1;
     f.addEventListener('load', () => {
@@ -205,6 +210,8 @@ function applyTheme(name) {
         const style = f.contentDocument.createElement('style');
         style.textContent = '#ui, #debug, #game-container { display: none !important; }';
         f.contentDocument.head.appendChild(style);
+        /* a fresh frame inherits the current dark/light mode */
+        syncFrameMode(document.body.classList.contains('light'));
       } catch { /* leave the page as it is */ }
     });
     document.body.prepend(f);
@@ -214,25 +221,174 @@ function applyTheme(name) {
   try { localStorage.setItem('xmb-theme', name); } catch {}
 }
 
-gearBtn.addEventListener('click', e => {
-  e.stopPropagation();
-  const open = themenu.hidden;
-  themenu.hidden = !open;
-  gearBtn.setAttribute('aria-expanded', String(open));
+/* every top bar dropdown behaves the same: its button toggles it, any
+   click elsewhere closes it, opening one closes the others */
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+const drops = [
+  [gearBtn, themenu],
+  [document.getElementById('searchBtn'), document.getElementById('searchPanel')],
+  [document.getElementById('langBtn'), document.getElementById('langMenu')]
+];
+function closeDrops() {
+  drops.forEach(([b, m]) => {
+    m.hidden = true;
+    b.setAttribute('aria-expanded', 'false');
+  });
+}
+drops.forEach(([b, m]) => {
+  b.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = m.hidden;
+    closeDrops();
+    m.hidden = !open;
+    b.setAttribute('aria-expanded', String(open));
+    if (open && m.id === 'searchPanel') searchInput.focus();
+  });
+});
+addEventListener('pointerdown', e => {
+  if (!e.target.closest('.settings')) closeDrops();
 });
 themenu.addEventListener('click', e => {
   const b = e.target.closest('button[data-theme]');
   if (!b) return;
   applyTheme(b.dataset.theme);
-  themenu.hidden = true;
-  gearBtn.setAttribute('aria-expanded', 'false');
+  closeDrops();
 });
-addEventListener('pointerdown', e => {
-  if (!themenu.hidden && !e.target.closest('.settings')) {
-    themenu.hidden = true;
-    gearBtn.setAttribute('aria-expanded', 'false');
+
+/* ---------- search: every item on the bar, one box ---------- */
+const searchIndex = [];
+CATEGORIES.forEach((c, ci) => c.items.forEach((it, ii) => searchIndex.push({
+  ci, ii, cat: c.label, title: it.title,
+  hay: [it.title, it.sub, it.meta, it.body].filter(Boolean).join(' ').toLowerCase()
+})));
+function jumpTo(hit) {
+  xmb.setCat(hit.ci, true);
+  xmb.setItem(hit.ii);
+  closeDrops();
+  searchInput.value = '';
+  searchResults.replaceChildren();
+}
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  searchResults.replaceChildren();
+  if (q.length < 2) return;
+  const hits = searchIndex.filter(en => en.hay.includes(q)).slice(0, 8);
+  if (!hits.length) {
+    const none = document.createElement('span');
+    none.className = 'none';
+    none.textContent = 'nothing found';
+    searchResults.appendChild(none);
+    return;
+  }
+  hits.forEach(h => {
+    const b = document.createElement('button');
+    b.className = 'hit';
+    const t = document.createElement('span');
+    t.textContent = h.title;
+    const c = document.createElement('i');
+    c.textContent = h.cat;
+    b.append(t, c);
+    b.addEventListener('click', () => jumpTo(h));
+    searchResults.appendChild(b);
+  });
+});
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const first = searchResults.querySelector('.hit');
+    if (first) first.click();
+  } else if (e.key === 'Escape') {
+    closeDrops();
   }
 });
+
+/* ---------- dark / light ----------
+   Royal blue flips its palette; the lava lamp has its own mode button
+   (we press it), the beach has a Time knob (night for dark, day for
+   light). The choice persists. */
+const modeBtn = document.getElementById('modeBtn');
+const sunI = document.getElementById('modeSun');
+const moonI = document.getElementById('modeMoon');
+function syncFrameMode(light) {
+  const f = document.querySelector('.themeframe');
+  if (!f) return;
+  /* space swaps its whole face: stars for dark, the murmuration for light */
+  const src = f.getAttribute('src') || '';
+  if (src.includes('space') || src.includes('birds')) {
+    const want = light ? 'themes/birds.html' : 'themes/space.html';
+    if (src !== want) f.src = want;
+    return;
+  }
+  try {
+    const d = f.contentDocument;
+    if (!d) return;
+    const lavaMode = d.getElementById('mode');
+    if (lavaMode) {
+      if (d.documentElement.classList.contains('light') !== light) lavaMode.click();
+      return;
+    }
+    const sun = d.getElementById('sun');
+    if (sun) {
+      sun.value = light ? '0.5' : '0.06';
+      sun.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  } catch { /* frame not ready yet */ }
+}
+function applyMode(light) {
+  document.body.classList.toggle('light', light);
+  sunI.style.display = light ? 'none' : 'block';
+  moonI.style.display = light ? 'block' : 'none';
+  modeBtn.setAttribute('aria-label', light ? 'Dark mode' : 'Light mode');
+  syncFrameMode(light);
+  try { localStorage.setItem('xmb-mode', light ? 'light' : 'dark'); } catch {}
+}
+modeBtn.addEventListener('click', () =>
+  applyMode(!document.body.classList.contains('light')));
+let storedMode = 'dark';
+try { storedMode = localStorage.getItem('xmb-mode') || 'dark'; } catch {}
+if (storedMode === 'light') applyMode(true);
+
+/* ---------- translate: the google element, kept invisible ----------
+   Picking a language sets the googtrans cookie and reloads; the element
+   script reads it and translates the whole page in place. */
+const langMenu = document.getElementById('langMenu');
+function currentLang() {
+  const m = document.cookie.match(/googtrans=\/en\/([^;]+)/);
+  return m ? decodeURIComponent(m[1]) : '';
+}
+function loadTranslator() {
+  if (document.getElementById('gt-script')) return;
+  window.googleTranslateElementInit = () => {
+    new window.google.translate.TranslateElement(
+      { pageLanguage: 'en', autoDisplay: false }, 'gt-host');
+  };
+  const s = document.createElement('script');
+  s.id = 'gt-script';
+  s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  s.async = true;
+  document.head.appendChild(s);
+}
+langMenu.addEventListener('click', e => {
+  const b = e.target.closest('button[data-lang]');
+  if (!b) return;
+  const kill = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  document.cookie = kill;
+  document.cookie = kill + '; domain=' + location.hostname;
+  if (b.dataset.lang) document.cookie = 'googtrans=/en/' + b.dataset.lang + '; path=/';
+  /* reload INTO the home screen, on the same card: never back through
+     PRESS START, and the page fades out first so the switch feels soft */
+  const ci = [...document.querySelectorAll('#bar .cat')]
+    .findIndex(c => c.classList.contains('is-on'));
+  const ii = [...document.querySelectorAll('.item')]
+    .findIndex(el => el.classList.contains('is-on'));
+  const dest = location.pathname + '?skip&cat=' + CATEGORIES[Math.max(0, ci)].id
+    + '&i=' + Math.max(0, ii);
+  document.body.classList.add('leaving');
+  setTimeout(() => location.assign(dest), 280);
+});
+if (currentLang()) loadTranslator();
+langMenu.querySelectorAll('button[data-lang]').forEach(b =>
+  b.setAttribute('aria-current', String(b.dataset.lang === currentLang())));
 
 let storedTheme = 'default';
 try { storedTheme = localStorage.getItem('xmb-theme') || 'default'; } catch {}
