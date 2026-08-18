@@ -332,7 +332,7 @@ body {
 /* The embed that actually plays the audio: parked OFF-SCREEN at real size,
    never display:none or 1px — browsers throttle invisible media iframes,
    which cut playback after a few seconds. */
-#spotify-host {
+#radio-host {
   position: fixed;
   left: -9999px;
   bottom: 0;
@@ -340,7 +340,7 @@ body {
   height: 152px;
   pointer-events: none;
 }
-#spotify-host iframe { width: 320px; height: 152px; }
+#radio-host iframe { width: 320px; height: 152px; }
 .sysbtn {
   background: none; border: 0; cursor: pointer;
   color: var(--chrome-dim); font-size: 1.05rem; line-height: 1; padding: 6px;

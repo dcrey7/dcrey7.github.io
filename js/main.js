@@ -2,7 +2,7 @@
 
 import { initXmb } from './xmb.js';
 import { initBoot } from './boot.js';
-import { SPOTIFY_PLAYLISTS } from './data.js';
+import { YT_PLAYLISTS } from './data.js';
 
 const xmb = initXmb();
 initBoot();
@@ -16,75 +16,82 @@ if (q.has('cat')) {
 }
 if (q.has('i')) xmb.setItem(Number(q.get('i')) || 0, true);
 
-/* ---------- the disc player ----------
-   A custom pill: spinning playlist cover, title, progress bar, play/pause
-   and prev/next cycling the playlists. Powered by Spotify's official
-   iframe embed controller (hidden); covers and titles come from Spotify's
-   public oEmbed endpoint. Spotify does not expose per-track names or track
-   skipping to websites, so the playlist is the unit here. */
+/* ---------- the radio ----------
+   saloon.wtf style, zero hardcoded songs: paste YouTube PLAYLIST links in
+   data.js and the player loads the whole playlist itself. The current
+   song's REAL title and channel come from the player at runtime
+   (getVideoData), prev/next skip real tracks, clicking the disc cycles
+   playlists. The video is parked off-screen; the audio plays. */
 const pill = document.getElementById('pill');
-const ids = SPOTIFY_PLAYLISTS
-  .map(u => (u.match(/playlist\/([A-Za-z0-9]+)/) || [])[1])
+const listIds = YT_PLAYLISTS
+  .map(u => (String(u).match(/[?&]list=([\w-]+)/) || [])[1])
   .filter(Boolean);
-if (ids.length) {
+if (listIds.length) {
   pill.hidden = false;
   const disc = document.getElementById('pillDisc');
   const title = document.getElementById('pillTitle');
+  const artist = document.getElementById('pillArtist');
   const prog = document.getElementById('pillProg');
   const timeEl = document.getElementById('pillTime');
   const btnPlay = document.getElementById('pillPlay');
-  let ctrl = null, cur = 0, paused = true;
-  const mmss = ms => {
-    const s = Math.max(0, Math.round(ms / 1000));
-    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  let yt = null, curList = 0;
+
+  const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+  const refresh = () => {
+    if (!yt || !yt.getVideoData) return;
+    const d = yt.getVideoData() || {};
+    if (d.title) title.textContent = d.title;
+    artist.textContent = d.author || '';
+    if (d.video_id) disc.src = `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
   };
 
-  const meta = async n => {
-    try {
-      const r = await fetch('https://open.spotify.com/oembed?url=' +
-        encodeURIComponent('https://open.spotify.com/playlist/' + ids[n]));
-      const j = await r.json();
-      title.textContent = j.title || 'playlist';
-      if (j.thumbnail_url) disc.src = j.thumbnail_url;
-    } catch { title.textContent = 'playlist'; }
-  };
-  meta(0);
-
-  const apiScript = document.createElement('script');
-  apiScript.src = 'https://open.spotify.com/embed/iframe-api/v1';
-  apiScript.async = true;
-  document.head.appendChild(apiScript);
-  window.onSpotifyIframeApiReady = API => {
-    API.createController(document.getElementById('spotify-host'),
-      { uri: 'spotify:playlist:' + ids[0], width: 320, height: 152 },
-      c => {
-        ctrl = c;
-        c.addListener('playback_update', e => {
-          paused = e.data.isPaused;
-          btnPlay.textContent = paused ? '▶' : '⏸';
-          disc.classList.toggle('spin', !paused);
-          if (e.data.duration) {
-            prog.style.width = (e.data.position / e.data.duration * 100) + '%';
-            timeEl.textContent = `${mmss(e.data.position)} / ${mmss(e.data.duration)}`;
-          }
-        });
-      });
+  const api = document.createElement('script');
+  api.src = 'https://www.youtube.com/iframe_api';
+  api.async = true;
+  document.head.appendChild(api);
+  window.onYouTubeIframeAPIReady = () => {
+    yt = new YT.Player('radio-host', {
+      width: 320, height: 180,
+      playerVars: {
+        listType: 'playlist', list: listIds[0],
+        controls: 0, disablekb: 1, playsinline: 1, loop: 1
+      },
+      events: {
+        onReady: refresh,
+        onStateChange: e => {
+          const playing = e.data === YT.PlayerState.PLAYING;
+          disc.classList.toggle('spin', playing);
+          btnPlay.textContent = playing ? '⏸' : '▶';
+          refresh();
+        }
+      }
+    });
   };
 
-  const load = n => {
-    cur = ((n % ids.length) + ids.length) % ids.length;
-    meta(cur);
-    if (ctrl) { ctrl.loadUri('spotify:playlist:' + ids[cur]); ctrl.play(); }
-  };
   btnPlay.addEventListener('click', () => {
-    if (!ctrl) return;
-    ctrl.togglePlay();
-    /* react instantly; the playback_update event confirms a beat later */
-    disc.classList.toggle('spin', paused);
-    btnPlay.textContent = paused ? '⏸' : '▶';
+    if (!yt) return;
+    if (yt.getPlayerState && yt.getPlayerState() === 1) yt.pauseVideo();
+    else yt.playVideo();
   });
-  document.getElementById('pillPrev').addEventListener('click', () => load(cur - 1));
-  document.getElementById('pillNext').addEventListener('click', () => load(cur + 1));
+  document.getElementById('pillPrev').addEventListener('click', () => yt && yt.previousVideo());
+  document.getElementById('pillNext').addEventListener('click', () => yt && yt.nextVideo());
+  /* the disc itself cycles between the playlists */
+  disc.addEventListener('click', () => {
+    if (!yt || listIds.length < 2) return;
+    curList = (curList + 1) % listIds.length;
+    yt.loadPlaylist({ listType: 'playlist', list: listIds[curList] });
+  });
+
+  setInterval(() => {
+    if (!yt || !yt.getDuration) return;
+    const d = yt.getDuration() || 0, p = yt.getCurrentTime() || 0;
+    if (d) {
+      prog.style.width = (p / d * 100) + '%';
+      timeEl.textContent = `${mmss(p)} / ${mmss(d)}`;
+    }
+    refresh();
+  }, 800);
 }
 
 /* The clock is pure console theatre, but it is the detail that sells it. */

@@ -269,11 +269,12 @@ export const EDUCATION = [
    Create a free project at supabase.com, then paste its URL and anon key. */
 export const SUPA = { url: '', anon: '' };
 
-/* YOUR Spotify playlists (Share → Copy link). prev/next cycles this list.
-   TEMPORARY placeholder until Abhishek supplies his own. */
-export const SPOTIFY_PLAYLISTS = [
-  'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M'
-];
+/* The radio, saloon.wtf style: paste YOUR YouTube playlist link(s) here.
+   The player loads the whole playlist itself, shows the current song's real
+   title and channel, and prev/next skip real tracks. Nothing is hardcoded;
+   manage the songs in the YouTube app. The disc click cycles playlists.
+   e.g. 'https://www.youtube.com/playlist?list=PL...'                       */
+export const YT_PLAYLISTS = [];
 
 export const CONTACT = {
   email: 'abhishek01789@gmail.com',
