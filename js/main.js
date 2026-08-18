@@ -2,6 +2,7 @@
 
 import { initXmb } from './xmb.js';
 import { initBoot } from './boot.js';
+import { bus } from './config.js';
 import { YT_PLAYLISTS } from './data.js';
 
 const xmb = initXmb();
@@ -34,7 +35,7 @@ if (listIds.length) {
   const prog = document.getElementById('pillProg');
   const timeEl = document.getElementById('pillTime');
   const btnPlay = document.getElementById('pillPlay');
-  let yt = null, curList = 0;
+  let yt = null, curList = 0, lastId = null, lastHop = 0;
 
   const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
@@ -43,7 +44,19 @@ if (listIds.length) {
     const d = yt.getVideoData() || {};
     if (d.title) title.textContent = d.title;
     artist.textContent = d.author || '';
-    if (d.video_id) disc.src = `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
+    if (d.video_id && d.video_id !== lastId) {
+      disc.src = `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
+      /* random hop BETWEEN playlists: when the song changes, sometimes jump
+         to another playlist (shuffled), so the mix crosses all of them */
+      if (lastId && listIds.length > 1 && Date.now() - lastHop > 30000 && Math.random() < .35) {
+        lastHop = Date.now();
+        const others = listIds.filter((_, i) => i !== curList);
+        const pick = others[Math.floor(Math.random() * others.length)];
+        curList = listIds.indexOf(pick);
+        yt.loadPlaylist({ listType: 'playlist', list: pick });
+      }
+      lastId = d.video_id;
+    }
   };
 
   const api = document.createElement('script');
@@ -55,14 +68,21 @@ if (listIds.length) {
       width: 320, height: 180,
       playerVars: {
         listType: 'playlist', list: listIds[0],
-        controls: 0, disablekb: 1, playsinline: 1, loop: 1
+        controls: 0, disablekb: 1, playsinline: 1
       },
       events: {
-        onReady: refresh,
+        onReady: () => { yt.setShuffle(true); refresh(); },
         onStateChange: e => {
           const playing = e.data === YT.PlayerState.PLAYING;
           disc.classList.toggle('spin', playing);
           btnPlay.textContent = playing ? '⏸' : '▶';
+          if (e.data === YT.PlayerState.CUED) yt.setShuffle(true);
+          /* end of a whole playlist: roll into a random one and keep going */
+          if (e.data === YT.PlayerState.ENDED) {
+            const pick = listIds[Math.floor(Math.random() * listIds.length)];
+            curList = listIds.indexOf(pick);
+            yt.loadPlaylist({ listType: 'playlist', list: pick });
+          }
           refresh();
         }
       }
@@ -74,6 +94,12 @@ if (listIds.length) {
     if (yt.getPlayerState && yt.getPlayerState() === 1) yt.pauseVideo();
     else yt.playVideo();
   });
+
+  /* AUTOPLAY: PRESS START is the user gesture browsers require — the radio
+     starts as the visitor enters. Any first click or key works as fallback. */
+  const tryPlay = () => { if (yt && yt.playVideo) yt.playVideo(); };
+  bus.addEventListener('start', tryPlay);
+  addEventListener('pointerdown', tryPlay, { once: true });
   document.getElementById('pillPrev').addEventListener('click', () => yt && yt.previousVideo());
   document.getElementById('pillNext').addEventListener('click', () => yt && yt.nextVideo());
   /* the disc itself cycles between the playlists */

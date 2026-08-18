@@ -227,6 +227,7 @@ body {
 /* ---------- top bar ---------- */
 
 .topbar {
+  position: relative;   /* anchors the centred pill */
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -256,11 +257,16 @@ body {
 
 /* ---------- the disc player pill ---------- */
 
+/* centred in the middle of the top bar, wide enough for real song names */
 .pill {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 14px 8px 8px;
+  padding: 8px 16px 8px 8px;
   border-radius: 999px;
   background: var(--glass);
   border: 1px solid var(--glass-line);
@@ -269,25 +275,37 @@ body {
 }
 .pill__disc {
   background: #101623;   /* neutral dark vinyl until the track art loads */
-  width: clamp(34px, 2.6vw, 52px);
-  height: clamp(34px, 2.6vw, 52px);
+  width: clamp(52px, 4vw, 84px);
+  height: clamp(52px, 4vw, 84px);
   border-radius: 50%;
   object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, .14);   /* the vinyl rim */
+  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .6);
 }
 .pill__disc.spin { animation: discspin 6s linear infinite; }
 @keyframes discspin { to { transform: rotate(360deg); } }
 .pill__meta {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  min-width: clamp(110px, 9vw, 190px);
+  gap: 4px;
+  min-width: clamp(180px, 17vw, 380px);
 }
 .pill__meta b {
-  font-size: .7rem;
+  font-size: .64rem;
   font-weight: 600;
-  letter-spacing: .06em;
+  letter-spacing: .05em;
   color: var(--chrome);
-  max-width: clamp(110px, 9vw, 190px);
+  max-width: clamp(180px, 17vw, 380px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pill__artist {
+  font-style: normal;
+  font-size: .56rem;
+  letter-spacing: .06em;
+  color: var(--chrome-dim);
+  max-width: clamp(180px, 17vw, 380px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
