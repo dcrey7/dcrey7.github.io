@@ -396,21 +396,37 @@ export function initXmb() {
     const total = barEl.children.length;
     const catw = barEl.children[0] ? barEl.children[0].offsetWidth : 0;
     const KEEP = catw * .30, CLEAR = 0;   /* no clearance — a continuous deck */
-    [...barEl.children].forEach((el, n) => {
+    /* Reflection occlusion, computed like a real mirror: each card's
+       reflection is clipped by exactly how much its selection-side
+       neighbour covers it ON SCREEN. Tilted cards project narrower than
+       their box (cos 38deg with perspective, about .72 wide, .78 at the
+       planted edge), the selected card projects wider (scale 1.16 plus
+       translateZ, about .092 past each side). Screen overlap converts
+       back to the card's own units through the near-edge factor. */
+    const els = [...barEl.children];
+    const TILTW = .72, NEAR = .78, SELHALF = .092;
+    const txs = [], Ls = [], Rs = [];
+    els.forEach((el, n) => {
       const d = n - catI, k = Math.abs(d), dir = Math.sign(d);
+      const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
+      txs[n] = tx;
+      const base = el.offsetLeft + tx;
+      if (d === 0) { Ls[n] = base - SELHALF * catw; Rs[n] = base + (1 + SELHALF) * catw; }
+      else if (d > 0) { Ls[n] = base; Rs[n] = base + TILTW * catw; }
+      else { Rs[n] = base + catw; Ls[n] = base + catw - TILTW * catw; }
+    });
+    els.forEach((el, n) => {
+      const d = n - catI, k = Math.abs(d);
       el.classList.toggle('is-on', d === 0);
       el.classList.toggle('cat--before', d < 0);
       el.classList.toggle('cat--after', d > 0);
-      const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
-      el.style.transform = `translateX(${Math.round(tx)}px)`;
+      el.style.transform = `translateX(${Math.round(txs[n])}px)`;
       el.style.zIndex = total - k;
-      /* the reflection clips to the card's visible sliver (see main.css) */
-      const pitch = barEl.children[1]
-        ? barEl.children[1].offsetLeft - barEl.children[0].offsetLeft : catw;
-      const vis = Math.max(24, pitch - (catw - KEEP));
-      const hide = Math.max(0, Math.round(catw - vis));
-      el.style.setProperty('--rcl', d > 0 ? hide + 'px' : '0px');
-      el.style.setProperty('--rcr', d < 0 ? hide + 'px' : '0px');
+      let hideL = 0, hideR = 0;
+      if (d > 0) hideL = Math.max(0, (Rs[n - 1] - Ls[n]) / NEAR);
+      if (d < 0) hideR = Math.max(0, (Rs[n] - Ls[n + 1]) / NEAR);
+      el.style.setProperty('--rcl', Math.min(catw, Math.round(hideL)) + 'px');
+      el.style.setProperty('--rcr', Math.min(catw, Math.round(hideR)) + 'px');
       el.setAttribute('aria-selected', String(d === 0));
       el.tabIndex = d === 0 ? 0 : -1;
     });
