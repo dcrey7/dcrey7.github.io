@@ -523,7 +523,9 @@ body[data-theme="beach"] .hero {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(18px, 1.6vw, 30px);   /* clear air between card and title */
+  /* the title sits BELOW the reflection band: card, 28px air, the
+     reflection (.39 of card height), then 14px padding, then the title */
+  gap: calc(42px + var(--catf) * .39);
   padding: 0;
   position: relative;   /* stacking: JS sets z-index by distance from the
                            selection, so cards tuck under toward it */
@@ -615,11 +617,11 @@ body[data-theme="beach"] .hero {
   will-change: transform;
   transition: transform .46s var(--ease);
   -webkit-mask-image: linear-gradient(to bottom,
-    rgb(0 0 0) calc(var(--catf) + 16px),
-    transparent calc(var(--catf) + 16px + var(--catf) * .39));
+    rgb(0 0 0) calc(var(--catf) + 28px),
+    transparent calc(var(--catf) + 28px + var(--catf) * .39));
   mask-image: linear-gradient(to bottom,
-    rgb(0 0 0) calc(var(--catf) + 16px),
-    transparent calc(var(--catf) + 16px + var(--catf) * .39));
+    rgb(0 0 0) calc(var(--catf) + 28px),
+    transparent calc(var(--catf) + 28px + var(--catf) * .39));
 }
 .rcard {
   position: absolute;
@@ -650,7 +652,7 @@ body[data-theme="beach"] .hero {
 .rcard__icon::after {
   content: '';
   position: absolute;
-  top: calc(100% + 16px);
+  top: calc(100% + 28px);
   left: 0;
   right: 0;
   height: 44%;
