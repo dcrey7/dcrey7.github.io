@@ -41,7 +41,11 @@ if (listIds.length) {
       phase = 0, wantRandomIndex = false;
 
   const hopRandom = () => {
-    curList = Math.floor(Math.random() * listIds.length);
+    /* always land on a DIFFERENT playlist than the current one */
+    const others = listIds.map((_, i) => i).filter(i => i !== curList);
+    curList = others.length
+      ? others[Math.floor(Math.random() * others.length)]
+      : curList;
     lastHop = Date.now();
     wantRandomIndex = true;
     yt.loadPlaylist({ listType: 'playlist', list: listIds[curList] });
@@ -90,6 +94,9 @@ if (listIds.length) {
         controls: 0, disablekb: 1, playsinline: 1
       },
       events: {
+        /* a private or dead playlist/video must never stall the radio:
+           on any player error, hop somewhere else and keep going */
+        onError: () => { phase = 1; hopRandom(); },
         onReady: refresh,
         onStateChange: e => {
           const playing = e.data === YT.PlayerState.PLAYING;
