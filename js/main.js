@@ -31,8 +31,13 @@ if (ids.length) {
   const disc = document.getElementById('pillDisc');
   const title = document.getElementById('pillTitle');
   const prog = document.getElementById('pillProg');
+  const timeEl = document.getElementById('pillTime');
   const btnPlay = document.getElementById('pillPlay');
   let ctrl = null, cur = 0, paused = true;
+  const mmss = ms => {
+    const s = Math.max(0, Math.round(ms / 1000));
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  };
 
   const meta = async n => {
     try {
@@ -60,6 +65,7 @@ if (ids.length) {
           disc.classList.toggle('spin', !paused);
           if (e.data.duration) {
             prog.style.width = (e.data.position / e.data.duration * 100) + '%';
+            timeEl.textContent = `${mmss(e.data.position)} / ${mmss(e.data.duration)}`;
           }
         });
       });
@@ -70,7 +76,13 @@ if (ids.length) {
     meta(cur);
     if (ctrl) { ctrl.loadUri('spotify:playlist:' + ids[cur]); ctrl.play(); }
   };
-  btnPlay.addEventListener('click', () => ctrl && ctrl.togglePlay());
+  btnPlay.addEventListener('click', () => {
+    if (!ctrl) return;
+    ctrl.togglePlay();
+    /* react instantly; the playback_update event confirms a beat later */
+    disc.classList.toggle('spin', paused);
+    btnPlay.textContent = paused ? '⏸' : '▶';
+  });
   document.getElementById('pillPrev').addEventListener('click', () => load(cur - 1));
   document.getElementById('pillNext').addEventListener('click', () => load(cur + 1));
 }

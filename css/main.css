@@ -299,6 +299,12 @@ body {
   overflow: hidden;
 }
 .pill__bar i { display: block; height: 100%; width: 0; background: var(--chrome); }
+.pill__time {
+  font-family: 'Space Mono', monospace;
+  font-size: .56rem;
+  color: var(--chrome-dim);
+  font-variant-numeric: tabular-nums;
+}
 .pill__btn {
   background: none;
   border: 0;
