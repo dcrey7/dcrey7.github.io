@@ -15,6 +15,7 @@ const $ = s => document.querySelector(s);
 
 export function initXmb() {
   const barEl    = $('#bar');
+  const mirrorEl = $('#barMirror');
   const colEl    = $('#column');
   const colTrack = $('#columnTrack');
   const heroEl   = $('#hero');
@@ -147,6 +148,7 @@ export function initXmb() {
   /* ---------- the horizontal axis ---------- */
   function buildBar() {
     barEl.replaceChildren();
+    mirrorEl.replaceChildren();
     CATEGORIES.forEach((cat, i) => {
       const b = document.createElement('button');
       b.className = 'cat';
@@ -167,6 +169,12 @@ export function initXmb() {
 
       b.addEventListener('click', () => setCat(i));
       barEl.appendChild(b);
+    });
+    /* the mirror deck: inert clones, one per card */
+    [...barEl.children].forEach(c => {
+      const m = c.cloneNode(true);
+      m.tabIndex = -1;
+      mirrorEl.appendChild(m);
     });
   }
 
@@ -348,7 +356,9 @@ export function initXmb() {
   function slideBar() {
     const el = barEl.children[catI];
     if (!el) return;
-    barEl.style.transform = `translateX(${Math.round(crossx() - el.offsetLeft)}px)`;
+    const tx = Math.round(crossx() - el.offsetLeft);
+    barEl.style.transform = `translateX(${tx}px)`;
+    mirrorEl.style.transform = `translateX(${tx}px) scaleY(-1)`;
   }
 
   /* Vertical rule (user-specified): on the FIRST item the selection sits
@@ -396,40 +406,26 @@ export function initXmb() {
     const total = barEl.children.length;
     const catw = barEl.children[0] ? barEl.children[0].offsetWidth : 0;
     const KEEP = catw * .30, CLEAR = 0;   /* no clearance — a continuous deck */
-    /* Reflection occlusion, computed like a real mirror: each card's
-       reflection is clipped by exactly how much its selection-side
-       neighbour covers it ON SCREEN. Tilted cards project narrower than
-       their box (cos 38deg with perspective, about .72 wide, .78 at the
-       planted edge), the selected card projects wider (scale 1.16 plus
-       translateZ, about .092 past each side). Screen overlap converts
-       back to the card's own units through the near-edge factor. */
-    const els = [...barEl.children];
-    const TILTW = .72, NEAR = .78, SELHALF = .092;
-    const txs = [], Ls = [], Rs = [];
-    els.forEach((el, n) => {
+    [...barEl.children].forEach((el, n) => {
       const d = n - catI, k = Math.abs(d), dir = Math.sign(d);
-      const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
-      txs[n] = tx;
-      const base = el.offsetLeft + tx;
-      if (d === 0) { Ls[n] = base - SELHALF * catw; Rs[n] = base + (1 + SELHALF) * catw; }
-      else if (d > 0) { Ls[n] = base; Rs[n] = base + TILTW * catw; }
-      else { Rs[n] = base + catw; Ls[n] = base + catw - TILTW * catw; }
-    });
-    els.forEach((el, n) => {
-      const d = n - catI, k = Math.abs(d);
       el.classList.toggle('is-on', d === 0);
       el.classList.toggle('cat--before', d < 0);
       el.classList.toggle('cat--after', d > 0);
-      el.style.transform = `translateX(${Math.round(txs[n])}px)`;
+      const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
+      el.style.transform = `translateX(${Math.round(tx)}px)`;
       el.style.zIndex = total - k;
-      let hideL = 0, hideR = 0;
-      if (d > 0) hideL = Math.max(0, (Rs[n - 1] - Ls[n]) / NEAR);
-      if (d < 0) hideR = Math.max(0, (Rs[n] - Ls[n + 1]) / NEAR);
-      el.style.setProperty('--rcl', Math.min(catw, Math.round(hideL)) + 'px');
-      el.style.setProperty('--rcr', Math.min(catw, Math.round(hideR)) + 'px');
       el.setAttribute('aria-selected', String(d === 0));
       el.tabIndex = d === 0 ? 0 : -1;
     });
+    /* the mirror deck follows the real one, card for card */
+    if (mirrorEl.children.length === barEl.children.length) {
+      [...barEl.children].forEach((src, n) => {
+        const m = mirrorEl.children[n];
+        m.className = src.className;
+        m.style.transform = src.style.transform;
+        m.style.zIndex = src.style.zIndex;
+      });
+    }
     buildColumn();
     slideBar();
     setItem(itemOf[catI], true);

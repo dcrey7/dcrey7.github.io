@@ -561,23 +561,6 @@ body[data-theme="beach"] .hero {
    element INSIDE the card's paint layer, so it scales, tilts, dims and
    fades in the same frame as the card itself — box-reflect could not:
    Chrome repaints it only after a composited animation ends (the lag). */
-.cat__icon::after {
-  content: '';
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  height: 44%;
-  border-radius: inherit;
-  background: linear-gradient(to bottom,
-    color-mix(in oklab, var(--key) 55%, var(--void)), transparent 88%);
-  opacity: .38;
-  pointer-events: none;
-  /* each reflection is clipped to its card's VISIBLE sliver, so tucked
-     reflections tile like the cards do and never blend into each other */
-  clip-path: inset(0 var(--rcr, 0px) 0 var(--rcl, 0px));
-  transition: clip-path .42s var(--ease);
-}
 /* Per-card perspective, not a shared one: a shared vanishing point sits at
    the bar's centre, so distant cards barely foreshorten — every card gets
    the identical camera, which is what keeps a strip looking uniform.
@@ -613,6 +596,29 @@ body[data-theme="beach"] .hero {
 
 /* Only the selected card is titled — the sides are anonymous thumbnails,
    exactly as the PS5 rail and an alt-tab switcher both do it. */
+/* The reflection is a MIRRORED CLONE of the whole deck. The clone is
+   flipped around the line just under the cards, flattened as one group
+   (opacity creates the group), then faded with one mask. Cards in the
+   clone occlude each other exactly like the real deck, so reflections
+   can never overlap or blend, on any background. */
+.bar--mirror {
+  position: absolute;
+  top: 20px;   /* the barwrap's top padding: same box as the real bar */
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  opacity: .38;
+  /* the fold sits under the cards: flip origin at catf + 9 leaves an
+     18px air gap between a card and its reflection */
+  transform-origin: 50% calc(var(--catf) + 9px);
+  -webkit-mask-image: linear-gradient(to bottom,
+    transparent calc(var(--catf) * .3), rgba(0, 0, 0, .95) var(--catf));
+  mask-image: linear-gradient(to bottom,
+    transparent calc(var(--catf) * .3), rgba(0, 0, 0, .95) var(--catf));
+}
+.bar--mirror .cat { cursor: default; }
+.bar--mirror .cat__label { visibility: hidden; }
+
 .cat__label {
   font-size: .6rem;
   letter-spacing: .18em;

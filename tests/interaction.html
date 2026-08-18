@@ -14,7 +14,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
 
   const wait = () => new Promise(r => setTimeout(r, 130));
   const press = k => w.dispatchEvent(new w.KeyboardEvent('keydown', { key: k, bubbles: true }));
-  const cat   = () => d.querySelector('.cat.is-on .cat__label').textContent;
+  const cat   = () => d.querySelector('#bar .cat.is-on .cat__label').textContent;
   const item  = () => d.querySelector('.item.is-on .item__name').textContent;
   const hero  = () => d.querySelector('.hero__title').textContent;
   const key   = () => d.documentElement.style.getPropertyValue('--key').trim();
@@ -86,14 +86,14 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   say('category wraps past the end', cat(), 'ABOUT');
 
   /* --- clicking --- */
-  d.querySelectorAll('.cat')[5].click(); await wait();
+  d.querySelectorAll('#bar .cat')[5].click(); await wait();
   say('click selects category', cat(), 'TROPHIES');
   say('trophies has 3 badge certs (image-less cut)', nItems(), 3);
   d.querySelectorAll('.item')[2].click(); await wait();
   say('click selects item', item(), 'DGM · IISc');
 
   /* --- uniform layout: middle carries the media, right rail the words --- */
-  d.querySelectorAll('.cat')[1].click(); await wait();
+  d.querySelectorAll('#bar .cat')[1].click(); await wait();
   await new Promise(r => setTimeout(r, 500));
   const kaEl = d.getElementById('keyart');
   say('right rail carries the work bullets', !!kaEl.querySelector('.hero__bullets'), 'true');
@@ -113,13 +113,13 @@ document.getElementById('f').onload = () => setTimeout(async () => {
      report failures the code was not actually producing. offsetLeft ignores
      transforms, and the inline transform holds the settled target. */
   const crossAt = async name => {
-    const idx = [...d.querySelectorAll('.cat')].findIndex(
+    const idx = [...d.querySelectorAll('#bar .cat')].findIndex(
       c => c.querySelector('.cat__label').textContent === name);
-    d.querySelectorAll('.cat')[idx].click();
+    d.querySelectorAll('#bar .cat')[idx].click();
     await new Promise(r => setTimeout(r, 250));
 
     const bar  = d.getElementById('bar');
-    const cat  = d.querySelector('.cat.is-on');
+    const cat  = d.querySelector('#bar .cat.is-on');
     const barX = parseFloat((bar.style.transform.match(/-?[\d.]+/) || [0])[0]);
     const categoryX = cat.offsetLeft + barX;          // where the icon settles
     const columnX = parseFloat(
@@ -148,7 +148,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   say('ONE crosspoint for every category (first included)', new Set(xs).size, 1);
   /* walk deep into PEOPLE: the selected row must park one reserved row down
      at every index — the box above it is the one you came from */
-  d.querySelectorAll('.cat')[4].click(); await wait();
+  d.querySelectorAll('#bar .cat')[4].click(); await wait();
   for (let i = 0; i < 7; i++) press('ArrowDown');
   await new Promise(r => setTimeout(r, 250));
   const track = d.getElementById('columnTrack');
