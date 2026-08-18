@@ -316,25 +316,31 @@ body {
 }
 .pill__btn:hover { color: var(--chrome); }
 .pill__btn--main {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--chrome);
   color: var(--void);
-  font-size: .74rem;
+  font-size: .7rem;
+  display: grid;
+  place-items: center;
+  padding: 0 0 0 2px;   /* optical centring for the ▶ glyph */
+  line-height: 1;
 }
 .pill__btn--main:hover { background: var(--yellow); color: var(--void); }
 
-/* the hidden embed that actually plays the audio */
+/* The embed that actually plays the audio: parked OFF-SCREEN at real size,
+   never display:none or 1px — browsers throttle invisible media iframes,
+   which cut playback after a few seconds. */
 #spotify-host {
   position: fixed;
+  left: -9999px;
   bottom: 0;
-  right: 0;
-  width: 1px;
-  height: 1px;
-  opacity: .01;
+  width: 320px;
+  height: 152px;
   pointer-events: none;
 }
+#spotify-host iframe { width: 320px; height: 152px; }
 .sysbtn {
   background: none; border: 0; cursor: pointer;
   color: var(--chrome-dim); font-size: 1.05rem; line-height: 1; padding: 6px;

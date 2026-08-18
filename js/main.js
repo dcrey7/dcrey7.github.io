@@ -56,7 +56,7 @@ if (ids.length) {
   document.head.appendChild(apiScript);
   window.onSpotifyIframeApiReady = API => {
     API.createController(document.getElementById('spotify-host'),
-      { uri: 'spotify:playlist:' + ids[0], width: 1, height: 1 },
+      { uri: 'spotify:playlist:' + ids[0], width: 320, height: 152 },
       c => {
         ctrl = c;
         c.addListener('playback_update', e => {
