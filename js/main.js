@@ -35,7 +35,9 @@ if (listIds.length) {
   const prog = document.getElementById('pillProg');
   const timeEl = document.getElementById('pillTime');
   const btnPlay = document.getElementById('pillPlay');
-  let yt = null, curList = 0, lastId = null, lastHop = 0;
+  /* every visit starts on a RANDOM playlist */
+  let yt = null, curList = Math.floor(Math.random() * listIds.length),
+      lastId = null, lastHop = 0, started = false;
 
   const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
@@ -67,7 +69,7 @@ if (listIds.length) {
     yt = new YT.Player('radio-host', {
       width: 320, height: 180,
       playerVars: {
-        listType: 'playlist', list: listIds[0],
+        listType: 'playlist', list: listIds[curList],
         controls: 0, disablekb: 1, playsinline: 1
       },
       events: {
@@ -96,8 +98,18 @@ if (listIds.length) {
   });
 
   /* AUTOPLAY: PRESS START is the user gesture browsers require — the radio
-     starts as the visitor enters. Any first click or key works as fallback. */
-  const tryPlay = () => { if (yt && yt.playVideo) yt.playVideo(); };
+     starts as the visitor enters, on a RANDOM SONG of the random playlist.
+     Any first click or key works as fallback. */
+  const tryPlay = () => {
+    if (!yt || !yt.playVideo) return;
+    const pl = yt.getPlaylist && yt.getPlaylist();
+    if (!started && pl && pl.length) {
+      started = true;
+      yt.playVideoAt(Math.floor(Math.random() * pl.length));
+    } else {
+      yt.playVideo();
+    }
+  };
   bus.addEventListener('start', tryPlay);
   addEventListener('pointerdown', tryPlay, { once: true });
   document.getElementById('pillPrev').addEventListener('click', () => yt && yt.previousVideo());
