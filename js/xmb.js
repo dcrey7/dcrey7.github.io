@@ -270,7 +270,7 @@ export function initXmb() {
       heroEl.appendChild(frame);
     } else if (photos.length) {
       const board = document.createElement('div');
-      board.className = 'mboard';
+      board.className = photos.length === 1 ? 'mboard mboard--one' : 'mboard';
       photos.slice(0, 6).forEach(f => {
         const img = document.createElement('img');
         img.src = 'assets/' + f;
@@ -376,6 +376,9 @@ export function initXmb() {
     const row = parseFloat(getComputedStyle(document.documentElement)
       .getPropertyValue('--row')) || 46;
     colEl.classList.toggle('column--athead', itemOf[catI] === 0);
+    /* nothing to scroll = nothing to fade: kill the bottom smear */
+    colEl.classList.toggle('column--fits',
+      colTrack.offsetHeight + row <= colEl.clientHeight);
     colTrack.style.transform =
       `translateY(${Math.min(0, Math.round(row - el.offsetTop))}px)`;
   }

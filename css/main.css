@@ -396,9 +396,9 @@ body {
 .gear {
   background: none; border: 0; cursor: pointer;
   color: var(--chrome-dim); padding: 8px; line-height: 0;
-  transition: color .2s var(--ease), transform .4s var(--ease);
+  transition: color .2s var(--ease);
 }
-.gear:hover { color: var(--chrome); transform: rotate(45deg); }
+.gear:hover { color: var(--chrome); }
 .gear[aria-expanded="true"] { color: var(--yellow); }
 .themenu[hidden] { display: none; }
 .themenu {
@@ -756,7 +756,13 @@ body { top: 0 !important; }
   transition: opacity .25s var(--ease);
 }
 .cat.is-on .cat__label { opacity: 1; }
-.cat:focus-visible { outline: 2px solid var(--chrome); outline-offset: 3px; }
+/* NO focus rings on the console chrome (user rule): selection reads
+   from scale and colour, not boxes. Form fields keep theirs. */
+.cat:focus-visible, .item:focus-visible, .btn:focus-visible,
+a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
+.themenu button:focus-visible, .boot__start:focus-visible,
+.cat:focus, .item:focus, .gear:focus, .pill__btn:focus,
+.themenu button:focus { outline: none; }
 
 /* ---------- the cross ---------- */
 
@@ -799,6 +805,15 @@ body { top: 0 !important; }
 }
 
 .column--athead { --topfade: 0px; }
+/* when every item fits, there is nothing to fade INTO: the bottom fade
+   would just smear the last rows like a bad shadow (visible on bright
+   themes). The engine sets this class whenever the list fits. */
+.column--fits {
+  mask-image: linear-gradient(to bottom,
+    transparent 0, #000 var(--topfade), #000 100%);
+  -webkit-mask-image: linear-gradient(to bottom,
+    transparent 0, #000 var(--topfade), #000 100%);
+}
 
 .column__track {
   position: relative;
@@ -877,7 +892,7 @@ body { top: 0 !important; }
   white-space: nowrap;
 }
 .item.is-on .item__name { font-weight: 600; }
-.item:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
 
 /* ---------- detail ---------- */
 
@@ -1007,7 +1022,7 @@ body { top: 0 !important; }
   transition: transform .18s var(--ease), background .18s var(--ease);
 }
 .btn:hover { transform: translateY(-2px); background: var(--yellow); }
-.btn:focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; }
+
 
 /* ---------- shelf ---------- */
 
@@ -1043,7 +1058,7 @@ body { top: 0 !important; }
   animation-delay: calc(180ms + var(--i, 0) * 45ms);
 }
 a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px); }
-a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
 
 /* media cards: the embedded demo player and event photos — images keep their
    own aspect (the photos are what they are), sized by the shelf's height */
@@ -1192,6 +1207,17 @@ a.card:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
   box-shadow: 0 22px 60px -20px rgba(0, 0, 0, .7);
 }
 
+/* a single photo board (PEOPLE) is uniform: same height for every
+   person, never touching the bottom of the screen */
+.mboard--one { column-count: 1; }
+.mboard--one img {
+  width: auto;
+  max-width: 100%;
+  height: clamp(280px, 52vh, 620px);
+  display: block;
+  margin: 0;
+}
+
 /* ---------- the ADD YOURS form ---------- */
 
 .recform {
@@ -1325,7 +1351,7 @@ body.booting .keyart { visibility: hidden; }
 /* the landing offers theme, mode and language; search waits for home */
 body.booting .settings:has(#searchBtn) { visibility: hidden; }
 .xmb, .topbar, .pill, .who { transition: opacity .6s var(--ease) .1s; }
-.topbar { z-index: 20; }   /* above the boot layer */
+.topbar { z-index: 60; }   /* above the boot layer AND the player */
 .pill[hidden] { display: none; }
 
 /* ---------- breakpoints ---------- */
