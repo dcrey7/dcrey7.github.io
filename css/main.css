@@ -35,6 +35,9 @@
   --chrome-dim: #8A9099;
   --yellow:     #FFC800;
 
+  /* card mixing anchor: CONSTANT, so cards look the same in light
+     and dark mode (user rule) — never tied to the page background */
+  --ink: #08090B;
   --glass:      rgba(255, 255, 255, .06);
   --glass-line: rgba(255, 255, 255, .12);
 
@@ -301,56 +304,55 @@ body {
 .pill__meta {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 4px;
   /* FIXED width: the block never resizes with the song name's length */
   width: clamp(200px, 17vw, 380px);
+  /* the whole stack NEVER grows taller than the disc */
+  max-height: clamp(52px, 4vw, 84px);
 }
-.pill__meta b {
-  font-size: .64rem;
-  font-weight: 600;
-  letter-spacing: .05em;
-  color: var(--chrome);
-  max-width: clamp(180px, 17vw, 380px);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.pill__artist {
-  font-style: normal;
-  font-size: .56rem;
-  letter-spacing: .06em;
-  color: var(--chrome-dim);
-  max-width: clamp(180px, 17vw, 380px);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: block;
-  min-height: 1em;   /* the line holds its height even while empty */
-}
-.pill__bar {
-  display: block;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--glass-line);
-  overflow: hidden;
-}
-.pill__bar i { display: block; height: 100%; width: 0; background: var(--chrome); }
-/* the times ride ON TOP of the bar: elapsed flush left, total flush
-   right; the transport buttons sit centred BELOW the bar */
-.pill__times {
+/* one line: elapsed left, the song name in the middle (a slow train
+   when it does not fit), total right */
+.pill__line {
   display: flex;
-  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
   font-family: 'Space Mono', monospace;
   font-size: .56rem;
   color: var(--chrome-dim);
   font-variant-numeric: tabular-nums;
 }
+.pill__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: .6rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  color: var(--chrome);
+}
+.pill__title > span { display: inline-block; }
+.pill__title.scrolls { text-align: left; }
+.pill__title.scrolls > span {
+  animation: traintitle 14s linear infinite;
+}
+@keyframes traintitle { to { transform: translateX(-50%); } }
+.pill__bar {
+  display: block;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, .16);
+  overflow: hidden;
+}
+.pill__bar i { display: block; height: 100%; width: 0; background: var(--chrome); }
+/* transport UNDER the bar: previous left, play centre, next right */
 .pill__ctl {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 14px;
-  margin-top: 2px;
+  justify-content: space-between;
 }
 .pill__btn {
   background: none;
@@ -642,7 +644,7 @@ body { top: 0 !important; }
   display: grid;
   place-items: center;
   overflow: visible;  /* the reflection hangs BELOW the box */
-  background: color-mix(in oklab, var(--key) 55%, var(--void));
+  background: color-mix(in oklab, var(--key) 55%, var(--ink));
   transition: box-shadow .28s var(--ease), transform .38s var(--ease-back),
               filter .28s var(--ease);
   position: relative;
@@ -746,7 +748,7 @@ body { top: 0 !important; }
   right: 0;
   height: 44%;
   border-radius: inherit;
-  background: color-mix(in oklab, var(--key) 55%, var(--void));
+  background: color-mix(in oklab, var(--key) 55%, var(--ink));
   transition: filter .28s var(--ease);
 }
 .rcard:not(.is-on) .rcard__icon::after { filter: brightness(.42) saturate(.8); }
@@ -868,7 +870,7 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: color-mix(in oklab, var(--key) 62%, var(--void));
+  background: color-mix(in oklab, var(--key) 62%, var(--ink));
   font-family: 'Anton', sans-serif;
   font-size: calc(var(--imark) * .36);
   color: #fff;

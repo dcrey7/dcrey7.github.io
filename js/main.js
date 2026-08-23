@@ -31,14 +31,14 @@ if (listIds.length) {
   pill.hidden = false;
   const disc = document.getElementById('pillDisc');
   const title = document.getElementById('pillTitle');
-  const artist = document.getElementById('pillArtist');
+  const titleWrap = document.getElementById('pillTitleWrap');
   const prog = document.getElementById('pillProg');
   const timeCur = document.getElementById('pillTimeCur');
   const timeTot = document.getElementById('pillTimeTot');
   const btnPlay = document.getElementById('pillPlay');
   /* the OPENER is always the first song of the first playlist; after it,
      everything is random playlist + random song */
-  let yt = null, curList = 0, lastId = null, lastHop = 0,
+  let yt = null, curList = 0, lastId = null, lastTitle = '', lastHop = 0,
       phase = 0, wantRandomIndex = false,
       userPaused = false, startedOnce = false, errAt = 0, errStreak = 0,
       stuckTicks = 0;
@@ -65,10 +65,20 @@ if (listIds.length) {
   const refresh = () => {
     if (!yt || !yt.getVideoData) return;
     const d = yt.getVideoData() || {};
-    /* never write blanks: mid-switch YouTube reports empty metadata for a
-       beat, and clearing the lines made the block jump */
-    if (d.title) title.textContent = d.title;
-    if (d.author) artist.textContent = d.author;
+    /* never write blanks: mid-switch YouTube reports empty metadata for
+       a beat. A long name becomes a slow TRAIN: doubled text scrolling
+       through the middle slot. Rebuilt only when the song changes. */
+    if (d.title && d.title !== lastTitle) {
+      lastTitle = d.title;
+      title.textContent = d.title;
+      titleWrap.classList.remove('scrolls');
+      requestAnimationFrame(() => {
+        if (title.scrollWidth > titleWrap.clientWidth + 2) {
+          title.textContent = d.title + '\u2003\u2003\u2003' + d.title + '\u2003\u2003\u2003';
+          titleWrap.classList.add('scrolls');
+        }
+      });
+    }
     if (d.video_id && d.video_id !== lastId) {
       disc.src = `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
       if (lastId && phase === 0) {
