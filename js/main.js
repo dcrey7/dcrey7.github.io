@@ -390,8 +390,9 @@ if (currentLang()) loadTranslator();
 langMenu.querySelectorAll('button[data-lang]').forEach(b =>
   b.setAttribute('aria-current', String(b.dataset.lang === currentLang())));
 
-let storedTheme = 'default';
-try { storedTheme = localStorage.getItem('xmb-theme') || 'default'; } catch {}
+/* the lava lamp is the house default; visitors can change it */
+let storedTheme = 'lava';
+try { storedTheme = localStorage.getItem('xmb-theme') || 'lava'; } catch {}
 applyTheme(storedTheme);
 
 /* The clock is pure console theatre, but it is the detail that sells it. */
