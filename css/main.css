@@ -433,14 +433,14 @@ body {
 .themenu button[aria-current="true"] { color: var(--yellow); }
 
 /* the beach is bright: give the chrome a soft shadow so words survive */
-body[data-theme="beach"] .clock,
-body[data-theme="beach"] .who__names b,
-body[data-theme="beach"] .who__names i,
-body[data-theme="beach"] .cat__label,
-body[data-theme="beach"] .item__name,
-body[data-theme="beach"] .pill__meta,
-body[data-theme="beach"] .keyart-rail,
-body[data-theme="beach"] .hero {
+body[data-theme="beach"]:not(.light) .clock,
+body[data-theme="beach"]:not(.light) .who__names b,
+body[data-theme="beach"]:not(.light) .who__names i,
+body[data-theme="beach"]:not(.light) .cat__label,
+body[data-theme="beach"]:not(.light) .item__name,
+body[data-theme="beach"]:not(.light) .pill__meta,
+body[data-theme="beach"]:not(.light) .keyart-rail,
+body[data-theme="beach"]:not(.light) .hero {
   text-shadow: 0 1px 10px rgba(4, 8, 16, .8), 0 0 2px rgba(4, 8, 16, .6);
 }
 
@@ -624,6 +624,17 @@ body { top: 0 !important; }
    stacking into mush. Opaque + dark is how a real switcher does it. */
 .cat:not(.is-on) .cat__icon { filter: brightness(.42) saturate(.8); }
 .cat:not(.is-on):hover .cat__icon { filter: brightness(.68) saturate(.9); }
+/* light mode dims the OTHER way: unselected cards wash out pale, they
+   do not go dark on a light page */
+body.light .cat:not(.is-on) .cat__icon {
+  filter: brightness(1.45) saturate(.45) contrast(.75);
+}
+body.light .cat:not(.is-on):hover .cat__icon {
+  filter: brightness(1.25) saturate(.65) contrast(.85);
+}
+body.light .rcard:not(.is-on) .rcard__icon::after {
+  filter: brightness(1.45) saturate(.45) contrast(.75);
+}
 /* NEVER opacity on hover: a see-through card exposes the deck behind it */
 
 /* Cover-switch cards (Compiz Shift "Cover" / CoverflowAltTab grammar): every
@@ -786,7 +797,10 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
 .column {
   flex: 0 0 auto;
   width: clamp(230px, 22vw, 430px);  /* names fit, video gets the rest */
-  margin-left: calc(var(--crossx) + (var(--catw) - var(--imark)) / 2 - 4px);
+  /* 6px of breathing room on the left, or the enlarged selected icon
+     gets clipped to a hard edge; margin compensates, crosspoint exact */
+  margin-left: calc(var(--crossx) + (var(--catw) - var(--imark)) / 2 - 10px);
+  padding-left: 6px;
   overflow: hidden;
   position: relative;
   padding-top: 6px;
@@ -1173,7 +1187,9 @@ a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px)
    backing: the image IS the card — a shadow around the letterboxed element
    box painted a phantom panel behind portraits. */
 .hero__logo {
-  height: clamp(240px, 56vh, 780px);   /* big: fills the middle, kills the gap */
+  /* big, but NEVER touching the bottom of the screen: the viewport
+     clearance wins over the ideal size */
+  height: min(clamp(240px, 56vh, 780px), calc(100vh - 400px));
   width: auto;
   max-width: 100%;
   object-fit: contain;
