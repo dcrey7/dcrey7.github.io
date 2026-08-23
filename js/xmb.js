@@ -282,7 +282,7 @@ export function initXmb() {
       heroEl.appendChild(board);
     } else if (item.logo || item.icon) {
       const img = document.createElement('img');
-      img.className = 'hero__logo';
+      img.className = item.person ? 'hero__logo hero__logo--person' : 'hero__logo';
       img.src = item.icon ? 'assets/afaicon.png' : 'assets/' + item.logo;
       img.alt = '';
       if (action) {

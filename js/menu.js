@@ -95,6 +95,7 @@ const people = {
   },
   ...PEOPLE.map(p => ({
     id: slug(p.name), mark: p.init, key: '#8B5CF6', logo: p.photo,
+    person: true,
     title: p.name.toUpperCase(),
     sub: p.role,
     meta: p.rel,

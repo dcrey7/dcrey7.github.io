@@ -797,10 +797,11 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
 .column {
   flex: 0 0 auto;
   width: clamp(230px, 22vw, 430px);  /* names fit, video gets the rest */
-  /* 6px of breathing room on the left, or the enlarged selected icon
-     gets clipped to a hard edge; margin compensates, crosspoint exact */
-  margin-left: calc(var(--crossx) + (var(--catw) - var(--imark)) / 2 - 10px);
-  padding-left: 6px;
+  /* the selected icon's SHADOW spans 22px past the box (blur 34 minus
+     spread 12) plus 6px of scale: 28px of clearance, or the shadow is
+     guillotined at the left edge; margin compensates, crosspoint exact */
+  margin-left: calc(var(--crossx) + (var(--catw) - var(--imark)) / 2 - 32px);
+  padding-left: 28px;
   overflow: hidden;
   position: relative;
   padding-top: 6px;
@@ -894,7 +895,13 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   object-fit: cover;
   border-radius: 10px;
 }
-.item.is-on .item__mark.has-img img {
+/* EVERY box in the vertical menu casts the same soft shadow (letter
+   tiles included, not only photos); the selected one casts deeper.
+   The shadow lives on the BOX, so images and slabs are identical. */
+.item .item__mark {
+  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, .45);
+}
+.item.is-on .item__mark {
   box-shadow: 0 14px 34px -12px rgba(0, 0, 0, .6);
 }
 
@@ -1187,14 +1194,22 @@ a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px)
    backing: the image IS the card — a shadow around the letterboxed element
    box painted a phantom panel behind portraits. */
 .hero__logo {
-  /* big, but NEVER touching the bottom of the screen: the viewport
-     clearance wins over the ideal size */
-  height: min(clamp(240px, 56vh, 780px), calc(100vh - 400px));
+  height: min(clamp(240px, 56vh, 780px), calc(100vh - 470px));
   width: auto;
   max-width: 100%;
   object-fit: contain;
   border-radius: 12px;
   margin-top: 10px;
+}
+/* PEOPLE photos: one identical 4:5 portrait card for every person,
+   cover-cropped, anchored to the face. Uniform by definition. */
+.hero__logo--person {
+  height: auto;
+  width: min(100%, clamp(320px, 26vw, 540px));
+  aspect-ratio: 1 / 1;
+  max-height: calc(100vh - 470px);
+  object-fit: cover;
+  object-position: top;
 }
 
 /* the middle photo board: ordered masonry, hover air, click = lightbox */
