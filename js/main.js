@@ -369,29 +369,18 @@ const langMenu = document.getElementById('langMenu');
 let curLang = '';
 try { curLang = localStorage.getItem('xmb-lang') || ''; } catch {}
 
-const xhash = str => {
-  let h = 5381;
-  for (let i = 0; i < str.length; i++) h = (h * 33 ^ str.charCodeAt(i)) >>> 0;
-  return h.toString(36);
-};
-const cacheGet = (lang, str) => {
-  try { return localStorage.getItem('xl:' + lang + ':' + xhash(str)); } catch { return null; }
-};
-const cacheSet = (lang, str, t) => {
-  try { localStorage.setItem('xl:' + lang + ':' + xhash(str), t); } catch {}
-};
-
-async function translateOne(text, lang) {
-  const cached = cacheGet(lang, text);
-  if (cached) return cached;
-  const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl='
-    + encodeURIComponent(lang) + '&dt=t&q=' + encodeURIComponent(text);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('translate failed');
-  const data = await res.json();
-  const out = (data[0] || []).map(part => part[0]).join('');
-  if (out) cacheSet(lang, text, out);
-  return out || text;
+/* BAKED dictionaries: locales/<lang>.json is written at deploy time by
+   tools/bake-i18n.mjs. Switching language = one file load + one
+   synchronous pass over the page. No per-string requests, no async
+   races, no mixed languages, ever. Unknown strings stay English. */
+const dicts = {};
+async function loadDict(lang) {
+  if (dicts[lang]) return dicts[lang];
+  try {
+    const res = await fetch('locales/' + lang + '.json');
+    dicts[lang] = res.ok ? await res.json() : {};
+  } catch { dicts[lang] = {}; }
+  return dicts[lang];
 }
 
 /* the song title, times and clock stay as they are */
@@ -434,20 +423,15 @@ async function applyLang() {
     nodes.forEach(n => swap(n, n.__en));
     return;
   }
-  const queue = nodes.slice();
-  const worker = async () => {
-    while (queue.length) {
-      if (run !== xlRun) return;
-      const n = queue.shift();
-      try {
-        const t = await translateOne(n.__en.trim(), curLang);
-        const pre = n.__en.match(/^\s*/)[0];
-        const post = n.__en.match(/\s*$/)[0];
-        if (run === xlRun) swap(n, pre + t + post);
-      } catch { /* stays English on failure */ }
-    }
-  };
-  await Promise.all([worker(), worker(), worker(), worker()]);
+  const dict = await loadDict(curLang);
+  if (run !== xlRun) return;
+  nodes.forEach(n => {
+    const t = dict[n.__en.trim()];
+    if (!t) { swap(n, n.__en); return; }
+    const pre = n.__en.match(/^\s*/)[0];
+    const post = n.__en.match(/\s*$/)[0];
+    swap(n, pre + t + post);
+  });
 }
 
 langMenu.addEventListener('click', e => {
