@@ -28,6 +28,11 @@ const UI = [
 const strings = new Set(UI);
 /* names, brands, domains and emails are NEVER translated */
 const SKIP = new Set([
+  'PHILIPPE FRAISSE', 'CLEMENT BACCAR', 'EKATERINA DMITRIEVA',
+  'OLIVIER TAUGOURDEAU', 'RAPHAËL VIENNE', 'SARTHAK KALA',
+  'GANDHARV AGGARWAL', 'RISHITA RAY', 'JUBIN THOMAS', 'SRIKAR MANEPALLI',
+  'SUGAM YADAV', 'DARSHAN KADAM', 'SHISHIR RAO', 'ARPIT KUMAR',
+  'DEVESH SINGH', 'American Express',
   'ABHISHEK THOMAS', 'VISTIQ.AI', 'AXA FRANCE', 'EXL SERVICES', 'MATHCO',
   'AMAZON', 'EMLYON', 'MCGILL', 'SVNIT SURAT', 'KICKY AI', 'MEMORY BRIDGEAI',
   'RIZZUME', 'NOTME', 'MEDICAL RAG', 'PIKA PAL AI', 'AWS ML SPECIALTY',
@@ -66,10 +71,11 @@ async function translate(text, lang) {
       if (t) return t;
       throw new Error('empty');
     } catch (e) {
+      /* a rate limit means the endpoint is closed to us right now:
+         abort the whole bake at once, deploys must not stall */
+      if (String(e).includes('rate')) { console.log('rate limited, bake aborted'); process.exit(2); }
       if (attempt === 3) throw e;
-      /* rate limits need PATIENCE, not retries */
-      const wait = String(e).includes('rate') ? 30000 : 2000 * (attempt + 1);
-      await new Promise(r => setTimeout(r, wait));
+      await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
     }
   }
 }

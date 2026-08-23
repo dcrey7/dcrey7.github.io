@@ -173,8 +173,13 @@ document.getElementById('f').onload = () => setTimeout(async () => {
       d.getElementById('column').classList.contains('column--athead'), 'true');
 
   /* --- the wheel: where you scroll decides what moves --- */
-  const spin = (el, dy) => el.dispatchEvent(new w.WheelEvent('wheel',
-    { deltaY: dy, bubbles: true }));
+  const spin = (el, dy) => {
+    const r = el.getBoundingClientRect();
+    el.dispatchEvent(new w.WheelEvent('wheel', {
+      deltaY: dy, bubbles: true,
+      clientX: r.left + 10, clientY: r.top + r.height / 2
+    }));
+  };
   /* the engine throttles the wheel to one step per 220ms */
   const cool = () => new Promise(r => setTimeout(r, 260));
   const catBefore = cat();

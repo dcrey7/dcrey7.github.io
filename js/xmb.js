@@ -474,8 +474,13 @@ export function initXmb() {
     if (e.target.closest('#shelf') || e.target.closest('.keyart-rail')) return;
     const now = performance.now();
     if (now - wheelAt < 220) return;
-    const overDeck = !!e.target.closest('.barwrap');
-    const overMenu = !!e.target.closest('.column');
+    /* FULL WIDTH bands decide (user rule): anywhere at the deck's
+       height scrolls categories, anywhere at the menu's height scrolls
+       items, whatever the cursor happens to be over */
+    const barR = barEl.parentElement.getBoundingClientRect();
+    const colR = colEl.getBoundingClientRect();
+    const overDeck = e.clientY >= barR.top && e.clientY <= barR.bottom;
+    const overMenu = !overDeck && e.clientY >= colR.top && e.clientY <= colR.bottom;
     const horiz = Math.abs(e.deltaX) > Math.abs(e.deltaY);
     const d = horiz ? e.deltaX : e.deltaY;
     if (Math.abs(d) < 8) return;
