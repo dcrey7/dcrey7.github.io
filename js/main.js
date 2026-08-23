@@ -360,47 +360,118 @@ let storedMode = 'dark';
 try { storedMode = localStorage.getItem('xmb-mode') || 'dark'; } catch {}
 if (storedMode === 'light') applyMode(true);
 
-/* ---------- translate: the google element, kept invisible ----------
-   Picking a language sets the googtrans cookie and reloads; the element
-   script reads it and translates the whole page in place. */
+/* ---------- translate ----------
+   No widget, no cookie, NO RELOAD: our own translator. Every text node
+   on screen keeps its English snapshot, gets translated through the
+   public endpoint, cached forever in localStorage, and FADES to the
+   new language in place. New renders are translated as they appear. */
 const langMenu = document.getElementById('langMenu');
-function currentLang() {
-  const m = document.cookie.match(/googtrans=\/en\/([^;]+)/);
-  return m ? decodeURIComponent(m[1]) : '';
+let curLang = '';
+try { curLang = localStorage.getItem('xmb-lang') || ''; } catch {}
+
+const xhash = str => {
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) h = (h * 33 ^ str.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+};
+const cacheGet = (lang, str) => {
+  try { return localStorage.getItem('xl:' + lang + ':' + xhash(str)); } catch { return null; }
+};
+const cacheSet = (lang, str, t) => {
+  try { localStorage.setItem('xl:' + lang + ':' + xhash(str), t); } catch {}
+};
+
+async function translateOne(text, lang) {
+  const cached = cacheGet(lang, text);
+  if (cached) return cached;
+  const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl='
+    + encodeURIComponent(lang) + '&dt=t&q=' + encodeURIComponent(text);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('translate failed');
+  const data = await res.json();
+  const out = (data[0] || []).map(part => part[0]).join('');
+  if (out) cacheSet(lang, text, out);
+  return out || text;
 }
-function loadTranslator() {
-  if (document.getElementById('gt-script')) return;
-  window.googleTranslateElementInit = () => {
-    new window.google.translate.TranslateElement(
-      { pageLanguage: 'en', autoDisplay: false }, 'gt-host');
+
+/* the song title, times and clock stay as they are */
+const XL_SKIP = '.pill, #clock, script, style, svg, input, textarea';
+function xlNodes() {
+  const out = [];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode(n) {
+      const t = n.nodeValue;
+      if (!t || t.trim().length < 2) return NodeFilter.FILTER_REJECT;
+      if (!/[a-zA-Z]{2}/.test(t)) return NodeFilter.FILTER_REJECT;
+      const el = n.parentElement;
+      if (!el || el.closest(XL_SKIP)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  let n;
+  while ((n = walker.nextNode())) out.push(n);
+  return out;
+}
+
+let xlRun = 0;
+async function applyLang() {
+  const run = ++xlRun;
+  const nodes = xlNodes();
+  nodes.forEach(n => { if (n.__en === undefined) n.__en = n.nodeValue; });
+  const swap = (n, text) => {
+    if (n.nodeValue === text) return;
+    const el = n.parentElement;
+    if (!el) { n.nodeValue = text; return; }
+    el.style.transition = 'opacity .22s ease';
+    el.style.opacity = '0';
+    setTimeout(() => {
+      if (run !== xlRun) return;
+      n.nodeValue = text;
+      el.style.opacity = '';
+    }, 220);
   };
-  const s = document.createElement('script');
-  s.id = 'gt-script';
-  s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-  s.async = true;
-  document.head.appendChild(s);
+  if (!curLang) {
+    nodes.forEach(n => swap(n, n.__en));
+    return;
+  }
+  const queue = nodes.slice();
+  const worker = async () => {
+    while (queue.length) {
+      if (run !== xlRun) return;
+      const n = queue.shift();
+      try {
+        const t = await translateOne(n.__en.trim(), curLang);
+        const pre = n.__en.match(/^\s*/)[0];
+        const post = n.__en.match(/\s*$/)[0];
+        if (run === xlRun) swap(n, pre + t + post);
+      } catch { /* stays English on failure */ }
+    }
+  };
+  await Promise.all([worker(), worker(), worker(), worker()]);
 }
+
 langMenu.addEventListener('click', e => {
   const b = e.target.closest('button[data-lang]');
   if (!b) return;
-  const kill = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-  document.cookie = kill;
-  document.cookie = kill + '; domain=' + location.hostname;
-  if (b.dataset.lang) document.cookie = 'googtrans=/en/' + b.dataset.lang + '; path=/';
-  /* reload INTO the home screen, on the same card: never back through
-     PRESS START, and the page fades out first so the switch feels soft */
-  const ci = [...document.querySelectorAll('#bar .cat')]
-    .findIndex(c => c.classList.contains('is-on'));
-  const ii = [...document.querySelectorAll('.item')]
-    .findIndex(el => el.classList.contains('is-on'));
-  const dest = location.pathname + '?skip&cat=' + CATEGORIES[Math.max(0, ci)].id
-    + '&i=' + Math.max(0, ii);
-  document.body.classList.add('leaving');
-  setTimeout(() => location.assign(dest), 280);
+  curLang = b.dataset.lang;
+  try { localStorage.setItem('xmb-lang', curLang); } catch {}
+  langMenu.querySelectorAll('button[data-lang]').forEach(x =>
+    x.setAttribute('aria-current', String(x.dataset.lang === curLang)));
+  closeDrops();
+  applyLang();
 });
-if (currentLang()) loadTranslator();
 langMenu.querySelectorAll('button[data-lang]').forEach(b =>
-  b.setAttribute('aria-current', String(b.dataset.lang === currentLang())));
+  b.setAttribute('aria-current', String(b.dataset.lang === curLang)));
+
+/* whatever a render just produced gets translated too (text swaps are
+   characterData changes, so this never observes itself) */
+const xlObserver = new MutationObserver(() => {
+  if (!curLang) return;
+  clearTimeout(xlObserver.__t);
+  xlObserver.__t = setTimeout(applyLang, 350);
+});
+xlObserver.observe(document.body, { childList: true, subtree: true });
+if (curLang) setTimeout(applyLang, 900);
 
 /* the lava lamp is the house default; visitors can change it */
 let storedTheme = 'lava';

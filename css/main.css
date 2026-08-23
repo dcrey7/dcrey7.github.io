@@ -521,12 +521,6 @@ body.light .themenu {
 body.light .themenu button:hover { background: rgba(10, 20, 40, .07); }
 body.light .keyart { color: #10131A; }
 
-/* ---------- translate (google element, kept invisible) ---------- */
-
-#gt-host { display: none; }
-.skiptranslate, .goog-te-banner-frame { display: none !important; }
-body { top: 0 !important; }
-
 /* a shader theme runs full screen behind everything, untouchable */
 .themeframe {
   position: fixed;
