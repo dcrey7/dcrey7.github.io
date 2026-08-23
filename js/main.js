@@ -374,13 +374,26 @@ try { curLang = localStorage.getItem('xmb-lang') || ''; } catch {}
    synchronous pass over the page. No per-string requests, no async
    races, no mixed languages, ever. Unknown strings stay English. */
 const dicts = {};
+const reverses = {};
 async function loadDict(lang) {
   if (dicts[lang]) return dicts[lang];
   try {
     const res = await fetch('locales/' + lang + '.json');
     dicts[lang] = res.ok ? await res.json() : {};
   } catch { dicts[lang] = {}; }
+  reverses[lang] = {};
+  for (const [en, tr] of Object.entries(dicts[lang])) reverses[lang][tr] = en;
   return dicts[lang];
+}
+/* a node's English snapshot must BE English: if the text matches a
+   known translation, map it back first (heals any poisoned state) */
+function toEnglish(text) {
+  const t = text.trim();
+  for (const lang in reverses) {
+    const en = reverses[lang][t];
+    if (en) return en;
+  }
+  return null;
 }
 
 /* the song title, times and clock stay as they are */
@@ -406,18 +419,24 @@ let xlRun = 0;
 async function applyLang() {
   const run = ++xlRun;
   const nodes = xlNodes();
-  nodes.forEach(n => { if (n.__en === undefined) n.__en = n.nodeValue; });
+  nodes.forEach(n => {
+    if (n.__en !== undefined) return;
+    const healed = toEnglish(n.nodeValue);
+    n.__en = healed !== null ? healed : n.nodeValue;
+  });
+  /* the text changes IMMEDIATELY (correctness first), the fade-in is
+     decoration: no delayed writes, nothing to cancel, no races */
   const swap = (n, text) => {
     if (n.nodeValue === text) return;
+    n.nodeValue = text;
     const el = n.parentElement;
-    if (!el) { n.nodeValue = text; return; }
-    el.style.transition = 'opacity .22s ease';
+    if (!el) return;
+    el.style.transition = 'none';
     el.style.opacity = '0';
-    setTimeout(() => {
-      if (run !== xlRun) return;
-      n.nodeValue = text;
+    requestAnimationFrame(() => {
+      el.style.transition = 'opacity .3s ease';
       el.style.opacity = '';
-    }, 220);
+    });
   };
   if (!curLang) {
     nodes.forEach(n => swap(n, n.__en));
@@ -449,8 +468,15 @@ langMenu.querySelectorAll('button[data-lang]').forEach(b =>
 
 /* whatever a render just produced gets translated too (text swaps are
    characterData changes, so this never observes itself) */
-const xlObserver = new MutationObserver(() => {
+const xlObserver = new MutationObserver(muts => {
   if (!curLang) return;
+  /* our own ticking widgets (player time, clock) churn the DOM every
+     second; they are excluded from translation anyway, so ignore them */
+  const relevant = muts.some(m => {
+    const el = m.target instanceof Element ? m.target : m.target.parentElement;
+    return el && !el.closest('.pill, #clock');
+  });
+  if (!relevant) return;
   clearTimeout(xlObserver.__t);
   xlObserver.__t = setTimeout(applyLang, 350);
 });

@@ -12,7 +12,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = join(root, 'locales');
 mkdirSync(out, { recursive: true });
 
-const LANGS = ['fr', 'de', 'es', 'it', 'pt', 'hi', 'ml', 'ja', 'ko', 'zh-CN', 'ar'];
+const LANGS = ['fr', 'de', 'es', 'it', 'pt'];
 
 /* interface strings that live in html/js, not in the data */
 const UI = [
@@ -26,10 +26,20 @@ const UI = [
 ];
 
 const strings = new Set(UI);
+/* names, brands, domains and emails are NEVER translated */
+const SKIP = new Set([
+  'ABHISHEK THOMAS', 'VISTIQ.AI', 'AXA FRANCE', 'EXL SERVICES', 'MATHCO',
+  'AMAZON', 'EMLYON', 'MCGILL', 'SVNIT SURAT', 'KICKY AI', 'MEMORY BRIDGEAI',
+  'RIZZUME', 'NOTME', 'MEDICAL RAG', 'PIKA PAL AI', 'AWS ML SPECIALTY',
+  'AWS CLOUD PRACTITIONER', 'DGM · IISc', 'IISc Bangalore',
+  'Amazon Web Services', 'GITHUB', 'LINKEDIN', 'HUGGING FACE'
+]);
 const take = s => {
   if (typeof s !== 'string') return;
   const t = s.trim();
   if (t.length < 2 || !/[a-zA-Z]{2}/.test(t)) return;
+  if (SKIP.has(t)) return;
+  if (/[.]\w{2,3}($|\/)|@/.test(t)) return;   /* domains and emails */
   strings.add(t);
 };
 for (const cat of CATEGORIES) {
