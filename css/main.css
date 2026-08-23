@@ -335,20 +335,23 @@ body {
   overflow: hidden;
 }
 .pill__bar i { display: block; height: 100%; width: 0; background: var(--chrome); }
-.pill__time {
+/* the times ride ON TOP of the bar: elapsed flush left, total flush
+   right; the transport buttons sit centred BELOW the bar */
+.pill__times {
+  display: flex;
+  justify-content: space-between;
   font-family: 'Space Mono', monospace;
   font-size: .56rem;
   color: var(--chrome-dim);
   font-variant-numeric: tabular-nums;
 }
-/* time and transport icons on ONE level, controls flush right */
-.pill__row {
+.pill__ctl {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 2px;
 }
-.pill__ctl { display: inline-flex; align-items: center; gap: 10px; }
 .pill__btn {
   background: none;
   border: 0;
@@ -622,19 +625,10 @@ body { top: 0 !important; }
 /* Side cards are dimmed by BRIGHTNESS, never by opacity: a transparent card
    lets the one behind show through, which dissolves the tucked-under
    stacking into mush. Opaque + dark is how a real switcher does it. */
+/* ONE dimming treatment for BOTH modes (user rule): the deep saturated
+   dark-mode colours are the good ones, light mode uses them too. */
 .cat:not(.is-on) .cat__icon { filter: brightness(.42) saturate(.8); }
 .cat:not(.is-on):hover .cat__icon { filter: brightness(.68) saturate(.9); }
-/* light mode dims the OTHER way: unselected cards wash out pale, they
-   do not go dark on a light page */
-body.light .cat:not(.is-on) .cat__icon {
-  filter: brightness(1.45) saturate(.45) contrast(.75);
-}
-body.light .cat:not(.is-on):hover .cat__icon {
-  filter: brightness(1.25) saturate(.65) contrast(.85);
-}
-body.light .rcard:not(.is-on) .rcard__icon::after {
-  filter: brightness(1.45) saturate(.45) contrast(.75);
-}
 /* NEVER opacity on hover: a see-through card exposes the deck behind it */
 
 /* Cover-switch cards (Compiz Shift "Cover" / CoverflowAltTab grammar): every

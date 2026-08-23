@@ -33,7 +33,8 @@ if (listIds.length) {
   const title = document.getElementById('pillTitle');
   const artist = document.getElementById('pillArtist');
   const prog = document.getElementById('pillProg');
-  const timeEl = document.getElementById('pillTime');
+  const timeCur = document.getElementById('pillTimeCur');
+  const timeTot = document.getElementById('pillTimeTot');
   const btnPlay = document.getElementById('pillPlay');
   /* the OPENER is always the first song of the first playlist; after it,
      everything is random playlist + random song */
@@ -173,7 +174,8 @@ if (listIds.length) {
     const d = yt.getDuration() || 0, p = yt.getCurrentTime() || 0;
     if (d) {
       prog.style.width = (p / d * 100) + '%';
-      timeEl.textContent = `${mmss(p)} / ${mmss(d)}`;
+      timeCur.textContent = mmss(p);
+      timeTot.textContent = mmss(d);
     }
     refresh();
   }, 800);
