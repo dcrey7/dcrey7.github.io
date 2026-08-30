@@ -2,8 +2,11 @@
 
 import { initXmb } from './xmb.js';
 import { initBoot } from './boot.js';
-import { YT_PLAYLISTS } from './data.js';
+import { YT_PLAYLISTS, THEME } from './data.js';
+import * as theme from './theme.js';
 import { CATEGORIES } from './menu.js';
+import { bus } from './config.js';
+import { sfx } from './sfx.js';
 
 const xmb = initXmb();
 initBoot();
@@ -62,23 +65,31 @@ if (listIds.length) {
   const ICON_PAUSE =
     '<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" fill="currentColor"/></svg>';
 
+  /* a long name becomes a slow TRAIN: doubled text scrolling through the
+     middle slot. Rebuilt only when the name changes. */
+  const showTitle = t => {
+    lastTitle = t;
+    title.textContent = t;
+    titleWrap.classList.remove('scrolls');
+    requestAnimationFrame(() => {
+      if (title.scrollWidth > titleWrap.clientWidth + 2) {
+        title.textContent = t + '\u2003\u2003\u2003' + t + '\u2003\u2003\u2003';
+        titleWrap.classList.add('scrolls');
+      }
+    });
+  };
+  const setOn = playing => {
+    disc.classList.toggle('spin', playing);
+    btnPlay.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+    btnPlay.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+  };
+
   const refresh = () => {
     if (!yt || !yt.getVideoData) return;
     const d = yt.getVideoData() || {};
     /* never write blanks: mid-switch YouTube reports empty metadata for
-       a beat. A long name becomes a slow TRAIN: doubled text scrolling
-       through the middle slot. Rebuilt only when the song changes. */
-    if (d.title && d.title !== lastTitle) {
-      lastTitle = d.title;
-      title.textContent = d.title;
-      titleWrap.classList.remove('scrolls');
-      requestAnimationFrame(() => {
-        if (title.scrollWidth > titleWrap.clientWidth + 2) {
-          title.textContent = d.title + '\u2003\u2003\u2003' + d.title + '\u2003\u2003\u2003';
-          titleWrap.classList.add('scrolls');
-        }
-      });
-    }
+       a beat */
+    if (d.title && d.title !== lastTitle) showTitle(d.title);
     if (d.video_id && d.video_id !== lastId) {
       disc.src = `https://i.ytimg.com/vi/${d.video_id}/hqdefault.jpg`;
       if (lastId && phase === 0) {
@@ -119,9 +130,9 @@ if (listIds.length) {
         onReady: refresh,
         onStateChange: e => {
           const playing = e.data === YT.PlayerState.PLAYING;
-          disc.classList.toggle('spin', playing);
-          btnPlay.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
-          btnPlay.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+          setOn(playing);
+          /* one music at a time: the theme waits while the radio plays */
+          theme.hold(playing || e.data === YT.PlayerState.BUFFERING);
           if (playing) { startedOnce = true; userPaused = false; }
           /* after a random hop lands: shuffle the list and jump to a
              random SONG inside it */
@@ -191,6 +202,16 @@ if (listIds.length) {
   }, 800);
 }
 
+/* ---------- the theme song ----------
+   The site's background music, separate from the radio in the pill. It
+   starts as early as the browser allows (at load, or on the first key or
+   click, which on the gate is PRESS ANY KEY), loops for ever, dips a
+   little when the home screen opens, waits while the radio plays, and
+   mutes with the speaker button. */
+theme.initTheme(THEME);
+window.__theme = theme;   /* a debug handle, like __yt */
+bus.addEventListener('start', () => theme.duck(true));
+
 /* ---------- themes ----------
    The settings gear, top left, swaps the backdrop. Shader themes are the
    self-contained WebGL pages in themes/, embedded full screen behind the
@@ -211,9 +232,10 @@ function applyTheme(name) {
     f.className = 'themeframe';
     /* space is the one theme with two FACES: stars at night, a flock of
        birds by day */
-    f.src = name === 'space' && document.body.classList.contains('light')
+    /* ?embed: the page hides its own panels from the first paint */
+    f.src = (name === 'space' && document.body.classList.contains('light')
       ? 'themes/birds.html'
-      : THEME_SRC[name];
+      : THEME_SRC[name]) + '?embed';
     f.setAttribute('aria-hidden', 'true');
     f.tabIndex = -1;
     f.addEventListener('load', () => {
@@ -318,6 +340,25 @@ searchInput.addEventListener('keydown', e => {
    Royal blue flips its palette; the lava lamp has its own mode button
    (we press it), the beach has a Time knob (night for dark, day for
    light). The choice persists. */
+/* ---------- sounds: a tick per move, a blip per select, one mute button ---------- */
+bus.addEventListener('cat', () => sfx.cat());
+bus.addEventListener('focus', () => sfx.item());
+bus.addEventListener('act', () => sfx.select());
+const sfxBtn = document.getElementById('sfxBtn');
+function applySound(v) {
+  sfx.set(v);
+  theme.mute(!v);
+  document.getElementById('sfxOn').style.display = v ? 'block' : 'none';
+  document.getElementById('sfxOff').style.display = v ? 'none' : 'block';
+  sfxBtn.setAttribute('aria-pressed', String(v));
+  sfxBtn.setAttribute('aria-label', v ? 'Mute sounds' : 'Unmute sounds');
+  try { localStorage.setItem('xmb-sound', v ? 'on' : 'off'); } catch {}
+}
+sfxBtn.addEventListener('click', () => applySound(!sfx.on));
+let storedSound = 'on';
+try { storedSound = localStorage.getItem('xmb-sound') || 'on'; } catch {}
+applySound(storedSound !== 'off');
+
 const modeBtn = document.getElementById('modeBtn');
 const sunI = document.getElementById('modeSun');
 const moonI = document.getElementById('modeMoon');
@@ -327,7 +368,7 @@ function syncFrameMode(light) {
   /* space swaps its whole face: stars for dark, the murmuration for light */
   const src = f.getAttribute('src') || '';
   if (src.includes('space') || src.includes('birds')) {
-    const want = light ? 'themes/birds.html' : 'themes/space.html';
+    const want = (light ? 'themes/birds.html' : 'themes/space.html') + '?embed';
     if (src !== want) f.src = want;
     return;
   }

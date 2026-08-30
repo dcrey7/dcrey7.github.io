@@ -30,12 +30,12 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   say('work has 5 items', nItems(), 5);
   say('first job selected', item(), 'VISTIQ.AI');
   say('hero follows item', hero(), 'VISTIQ.AI');
-  say('key colour follows', key(), '#2F6BFF');
+  say('key colour follows', key(), 'var(--sys-blue)');
 
   press('ArrowDown'); await wait();
   say('down moves item', item(), 'AXA FRANCE');
   say('hero follows down', hero(), 'AXA FRANCE');
-  say('colour follows down', key(), '#1B34C8');
+  say('colour follows down', key(), 'var(--sys-blue)');
   say('category unchanged', cat(), 'WORK');
 
   press('ArrowDown'); press('ArrowDown'); await wait();

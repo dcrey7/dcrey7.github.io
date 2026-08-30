@@ -1,0 +1,28 @@
+<!DOCTYPE html><meta charset="utf-8"><title>theme frame ui test</title>
+<style>body{font:13px/1.5 monospace;background:#111;color:#ddd;padding:16px}
+iframe{position:absolute;left:-9999px;width:1440px;height:900px;border:0}</style>
+<!-- the site on its landing page, lava theme forced -->
+<iframe id="f" src="/?theme=lava"></iframe>
+<pre id="out">running…</pre>
+<script>
+const out = document.getElementById('out');
+document.getElementById('f').onload = () => setTimeout(() => {
+  const w = document.getElementById('f').contentWindow, d = w.document;
+  const lines = [];
+  const f = d.querySelector('.themeframe');
+  lines.push('theme: ' + d.body.dataset.theme + '  booting: ' + d.body.classList.contains('booting'));
+  if (!f) { lines.push('no theme frame'); out.textContent = lines.join('\n'); return; }
+  lines.push('frame src: ' + f.getAttribute('src'));
+  const check = () => {
+    try {
+      const fd = f.contentDocument;
+      const ui = fd && fd.getElementById('ui');
+      lines.push('ui display: ' + (ui ? w.getComputedStyle(ui).display : 'no #ui yet')
+        + '  injected styles: ' + (fd ? fd.head.querySelectorAll('style').length : 0)
+        + '  ready: ' + (fd && fd.readyState));
+    } catch (e) { lines.push('error: ' + e.message); }
+  };
+  check();
+  setTimeout(() => { check(); out.textContent = lines.join('\n'); }, 3000);
+}, 1500);
+</script>

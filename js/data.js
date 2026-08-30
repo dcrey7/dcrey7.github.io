@@ -302,3 +302,12 @@ export const SYSTEM_KEYS = {
   trophies: { key: '#F59E0B', mark: '★'  },
   contact:  { key: '#EC4899', mark: '✉'  }
 };
+
+/* The theme song: plays from the first key or click, loops between
+   loopStart and the end of the file (the file's last bar is a crossfade
+   back into the bar before loopStart, rendered offline; the first 120 ms
+   of the song are cut). */
+export const THEME = {
+  url: 'assets/theme.mp3', title: 'Silent Echoes', by: 'Flume',
+  loopStart: 15.347, loopEnd: 58.504
+};

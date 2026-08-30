@@ -32,14 +32,38 @@
 
   --void:       #08090B;
   --chrome:     #EDEFF3;
-  --chrome-dim: #8A9099;
+  --chrome-dim: #EDEFF3;   /* no gray text: one ink per mode (user rule) */
   --yellow:     #FFC800;
 
   /* card mixing anchor: CONSTANT, so cards look the same in light
      and dark mode (user rule) — never tied to the page background */
   --ink: #08090B;
   --glass:      rgba(255, 255, 255, .06);
-  --glass-line: rgba(255, 255, 255, .12);
+  --glass-line: #EDEFF3;   /* no gray lines: lines are drawn in the ink */
+  /* Cards are plain opaque SURFACES, one neutral for every card (user
+     rule: no colours). Dark mode follows the Material dark theme: a card
+     is the page colour with a white overlay, 9% at rest, 14% selected, so
+     height reads as a lighter step, not a shadow. Icons are off-white, not
+     pure white (glare). */
+  /* ICON PALETTE: Apple's system colours (HIG), the dark variants here,
+     the light variants under body.light. Made for tinted icons on neutral
+     surfaces, and each hue is tuned per mode. */
+  --sys-red:    #FF453A;
+  --sys-orange: #FF9F0A;
+  --sys-yellow: #FFD60A;
+  --sys-green:  #30D158;
+  --sys-blue:   #0A84FF;
+  --sys-purple: #BF5AF2;
+  --sys-pink:   #FF375F;
+  --surface:        #1E1F22;   /* tiles                       */
+  --surface-on:     #2E3035;   /* the selected card, highest  */
+  --surface-1:      #1E1F22;   /* its two neighbours          */
+  --surface-2:      #131416;   /* the tucked slivers, lowest  */
+  /* a 1px dark seam around every card, so stacked cards separate */
+  --card-shadow:    0 0 0 1px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .07),
+                    0 10px 24px -14px rgba(0, 0, 0, .7);
+  --card-shadow-on: 0 0 0 1px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .09),
+                    0 18px 40px -18px rgba(0, 0, 0, .8);
 
   /* One fluid base size; every other dimension of the cross derives from it,
      so the whole thing scales continuously with the viewport — no per-
@@ -47,9 +71,8 @@
   --cat:  clamp(46px, 5.6vw, 124px);    /* base size unit — keeps scaling
                                            on big screens (175% reference) */
   --catf: calc(var(--cat) * 1.28);      /* category card height        */
-  --catw: calc(var(--catf) * 1.6);      /* category card width — landscape,
-                                           like the window thumbnails of a
-                                           cover-switch alt-tab         */
+  --catw: var(--catf);                  /* category card width: SQUARE, the
+                                           vertical menu box grown up   */
   --imark: calc(var(--cat) * .74);      /* item card height            */
   --imarkw: calc(var(--imark) * 1.6);   /* item card width — same landscape
                                            ratio as the category cards  */
@@ -61,7 +84,7 @@
      The deck is drawn purely with transforms over a constant layout pitch
      (one card width), so alignment can never drift: animating layout
      margins was what broke it. */
-  --crossx: calc(var(--catw) * .36);
+  --crossx: calc(var(--catw) * 1.18);   /* one FULL previous card, plus air */
 
   --ease:      cubic-bezier(.22, .61, .36, 1);
   --ease-back: cubic-bezier(.34, 1.28, .64, 1);
@@ -185,7 +208,7 @@ body {
   letter-spacing: 0;
   font-size: 1.14rem;   /* the written stuff takes real space */
   line-height: 1.6;
-  color: #C9CDD4;
+  color: var(--chrome);
   margin-bottom: 14px;
   /* middle aligned as a block, justified as text (user rule) */
   text-align: justify;
@@ -292,7 +315,7 @@ body {
   height: clamp(52px, 4vw, 84px);
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid rgba(255, 255, 255, .14);   /* the vinyl rim */
+  border: 2px solid var(--chrome);   /* the vinyl rim */
   box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .6);
 }
 /* the animation NEVER restarts: it is always applied and only its
@@ -317,7 +340,7 @@ body {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Archivo', system-ui, sans-serif;
   font-size: .56rem;
   color: var(--chrome-dim);
   font-variant-numeric: tabular-nums;
@@ -344,7 +367,7 @@ body {
   display: block;
   height: 3px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, .16);
+  background: linear-gradient(var(--chrome), var(--chrome)) center / 100% 1px no-repeat;
   overflow: hidden;
 }
 .pill__bar i { display: block; height: 100%; width: 0; background: var(--chrome); }
@@ -374,7 +397,7 @@ body {
   color: var(--chrome);
   width: 1.6em;
 }
-.pill__btn--main:hover { color: var(--yellow); }
+.pill__btn--main:hover { color: var(--chrome); }
 
 /* The embed that actually plays the audio: parked OFF-SCREEN at real size,
    never display:none or 1px — browsers throttle invisible media iframes,
@@ -394,7 +417,7 @@ body {
   transition: color .2s var(--ease);
 }
 .sysbtn:hover { color: var(--chrome); }
-.sysbtn[aria-pressed="true"] { color: var(--yellow); }
+.sysbtn[aria-pressed="true"] { color: var(--void); background: var(--chrome); border-radius: 8px; }
 /* ---------- settings: the theme menu, top left ---------- */
 
 .settings { position: relative; z-index: 45; }
@@ -404,7 +427,7 @@ body {
   transition: color .2s var(--ease);
 }
 .gear:hover { color: var(--chrome); }
-.gear[aria-expanded="true"] { color: var(--yellow); }
+.gear[aria-expanded="true"] { color: var(--void); background: var(--chrome); border-radius: 8px; }
 .themenu[hidden] { display: none; }
 .themenu {
   position: absolute;
@@ -416,7 +439,7 @@ body {
   padding: 10px;
   border-radius: 12px;
   background: rgba(6, 10, 20, .88);
-  border: 1px solid rgba(255, 255, 255, .08);
+  border: 1px solid var(--chrome);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 24px 60px -18px rgba(0, 0, 0, .8);
@@ -428,14 +451,15 @@ body {
 .themenu button {
   background: none; border: 0; cursor: pointer;
   text-align: left;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Archivo', system-ui, sans-serif;
   font-size: .72rem; letter-spacing: .12em;
   color: var(--chrome);
   padding: 9px 10px; border-radius: 8px;
+  white-space: nowrap;
   transition: background .15s var(--ease), color .15s var(--ease);
 }
-.themenu button:hover { background: rgba(255, 255, 255, .08); }
-.themenu button[aria-current="true"] { color: var(--yellow); }
+.themenu button:hover { background: var(--chrome); color: var(--void); }
+.themenu button[aria-current="true"] { text-decoration: underline; text-underline-offset: 4px; font-weight: 700; }
 
 /* the beach is bright: give the chrome a soft shadow so words survive */
 body[data-theme="beach"]:not(.light) .clock,
@@ -455,9 +479,9 @@ body[data-theme="beach"]:not(.light) .hero {
 .themenu--search input {
   background: none;
   border: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, .18);
+  border-bottom: 1px solid var(--chrome);
   outline: none;
-  font-family: 'Space Mono', monospace;
+  font-family: 'Archivo', system-ui, sans-serif;
   font-size: .78rem;
   letter-spacing: .12em;
   color: var(--chrome);
@@ -492,9 +516,28 @@ body.leaving { opacity: 0; transition: opacity .26s var(--ease); }
 body.light {
   --void:       #E9EDF4;
   --chrome:     #15181D;
-  --chrome-dim: #5A6270;
+  --chrome-dim: #15181D;
   --glass:      rgba(10, 20, 40, .05);
-  --glass-line: rgba(10, 20, 40, .14);
+  --glass-line: #15181D;
+  /* light mode: white cards that sit on the page with a soft shadow;
+     icons are near black at 87% (Material high emphasis), not pure black */
+  --sys-red:    #FF3B30;
+  --sys-orange: #FF9500;
+  --sys-yellow: #FFCC00;
+  --sys-green:  #34C759;
+  --sys-blue:   #007AFF;
+  --sys-purple: #AF52DE;
+  --sys-pink:   #FF2D55;
+  --surface:        #FFFFFF;
+  --surface-on:     #FFFFFF;
+  --surface-1:      #F2F4F7;
+  --surface-2:      #E6E9EE;
+  /* a soft ring plus a short shadow, so a card's edge shows on the card
+     behind it */
+  --card-shadow:    0 0 0 1px rgba(20, 30, 50, .07), 0 3px 8px -2px rgba(20, 30, 50, .16),
+                    0 10px 24px -14px rgba(20, 30, 50, .35);
+  --card-shadow-on: 0 0 0 1px rgba(20, 30, 50, .07), 0 6px 14px -4px rgba(20, 30, 50, .18),
+                    0 18px 40px -18px rgba(20, 30, 50, .45);
 }
 /* the light field CROSSFADES over the dark one: an overlay whose opacity
    animates, because background gradients cannot transition smoothly */
@@ -513,13 +556,12 @@ body.light .field::after { opacity: 1; }
 body { transition: color .5s var(--ease); }
 body.light .grain { opacity: .04; }
 .grain { transition: opacity .6s var(--ease); }
-body.light .side__desc { color: #3A414C; }
+body.light .side__desc { color: var(--chrome); }
 body.light .themenu {
   background: rgba(250, 251, 253, .92);
-  border-color: rgba(10, 20, 40, .1);
+  border-color: var(--chrome);
 }
-body.light .themenu button:hover { background: rgba(10, 20, 40, .07); }
-body.light .keyart { color: #10131A; }
+body.light .keyart { color: var(--chrome); }
 
 /* a shader theme runs full screen behind everything, untouchable */
 .themeframe {
@@ -618,67 +660,40 @@ body.light .keyart { color: #10131A; }
    an animating margin shifts offsetLeft mid-read and breaks the crosspoint. */
 .cat { transition: transform .42s var(--ease); will-change: transform; }
 
-/* Side cards are dimmed by BRIGHTNESS, never by opacity: a transparent card
-   lets the one behind show through, which dissolves the tucked-under
-   stacking into mush. Opaque + dark is how a real switcher does it. */
-/* ONE dimming treatment for BOTH modes (user rule): the deep saturated
-   dark-mode colours are the good ones, light mode uses them too. */
-.cat:not(.is-on) .cat__icon { filter: brightness(.42) saturate(.8); }
-.cat:not(.is-on):hover .cat__icon { filter: brightness(.68) saturate(.9); }
-/* NEVER opacity on hover: a see-through card exposes the deck behind it */
-
-/* Cover-switch cards (Compiz Shift "Cover" / CoverflowAltTab grammar): every
-   card the SAME size. The selected one faces the camera flat and slightly
-   forward; cards before it tilt toward the centre, cards after it mirror.
-   Selection reads from the tilt, the ring and the glow — never from scale. */
+/* NO CARDS (user rule): the deck is the icons alone. Each slot keeps the
+   size a card had, so the layout, the crosspoint and the tests do not
+   move. The selected icon is a 3D extrusion revolving on Y; the previous
+   and the next stand still at the cover flow slant (drawn by icon3d.js,
+   not by a CSS tilt); the ones further out are hidden, since with no card
+   in front nothing would cover them. */
 .cat__icon {
   width: var(--catw);
   height: var(--catf);
-  border-radius: 12px;
   display: grid;
   place-items: center;
-  overflow: visible;  /* the reflection hangs BELOW the box */
-  background: color-mix(in oklab, var(--key) 55%, var(--ink));
-  transition: box-shadow .28s var(--ease), transform .38s var(--ease-back),
-              filter .28s var(--ease);
   position: relative;
+  transition: opacity .3s var(--ease), transform .38s var(--ease-back);
 }
-
-/* Every card stands on the same glossy floor. The reflection is a pseudo
-   element INSIDE the card's paint layer, so it scales, tilts, dims and
-   fades in the same frame as the card itself — box-reflect could not:
-   Chrome repaints it only after a composited animation ends (the lag). */
-/* Per-card perspective, not a shared one: a shared vanishing point sits at
-   the bar's centre, so distant cards barely foreshorten — every card gets
-   the identical camera, which is what keeps a strip looking uniform.
-
-   The pivot is the edge FACING the selection: the near edge stays planted
-   next to its neighbour while the far edge swings back, so the tilted cards
-   stay a packed deck instead of splaying apart. */
-.cat--before .cat__icon {
-  transform-origin: right center;
-  transform: perspective(700px) rotateY(38deg) translateZ(-14px);
-}
-.cat--after .cat__icon {
-  transform-origin: left center;
-  transform: perspective(700px) rotateY(-38deg) translateZ(-14px);
-}
-/* Bigger AND middle-aligned in one move: scale grows the card symmetrically
-   around its centre, so its centre line stays on the deck's centre line.
-   (A layout size change would shift the grid — transforms only, as ever.) */
-/* Selection: full colour, forward, and a soft floor REFLECTION under the
-   card (classic cover-switch cap) — no grow, no ring (user rules). */
-.cat.is-on .cat__icon {
-  /* clearly bigger than the side cards; the reflection rides along in the
-     same frame because it is part of the card's own layer */
-  transform: perspective(700px) translateZ(14px) scale(1.16);
-}
+.cat--far .cat__icon { opacity: 0; }
+.cat.is-on .cat__icon { transform: scale(1.2); }
 .cat__icon img { width: 66%; height: 66%; object-fit: contain; }
+/* the icon carries the category colour */
+.cat__icon .glyph { display: none; width: 46%; height: 46%; color: var(--key); }
+/* the canvas is taller than the slot: the icon takes the top square, its
+   faded reflection hangs below it, the label sits on the reflection */
+.cat__icon .glyph3d { display: block; position: absolute; top: 0; left: 0; width: 100%; height: 175%; color: var(--key); pointer-events: none; }
+/* no motion: the flat icons */
+@media (prefers-reduced-motion: reduce) {
+  .cat__icon .glyph { display: block; }
+  .cat__icon .glyph3d { display: none; }
+}
+.item__mark .glyph { width: 74%; height: 74%; color: var(--key); display: block; }
+
 .cat__mark {
   font-family: 'Anton', sans-serif;
   font-size: calc(var(--catf) * .5);
   line-height: 1;
-  color: rgba(255, 255, 255, .93);
+  color: var(--chrome);
 }
 
 /* Only the selected card is titled — the sides are anonymous thumbnails,
@@ -742,10 +757,13 @@ body.light .keyart { color: #10131A; }
   right: 0;
   height: 44%;
   border-radius: inherit;
-  background: color-mix(in oklab, var(--key) 55%, var(--ink));
-  transition: filter .28s var(--ease);
+  background: var(--surface);
+  transition: filter .28s var(--ease), box-shadow .28s var(--ease),
+              background-color .28s var(--ease);
 }
-.rcard:not(.is-on) .rcard__icon::after { filter: brightness(.42) saturate(.8); }
+.rcard--before .rcard__icon::after, .rcard--after .rcard__icon::after { background: var(--surface-1); }
+.rcard--far .rcard__icon::after { background: var(--surface-2); }
+.rcard.is-on .rcard__icon::after { background: var(--surface-on); }
 
 .cat__label {
   font-size: .6rem;
@@ -842,17 +860,18 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   cursor: pointer;
   font-family: inherit;
   text-align: left;
-  color: var(--chrome-dim);
-  opacity: .5;
+  color: var(--chrome);
+  opacity: .72;   /* the other rows step back; the selected one is full */
   transition: opacity .24s var(--ease), color .24s var(--ease), transform .24s var(--ease);
 }
-.item:hover { opacity: .85; }
+.item:hover { opacity: .9; }
 /* No nudge on the selected row: the column must sit exactly under the active
    category, and a 6px shift breaks that. The ring and weight carry the state. */
 .item.is-on {
   opacity: 1;
   color: var(--chrome);
 }
+
 
 /* every vertical icon box is SQUARE, the same dimension as the logos */
 .item__mark {
@@ -863,15 +882,20 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   transition: transform .3s var(--ease-back);
   display: grid;
   place-items: center;
-  overflow: hidden;
-  background: color-mix(in oklab, var(--key) 62%, var(--ink));
+  position: relative;
+  overflow: visible;   /* the halo reaches past the box */
+  /* NO BOX (user rule): a letter or an icon sits flat on nothing; only an
+     image is a square, because the image itself is one */
+  background: none;
   font-family: 'Anton', sans-serif;
-  font-size: calc(var(--imark) * .36);
-  color: #fff;
+  font-size: calc(var(--imark) * .52);
+  color: var(--key);   /* letter marks are coloured like the icons */
 }
 .item__mark img { width: 72%; height: 72%; object-fit: contain; }
-/* the selected row's icon grows, centre-symmetric, no ring (user rule) */
-.item.is-on .item__mark { transform: scale(1.12); }
+/* the selected row's icon GROWS (no glow, user rule): with the bold
+   name and the other rows stepped back, it is the one row that reads as
+   selected */
+.item.is-on .item__mark { transform: scale(1.35); }
 
 /* A real image is its OWN box: the coloured slab vanishes and the image
    fills the full row height, rounded like a proper icon. Square logos and
@@ -885,14 +909,24 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   object-fit: cover;
   border-radius: 10px;
 }
-/* EVERY box in the vertical menu casts the same soft shadow (letter
-   tiles included, not only photos); the selected one casts deeper.
-   The shadow lives on the BOX, so images and slabs are identical. */
-.item .item__mark {
+/* only an image square casts a shadow; the selected one casts deeper */
+.item .item__mark.has-img {
   box-shadow: 0 8px 20px -10px rgba(0, 0, 0, .45);
 }
-.item.is-on .item__mark {
+.item.is-on .item__mark.has-img {
   box-shadow: 0 14px 34px -12px rgba(0, 0, 0, .6);
+}
+/* A badge with a transparent background is its OWN shape (the AWS hexagon):
+   no box, no rounded rectangle, and the shadow follows the alpha edge of
+   the symbol instead of a square behind it. */
+.item__mark--shape, .item.is-on .item__mark--shape { box-shadow: none; }
+.item__mark.has-img.item__mark--shape img {
+  object-fit: contain;
+  border-radius: 0;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35));
+}
+.item.is-on .item__mark.has-img.item__mark--shape img {
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, .45));
 }
 
 .item__name {
@@ -902,7 +936,7 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.item.is-on .item__name { font-weight: 600; }
+.item.is-on .item__name { font-weight: 700; font-size: 1rem; }
 
 
 /* ---------- detail ---------- */
@@ -936,7 +970,7 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
 }
 
 .hero__badge {
-  font-size: .66rem; letter-spacing: .2em; color: var(--yellow);
+  font-size: .66rem; letter-spacing: .2em; color: var(--chrome);
   display: flex; align-items: center; gap: 10px;
 }
 .hero__sub {
@@ -955,7 +989,7 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   max-width: 16ch;
   text-wrap: balance;
 }
-.hero__meta { font-family: 'Space Mono', monospace; font-size: .72rem; color: var(--chrome-dim); }
+.hero__meta { font-family: 'Archivo', system-ui, sans-serif; font-size: .72rem; color: var(--chrome-dim); }
 
 /* The action is embedded IN the title itself — no separate link text.
    A small arrow marks it; the whole heading (and the logo) opens it. */
@@ -970,10 +1004,10 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   vertical-align: super;
   color: var(--chrome-dim);
 }
-.hero__title a:hover { color: var(--yellow); }
+.hero__title a:hover { text-decoration: underline; text-underline-offset: .12em; }
 .hero > a { align-self: flex-start; }   /* a linked logo stays left */
 .hero__body {
-  font-size: .88rem; line-height: 1.55; color: #C9CDD4;
+  font-size: .88rem; line-height: 1.55; color: var(--chrome);
   max-width: 56ch;
   /* full recommendation quotes are long — contain them quietly */
   max-height: 40vh;
@@ -990,18 +1024,18 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   max-width: 60ch;
   font-size: 1.05rem;
   line-height: 1.55;
-  color: #C9CDD4;
+  color: var(--chrome);
 }
 .hero__bullets li { padding-left: 1.1em; position: relative; }
 .hero__bullets li::before {
   content: '▸';
   position: absolute;
   left: 0;
-  color: var(--yellow);
+  color: var(--chrome);
 }
 
 .hero__stack {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Archivo', system-ui, sans-serif;
   font-size: .74rem;
   color: var(--chrome-dim);
   max-width: 60ch;
@@ -1032,7 +1066,7 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   text-decoration: none;
   transition: transform .18s var(--ease), background .18s var(--ease);
 }
-.btn:hover { transform: translateY(-2px); background: var(--yellow); }
+.btn:hover { transform: translateY(-2px); }
 
 
 /* ---------- shelf ---------- */
@@ -1068,7 +1102,7 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   animation: rise .42s var(--ease) both;
   animation-delay: calc(180ms + var(--i, 0) * 45ms);
 }
-a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px); }
+a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(-3px); }
 
 
 /* media cards: the embedded demo player and event photos — images keep their
@@ -1104,17 +1138,17 @@ a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px)
   animation: rise .42s var(--ease) both;
   animation-delay: calc(180ms + var(--i, 0) * 45ms);
 }
-.plink:hover { color: var(--yellow); }
+.plink:hover { text-decoration-thickness: 2px; }
 .plink__host {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Archivo', system-ui, sans-serif;
   font-size: .68rem;
   font-weight: 400;
   color: var(--chrome-dim);
 }
 
-.card__kicker { font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: var(--yellow); }
+.card__kicker { font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: var(--chrome); }
 .card__title  { font-size: .86rem; font-weight: 600; }
-.card__body   { font-size: .76rem; line-height: 1.5; color: #C9CDD4; }
+.card__body   { font-size: .76rem; line-height: 1.5; color: var(--chrome); }
 
 /* ---------- the uniform item layout ---------- */
 
@@ -1123,7 +1157,10 @@ a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px)
   position: fixed;
   z-index: 1;
   right: 3vw;
-  top: clamp(210px, 24vh, 330px);    /* the player owns the deck level above */
+  /* ONE top line for the whole cross (user rule): the rail starts where
+     the column and the heading start. xmb.js measures the cross and sets
+     --cross-top; the clamp is only the fallback before it runs. */
+  top: var(--cross-top, clamp(210px, 24vh, 330px));
   bottom: clamp(120px, 14vh, 190px); /* and the avatar owns the corner below */
   width: clamp(300px, 23vw, 620px);
   display: flex;
@@ -1134,19 +1171,17 @@ a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px)
   pointer-events: auto;
   font-family: 'Archivo', system-ui, sans-serif;
 }
-/* the right third is centre aligned; the links and the words cluster
-   together in its vertical MIDDLE — links right aligned above the text */
+/* the right third is centre aligned; the links right aligned above the
+   words; everything starts at the TOP of the rail, level with the column
+   and the heading */
 .keyart-rail { text-align: center; align-items: center; }
 .keyart-rail > .rail-links {
-  margin-top: auto;
   align-self: flex-end;
   text-align: right;
   justify-content: flex-end;
 }
 .keyart-rail > .side__desc,
 .keyart-rail > .hero__bullets { margin-bottom: auto; }
-.keyart-rail > .side__desc:first-child,
-.keyart-rail > .hero__bullets:first-child { margin-top: auto; }
 .rail-links { justify-content: flex-end; }
 
 /* long descriptions scroll in place, with a slim scroller in the site's
@@ -1156,12 +1191,12 @@ a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px)
   overflow-y: auto;
   padding-right: 10px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, .28) transparent;
+  scrollbar-color: var(--chrome) transparent;
 }
 .keyart-rail .side__desc::-webkit-scrollbar { display: block; width: 6px; }
 .keyart-rail .side__desc::-webkit-scrollbar-track { background: transparent; }
 .keyart-rail .side__desc::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, .24);
+  background: var(--chrome);
   border-radius: 999px;
 }
 .keyart-rail .side__desc::-webkit-scrollbar-thumb:hover {
@@ -1191,6 +1226,8 @@ a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px)
   border-radius: 12px;
   margin-top: 10px;
 }
+/* a badge shape in the middle: the symbol itself, no rounded card */
+.hero__logo--shape { border-radius: 0; filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .35)); }
 /* PEOPLE photos: one identical 4:5 portrait card for every person,
    cover-cropped, anchored to the face. Uniform by definition. */
 .hero__logo--person {
@@ -1261,7 +1298,7 @@ a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px)
   transition: border-color .18s var(--ease);
 }
 .recform input:focus,
-.recform textarea:focus { border-color: var(--yellow); }
+.recform textarea:focus { border-color: var(--chrome); box-shadow: inset 0 0 0 1px var(--chrome); }
 .recform input::placeholder,
 .recform textarea::placeholder { color: var(--chrome-dim); }
 .recform textarea { grid-column: 1 / -1; resize: vertical; }
@@ -1277,7 +1314,7 @@ a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px)
   cursor: pointer;
   transition: border-color .18s var(--ease), color .18s var(--ease);
 }
-.recform__photo:hover { border-color: var(--yellow); color: var(--chrome); }
+.recform__photo:hover { border-style: solid; }
 .recform button {
   grid-column: 1 / -1;
   justify-self: start;
@@ -1293,8 +1330,8 @@ a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px)
   cursor: pointer;
   transition: background .18s var(--ease), transform .18s var(--ease);
 }
-.recform button:hover { background: var(--yellow); transform: translateY(-2px); }
-.recform__note { grid-column: 1 / -1; font-size: .88rem; color: var(--yellow); }
+.recform button:hover { transform: translateY(-2px); }
+.recform__note { grid-column: 1 / -1; font-size: .88rem; color: var(--chrome); font-weight: 600; }
 
 /* ---------- lightbox ---------- */
 
@@ -1330,18 +1367,29 @@ a.card:hover { background: rgba(255, 255, 255, .11); transform: translateY(-3px)
   transition: background .6s var(--ease);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 14px; text-align: center; padding: 24px;
+  perspective: 900px;   /* the coin turns in real 3D */
   transition: opacity .5s var(--ease), visibility .5s;
 }
 body:not(.booting) .boot { opacity: 0; visibility: hidden; }
 
-.boot__mark { width: clamp(76px, 16vw, 120px); animation: pulse 2.4s ease-in-out infinite; }
-@keyframes pulse { 50% { transform: scale(1.05); } }
+/* The afaicon on the gate: its black outline, traced to a vector, drawn
+   as a 3D extrusion turning on the Y axis by icon3d.js (the same renderer
+   as the category icons), in silver chrome. */
+.boot__mark3d {
+  width: clamp(200px, 34vw, 380px);
+  aspect-ratio: 1;
+  color: var(--chrome);
+  transition: opacity .45s var(--ease);
+}
+.boot.leaving .boot__mark3d,
+.boot.leaving .boot__title, .boot.leaving .boot__sub,
+.boot.leaving .loadbar, .boot.leaving .boot__start { opacity: 0; transition: opacity .45s var(--ease); }
 
 .boot__title { font-family: 'Anton', sans-serif; font-weight: 400; font-size: clamp(1.7rem, 6vw, 3rem); }
 .boot__sub { font-size: .66rem; letter-spacing: .26em; color: var(--chrome-dim); }
 
-.loadbar { width: min(240px, 60vw); height: 2px; background: var(--glass-line); overflow: hidden; }
-.loadbar i { display: block; height: 100%; width: 0; background: var(--yellow); transition: width .1s linear; }
+.loadbar { width: min(240px, 60vw); height: 2px; background: linear-gradient(var(--chrome), var(--chrome)) center / 100% 1px no-repeat; overflow: hidden; }
+.loadbar i { display: block; height: 100%; width: 0; background: var(--chrome); transition: width .1s linear; }
 
 .boot__start {
   margin-top: 6px; background: none; border: 0; cursor: pointer;
@@ -1349,10 +1397,11 @@ body:not(.booting) .boot { opacity: 0; visibility: hidden; }
   color: var(--chrome); opacity: 0; padding: 10px 18px;
   transition: opacity .3s var(--ease);
 }
-.boot__start.ready { opacity: 1; animation: blink 1.5s steps(2, start) infinite; }
-@keyframes blink { 50% { opacity: .25; } }
+/* PRESS ANY KEY breathes, it does not blink */
+.boot__start.ready { opacity: 1; animation: breathe 2.6s ease-in-out infinite; }
+@keyframes breathe { 50% { opacity: .35; } }
 
-.boot__hint { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--chrome-dim); }
+.boot__hint { font-family: 'Archivo', system-ui, sans-serif; font-size: .62rem; color: var(--chrome-dim); }
 
 /* the landing page shows ONLY the boot screen: the player and the
    avatar wait for the home screen, then everything fades in together */
@@ -1370,7 +1419,8 @@ body.booting .pill, body.booting .who {
 body.booting .keyart-rail,
 body.booting .keyart { visibility: hidden; }
 /* the landing offers theme, mode and language; search waits for home */
-body.booting .settings:has(#searchBtn) { visibility: hidden; }
+body.booting .settings:has(#searchBtn),
+body.booting .settings:has(#sfxBtn) { display: none; }
 .xmb, .topbar, .pill, .who { transition: opacity .6s var(--ease) .1s; }
 .topbar { z-index: 60; }   /* above the boot layer AND the player */
 .pill[hidden] { display: none; }
@@ -1436,3 +1486,6 @@ body.booting .settings:has(#searchBtn) { visibility: hidden; }
     scroll-behavior: auto !important;
   }
 }
+
+/* no cards, so no card reflection */
+.reflbar { display: none; }

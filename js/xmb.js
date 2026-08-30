@@ -7,7 +7,8 @@
 
    Skin is PS5: near-black, one key colour per item driving the whole screen. */
 
-import { emit } from './config.js';
+import { emit, REDUCED } from './config.js';
+import { spin, stop } from './icon3d.js';
 import { CATEGORIES } from './menu.js';
 import { SUPA } from './data.js';
 
@@ -115,6 +116,18 @@ export function initXmb() {
     const span = document.createElement('span');
     span.className = cls;
     span.textContent = entry.mark || '';
+    if (entry.svg) {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.classList.add('glyph');
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', entry.svg);
+      p.setAttribute('fill', 'currentColor');
+      svg.appendChild(p);
+      el.appendChild(svg);
+      return;
+    }
     if (entry.icon) {
       const img = document.createElement('img');
       img.src = 'assets/afaicon.png';
@@ -145,6 +158,19 @@ export function initXmb() {
     el.appendChild(span);
   }
 
+  /* one top line for the cross: the right rail (position fixed) starts
+     where the column and the heading start. Measured, so any deck size
+     or viewport gives the same line. */
+  const crossEl = document.querySelector('.cross');
+  function levelRail() {
+    if (!crossEl) return;
+    const top = crossEl.getBoundingClientRect().top + 6;   /* .detail padding */
+    document.documentElement.style.setProperty('--cross-top', Math.round(top) + 'px');
+  }
+  addEventListener('resize', levelRail);
+  addEventListener('load', levelRail);
+  requestAnimationFrame(levelRail);
+
   /* ---------- the horizontal axis ---------- */
   function buildBar() {
     barEl.replaceChildren();
@@ -159,6 +185,14 @@ export function initXmb() {
       const icon = document.createElement('span');
       icon.className = 'cat__icon';
       markInto(icon, cat, 'cat__mark');
+      /* the 3D twin of the icon: a canvas that spins when the card is
+         selected (the flat SVG stays for the side cards) */
+      if (cat.svg) {
+        const cv = document.createElement('canvas');
+        cv.className = 'glyph3d';
+        cv.dataset.d = cat.svg;
+        icon.appendChild(cv);
+      }
       b.appendChild(icon);
 
       const lab = document.createElement('span');
@@ -193,9 +227,10 @@ export function initXmb() {
       b.setAttribute('aria-current', String(i === itemOf[catI]));
 
       /* no mark, no icon, no logo: the name stands alone, no empty box */
-      if (item.mark || item.icon || item.logo) {
+      if (item.mark || item.icon || item.logo || item.svg) {
         const badge = document.createElement('span');
         badge.className = 'item__mark';
+        if (item.shape) badge.classList.add('item__mark--shape');
         markInto(badge, item, 'item__glyph');
         b.appendChild(badge);
       }
@@ -282,7 +317,8 @@ export function initXmb() {
       heroEl.appendChild(board);
     } else if (item.logo || item.icon) {
       const img = document.createElement('img');
-      img.className = item.person ? 'hero__logo hero__logo--person' : 'hero__logo';
+      img.className = item.person ? 'hero__logo hero__logo--person'
+                    : item.shape ? 'hero__logo hero__logo--shape' : 'hero__logo';
       img.src = item.icon ? 'assets/afaicon.png' : 'assets/' + item.logo;
       img.alt = '';
       if (action) {
@@ -412,12 +448,14 @@ export function initXmb() {
        so the crosspoint stays exact — animating layout margins did not. */
     const total = barEl.children.length;
     const catw = barEl.children[0] ? barEl.children[0].offsetWidth : 0;
-    const KEEP = catw * .30, CLEAR = 0;   /* no clearance — a continuous deck */
+    const KEEP = catw * .30, CLEAR = 0;   /* no clearance: the enlarged selection sits over its neighbours */
     [...barEl.children].forEach((el, n) => {
       const d = n - catI, k = Math.abs(d), dir = Math.sign(d);
       el.classList.toggle('is-on', d === 0);
       el.classList.toggle('cat--before', d < 0);
       el.classList.toggle('cat--after', d > 0);
+      /* far: two or more steps out, only a sliver shows, lowest tone */
+      el.classList.toggle('cat--far', k >= 2);
       const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
       el.style.transform = `translateX(${Math.round(tx)}px)`;
       el.style.zIndex = total - k;
@@ -428,7 +466,8 @@ export function initXmb() {
       const rc = reflEl.children[n];
       if (rc) {
         rc.className = 'rcard'
-          + (d === 0 ? ' is-on' : d < 0 ? ' rcard--before' : ' rcard--after');
+          + (d === 0 ? ' is-on' : d < 0 ? ' rcard--before' : ' rcard--after')
+          + (k >= 2 ? ' rcard--far' : '');
         rc.style.left = (el.offsetLeft + 120) + 'px';   /* reflbar slack */
         rc.style.transform = el.style.transform;
         rc.style.zIndex = el.style.zIndex;
@@ -436,6 +475,21 @@ export function initXmb() {
     });
     buildColumn();
     slideBar();
+    if (!REDUCED) {
+      /* the selected icon revolves; its two neighbours stand still at the
+         cover flow slant (the side that faces the selection swings back) */
+      const TILT = 38 * Math.PI / 180;
+      stop('deck-prev'); stop('deck-next');   /* the ends have no neighbour */
+      [...barEl.children].forEach((el, n) => {
+        const d = n - catI, cv = el.querySelector('.glyph3d');
+        if (!cv) return;
+        if (d === 0) spin(cv, { group: 'deck', fit: .85, reflect: true });
+        else if (Math.abs(d) === 1) {
+          spin(cv, { group: d < 0 ? 'deck-prev' : 'deck-next', fit: .6,
+                     angle: d < 0 ? TILT : -TILT, speed: 0, reflect: true });
+        }
+      });
+    }
     setItem(itemOf[catI], true);
     if (!quiet) emit('cat', { id: CATEGORIES[catI].id });
   }
@@ -443,7 +497,7 @@ export function initXmb() {
   function act() {
     /* enter opens the primary action at the heading, else a rail link */
     const a = heroEl.querySelector('a') || keyartEl.querySelector('a');
-    if (a) a.click();
+    if (a) { emit('act'); a.click(); }
   }
 
   /* ---------- input ---------- */
