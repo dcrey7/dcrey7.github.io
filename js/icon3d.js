@@ -211,7 +211,7 @@ export function spin(el, opts = {}) {
     canvas: el, ctx: el.getContext('2d'), off, octx: off.getContext('2d'),
     path: new Path2D(el.dataset.d || ''),
     colour, side: darken(colour), fit, material, reflect,
-    speed: speed !== null ? speed : (prev ? prev.speed : 1),
+    speed: speed !== null ? speed : 1,
     angle: angle !== null ? angle : (prev ? prev.angle : 0)   /* a change keeps the phase */
   });
   if (!raf) { last = 0; raf = requestAnimationFrame(loop); }

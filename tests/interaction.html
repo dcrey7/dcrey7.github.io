@@ -19,6 +19,16 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   const hero  = () => d.querySelector('.hero__title').textContent;
   const key   = () => d.documentElement.style.getPropertyValue('--key').trim();
   const nItems= () => d.querySelectorAll('.item').length;
+  const xform = el => parseFloat((el.style.transform.match(/translateX\((-?[\d.]+)/) || [0, 0])[1]) || 0;
+  const deckSlots = () => {
+    const cats = [...d.querySelectorAll('#bar .cat')];
+    const on = d.querySelector('#bar .cat.is-on');
+    const w0 = cats[0].offsetWidth;
+    return Object.fromEntries(cats.map(c => [
+      c.querySelector('.cat__label').textContent,
+      Math.round((c.offsetLeft + xform(c) - on.offsetLeft) / w0)
+    ]));
+  };
 
   /* --- the two axes --- */
   say('starts on ABOUT', cat(), 'ABOUT');
@@ -61,10 +71,23 @@ document.getElementById('f').onload = () => setTimeout(async () => {
 
   press('ArrowRight'); press('ArrowRight'); await wait();
   say('PLAY remembered its item', item(), 'MEMORY BRIDGEAI');
+  await new Promise(r => setTimeout(r, 360));
+  const playSlots = deckSlots();
+  say('PLAY shows one previous icon', playSlots.EDUCATION, -1);
+  say('PLAY shows every real next icon',
+      [playSlots.PEOPLE, playSlots.TROPHIES, playSlots.CONTACT].join(','), '1,2,3');
 
   /* --- the long category --- */
   for (let i = 0; i < 3; i++) { press('ArrowRight'); await wait(); }
   say('reached CONTACT', cat(), 'CONTACT');
+  await new Promise(r => setTimeout(r, 360));
+  const contactSlots = deckSlots();
+  say('CONTACT shows one previous icon', contactSlots.TROPHIES, -1);
+  say('CONTACT does not pull ABOUT to the next side', contactSlots.ABOUT < 0, 'true');
+  press('ArrowRight'); await wait();
+  say('right from CONTACT wraps to ABOUT', cat(), 'ABOUT');
+  press('ArrowLeft'); await wait();
+  say('left from ABOUT returns to CONTACT', cat(), 'CONTACT');
   press('ArrowLeft'); await wait();
   say('back to TROPHIES', cat(), 'TROPHIES');
   press('ArrowLeft'); await wait();

@@ -484,7 +484,7 @@ export function initXmb() {
         if (!cv) return;
         /* ONE previous, EVERY next (user rule): the previous and all the
            nexts stand still at the slant, the selected one revolves */
-        if (d === 0) spin(cv, { group: 'deck-i' + n, fit: .85, reflect: true });
+        if (d === 0) spin(cv, { group: 'deck-i' + n, fit: .85, speed: 1, reflect: true });
         else if (d === -1 || d >= 1) {
           spin(cv, { group: 'deck-i' + n, fit: .6,
                      angle: d < 0 ? TILT : -TILT, speed: 0, reflect: true });
