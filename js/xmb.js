@@ -456,7 +456,7 @@ export function initXmb() {
       el.classList.toggle('cat--after', d > 0);
       /* far: two or more steps out, only a sliver shows, lowest tone */
       el.classList.toggle('cat--far', k >= 2);
-      const tx = d === 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
+      const tx = d >= 0 ? 0 : dir * (CLEAR - (k - 1) * (catw - KEEP));
       el.style.transform = `translateX(${Math.round(tx)}px)`;
       el.style.zIndex = total - k;
       el.setAttribute('aria-selected', String(d === 0));
@@ -479,14 +479,17 @@ export function initXmb() {
       /* the selected icon revolves; its two neighbours stand still at the
          cover flow slant (the side that faces the selection swings back) */
       const TILT = 38 * Math.PI / 180;
-      stop('deck-prev'); stop('deck-next');   /* the ends have no neighbour */
       [...barEl.children].forEach((el, n) => {
         const d = n - catI, cv = el.querySelector('.glyph3d');
         if (!cv) return;
-        if (d === 0) spin(cv, { group: 'deck', fit: .85, reflect: true });
-        else if (Math.abs(d) === 1) {
-          spin(cv, { group: d < 0 ? 'deck-prev' : 'deck-next', fit: .6,
+        /* ONE previous, EVERY next (user rule): the previous and all the
+           nexts stand still at the slant, the selected one revolves */
+        if (d === 0) spin(cv, { group: 'deck-i' + n, fit: .85, reflect: true });
+        else if (d === -1 || d >= 1) {
+          spin(cv, { group: 'deck-i' + n, fit: .6,
                      angle: d < 0 ? TILT : -TILT, speed: 0, reflect: true });
+        } else {
+          stop('deck-i' + n);
         }
       });
     }

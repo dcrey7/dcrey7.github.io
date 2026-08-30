@@ -674,7 +674,8 @@ body.light .keyart { color: var(--chrome); }
   position: relative;
   transition: opacity .3s var(--ease), transform .38s var(--ease-back);
 }
-.cat--far .cat__icon { opacity: 0; }
+/* one previous, every next: only the far BEFORE icons hide */
+.cat--before.cat--far .cat__icon { opacity: 0; }
 .cat.is-on .cat__icon { transform: scale(1.2); }
 .cat__icon img { width: 66%; height: 66%; object-fit: contain; }
 /* the icon carries the category colour */
@@ -895,7 +896,7 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
 /* the selected row's icon GROWS (no glow, user rule): with the bold
    name and the other rows stepped back, it is the one row that reads as
    selected. 1.18, not more: bigger swallowed the neighbouring rows. */
-.item.is-on .item__mark { transform: scale(1.18); z-index: 2; }
+.item.is-on .item__mark { transform: scale(1.22); z-index: 2; }
 
 /* A real image is its OWN box: the coloured slab vanishes and the image
    fills the full row height, rounded like a proper icon. Square logos and
@@ -936,7 +937,7 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.item.is-on .item__name { font-weight: 700; font-size: 1rem; }
+.item.is-on .item__name { font-weight: 700; font-size: 1.18rem; }
 
 
 /* ---------- detail ---------- */

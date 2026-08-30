@@ -110,10 +110,10 @@ function drawOne(it, dt) {
   const s = (Math.min(w, h) * it.fit) / 24;   /* px per icon unit */
   const cx = w / 2;
   const cy0 = it.reflect ? w / 2 : h / 2;
-  /* the revolving icon also BOBS: a slow, small rise and fall (3.2 s,
-     under one grid unit). The still ones stay planted. */
+  /* the revolving icon also BOBS: a small rise and fall (2.2 s, under
+     one grid unit). The still ones stay planted. */
   it.t = (it.t || 0) + dt;
-  const bob = it.speed > 0 ? Math.sin(it.t / 1000 * (Math.PI * 2 / 3.2)) * 0.7 * s : 0;
+  const bob = it.speed > 0 ? Math.sin(it.t / 1000 * (Math.PI * 2 / 2.2)) * 0.7 * s : 0;
   const cy = cy0 - bob;
   const sx = Math.max(Math.abs(cosA), MIN_W) * (cosA < 0 ? -1 : 1);
   const sideFill = it.material === 'chrome' ? chrome(octx, a, true) : it.side;
