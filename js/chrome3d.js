@@ -126,8 +126,8 @@ export async function chromeMark(canvas, pathD, envUrl) {
     /* a light, random variation in roughness (the map scales the value)
        and a faint waviness (the same noise as a bump): plated chrome,
        never a flat black face, no pattern, no sparkle */
-    /* GOLD: the metal's own colour tints every reflection */
-    color: 0xffc247, metalness: 1, roughness: 0.32, roughnessMap: rough,
+    /* SILVER chrome: a neutral metal, the reflections stay uncoloured */
+    color: 0xdde0e5, metalness: 1, roughness: 0.32, roughnessMap: rough,
     bumpMap: rough, bumpScale: 0.1, envMapIntensity: 1.15
   });
   const mesh = new THREE.Mesh(geo, mat);
