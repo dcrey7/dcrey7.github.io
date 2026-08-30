@@ -187,8 +187,11 @@ export function spin(el, opts = {}) {
   /* backing store from the LAYOUT size, with room for a CSS scale up to
      1.25, so a mid transition measurement can never leave it soft */
   const dpr = Math.min(devicePixelRatio || 1, 2) * 1.25;
-  el.width = Math.max(1, Math.round(el.offsetWidth * dpr));
-  el.height = Math.max(1, Math.round(el.offsetHeight * dpr));
+  /* a hidden canvas measures 0: give it a sane size rather than 1 px
+     (which CSS would stretch into a solid block) */
+  const cw = el.offsetWidth || 200, ch = el.offsetHeight || 200;
+  el.width = Math.max(1, Math.round(cw * dpr));
+  el.height = Math.max(1, Math.round(ch * dpr));
   const off = document.createElement('canvas');
   off.width = el.width; off.height = el.height;
   const colour = getComputedStyle(el).color;

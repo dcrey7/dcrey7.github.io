@@ -5,10 +5,20 @@ import { initBoot } from './boot.js';
 import { YT_PLAYLISTS, THEME } from './data.js';
 import * as theme from './theme.js';
 import { CATEGORIES } from './menu.js';
-import { bus } from './config.js';
+import { bus, MOBILE } from './config.js';
+import { initMobile } from './mobile.js';
 import { sfx } from './sfx.js';
 
 const xmb = initXmb();
+
+/* ---------- the phone version ----------
+   Under 760 px the cross is hidden and js/mobile.js takes over: a wheel of
+   the category icons and one clean scroll per category. Crossing the
+   width on a resize reloads, the two layouts are not meant to swap live. */
+const isMobile = MOBILE();
+document.body.classList.toggle('mobile', isMobile);
+if (isMobile) initMobile({ buildRecForm: xmb.buildRecForm });
+addEventListener('resize', () => { if (MOBILE() !== isMobile) location.reload(); });
 initBoot();
 
 /* Deep link: ?cat=play&i=1 opens a category on a given item. */

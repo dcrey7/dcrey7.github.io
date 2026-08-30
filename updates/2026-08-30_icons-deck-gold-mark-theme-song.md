@@ -68,6 +68,24 @@ status: deployed to hiabhi.com from worktree-ps5-ui (commit 70f1006)
 - One ink per mode: `--chrome-dim` equals `--chrome`; lines use the ink.
 - The right rail starts on the cross top line (`--cross-top`, measured).
 
+## The phone version (js/mobile.js, under 760 px)
+
+- Not a shrunken desktop. `body.mobile` hides the cross, the pill, the
+  rail and the avatar; `js/mobile.js` builds three screens.
+- Gate: shared with the desktop (icons top left, WELCOME, the gold mark).
+- Home, a launcher: big clock and date, a status line, two widgets (now
+  playing mirrors the hidden pill; the name card), then the categories as
+  bare rows: 3D icon left (canvas, still at 30°), name centred, chevron
+  right. The selected row has no box and no border: its icon revolves,
+  the name is bold, a one line subtitle appears. Tap to select, tap again
+  to open; arrow keys and Enter do the same.
+- Page: one scroll per category, item by item, media LEFT (logo, badge,
+  portrait, photos, video) and every word RIGHT; items without media and
+  the review form take the full width. Sticky header with the back button.
+- Images work again (the desktop's viewport maths are overridden).
+- Deep links: `?skip&cat=work&open=1`. Verified at 390x844 with GPU
+  headless Chrome: gate, home, WORK, PLAY, PEOPLE, TROPHIES.
+
 # What was measured
 
 - Suite `tests/interaction.html`: 59/59 at every step.

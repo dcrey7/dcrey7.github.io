@@ -568,5 +568,5 @@ export function initXmb() {
   buildBar();
   setCat(0, true);
 
-  return { setCat, setItem, act };
+  return { setCat, setItem, act, buildRecForm };
 }
