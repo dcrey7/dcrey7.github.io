@@ -108,7 +108,13 @@ function drawOne(it, dt) {
   /* with a reflection the icon lives in the top square of a taller
      canvas and its mirror hangs below; without, it is centred */
   const s = (Math.min(w, h) * it.fit) / 24;   /* px per icon unit */
-  const cx = w / 2, cy = it.reflect ? w / 2 : h / 2;
+  const cx = w / 2;
+  const cy0 = it.reflect ? w / 2 : h / 2;
+  /* the revolving icon also BOBS: a slow, small rise and fall (3.2 s,
+     under one grid unit). The still ones stay planted. */
+  it.t = (it.t || 0) + dt;
+  const bob = it.speed > 0 ? Math.sin(it.t / 1000 * (Math.PI * 2 / 3.2)) * 0.7 * s : 0;
+  const cy = cy0 - bob;
   const sx = Math.max(Math.abs(cosA), MIN_W) * (cosA < 0 ? -1 : 1);
   const sideFill = it.material === 'chrome' ? chrome(octx, a, true) : it.side;
   const faceFill = it.material === 'chrome' ? chrome(ctx, a, false) : it.colour;
@@ -140,10 +146,12 @@ function drawOne(it, dt) {
   /* the reflection: the drawn icon mirrored under its own base, dim, and
      faded out towards the bottom. Same frame, so it turns with the icon. */
   if (it.reflect) {
+    /* the floor does not bob: the mirror line stays put, so the gap
+       between the icon and its reflection breathes with the bounce */
     const gap = 0.6 * s;
-    const yBase = cy + 12 * s + gap;            /* the mirror line   */
-    const yTop = cy - 12 * s;                   /* top of the icon   */
-    const hRef = Math.min(h - yBase, 12 * s);   /* reflection height */
+    const yBase = cy0 + 12 * s + gap;                    /* the mirror line */
+    const yTop = Math.max(0, cy0 - 12 * s - 1.2 * s);    /* covers the rise */
+    const hRef = Math.min(h - yBase, 12 * s);            /* reflection height */
     if (hRef > 2) {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.save();
