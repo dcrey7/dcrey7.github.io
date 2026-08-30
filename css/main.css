@@ -894,8 +894,8 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
 .item__mark img { width: 72%; height: 72%; object-fit: contain; }
 /* the selected row's icon GROWS (no glow, user rule): with the bold
    name and the other rows stepped back, it is the one row that reads as
-   selected */
-.item.is-on .item__mark { transform: scale(1.35); }
+   selected. 1.18, not more: bigger swallowed the neighbouring rows. */
+.item.is-on .item__mark { transform: scale(1.18); z-index: 2; }
 
 /* A real image is its OWN box: the coloured slab vanishes and the image
    fills the full row height, rounded like a proper icon. Square logos and
