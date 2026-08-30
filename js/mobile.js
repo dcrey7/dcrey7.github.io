@@ -2,15 +2,17 @@
    screens, one idea each.
 
    1. The gate (shared with the desktop): WELCOME, the gold mark, tap.
-   2. Home, laid out like a phone launcher: the big clock and the date,
-      a status line, two small widgets (now playing, who I am), then the
-      categories as a list of rows: the 3D icon on the left, the name.
-      The selected row is outlined in its own colour, shows a one line
-      subtitle, and its icon revolves. Tap a row to select it, tap the
-      selected row to open it. Arrow keys and Enter do the same.
-   3. The page: everything in that category as one clean scroll, item by
-      item (title, lines, media, bullets, links, the form on PEOPLE), with
-      a back button to home.
+   2. Home, laid out like a phone lock screen: the big clock and the date,
+      the player pill (disc, name, times, previous, play, next: the same
+      element as on the desktop, moved here), then the categories as bare
+      rows: the 3D icon on the left, the name centred. The selected row's
+      icon revolves, its name is bold, a one line subtitle appears. Tap a
+      row to select it, tap the selected row to open it. The top bar keeps
+      only a hamburger; it opens the controls (search, language, sound,
+      mode, theme).
+   3. The page: the items of that category as rows in the same style
+      (logo left, name centred) that drop down on a tap to show the words,
+      bullets, links, the form. A back button returns home.
 
    Runs only under 760 px (config.MOBILE). The desktop cross stays in the
    DOM but hidden, so deep links and the tests keep their meaning. */
@@ -61,33 +63,30 @@ export function initMobile({ buildRecForm }) {
   tickClock();
   setInterval(tickClock, 15000);
 
-  home.appendChild(el('div', 'mob-status', 'AI ENGINEER  ·  PARIS  ·  OPEN TO WORK'));
+  /* the player: the desktop's pill itself, moved under the clock (its
+     script keeps working, it holds the children by id) */
+  const pill = document.getElementById('pill');
+  if (pill) home.appendChild(pill);
 
-  /* widgets: now playing mirrors the (hidden) player pill; the second is
-     the name card */
-  const widgets = el('div', 'mob-widgets');
-  const wPlay = el('button', 'mob-widget');
-  wPlay.type = 'button';
-  const wPlayHead = el('div', 'mob-widget__head', 'NOW PLAYING');
-  const wPlayTitle = el('div', 'mob-widget__title', '…');
-  const wPlaySub = el('div', 'mob-widget__sub', 'tap to play');
-  wPlay.appendChild(wPlayHead); wPlay.appendChild(wPlayTitle); wPlay.appendChild(wPlaySub);
-  wPlay.addEventListener('click', () => document.getElementById('pillPlay')?.click());
-  const wMe = el('div', 'mob-widget');
-  wMe.appendChild(el('div', 'mob-widget__head', 'ABHISHEK THOMAS'));
-  wMe.appendChild(el('div', 'mob-widget__title', 'AI Engineer'));
-  wMe.appendChild(el('div', 'mob-widget__sub', 'LLM evals · RAG · agents'));
-  widgets.appendChild(wPlay);
-  widgets.appendChild(wMe);
-  home.appendChild(widgets);
-  const syncPlay = () => {
-    const t = document.getElementById('pillTitle')?.textContent || '';
-    const playing = document.getElementById('pillPlay')?.getAttribute('aria-label') === 'Pause';
-    wPlayTitle.textContent = t.split(' ')[0] || 'radio';
-    wPlaySub.textContent = playing ? 'playing · tap to pause' : 'tap to play';
-  };
-  syncPlay();
-  setInterval(syncPlay, 1000);
+  /* the top bar: a hamburger opens the controls */
+  const topbar = document.querySelector('.topbar');
+  const burger = el('button', 'mob-menu');
+  burger.type = 'button';
+  burger.setAttribute('aria-label', 'Menu');
+  burger.setAttribute('aria-expanded', 'false');
+  burger.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>';
+  burger.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = document.body.classList.toggle('mob-menu-open');
+    burger.setAttribute('aria-expanded', String(open));
+  });
+  addEventListener('click', e => {
+    if (!e.target.closest('.sys') && document.body.classList.contains('mob-menu-open')) {
+      document.body.classList.remove('mob-menu-open');
+      burger.setAttribute('aria-expanded', 'false');
+    }
+  });
+  if (topbar) topbar.prepend(burger);
 
   /* the category rows */
   const rows = el('div', 'mob-rows');
@@ -165,49 +164,85 @@ export function initMobile({ buildRecForm }) {
     return a;
   };
 
-  function renderItem(item) {
-    const art = el('article', 'mob-item');
-    const text = el('div', 'mob-item__text');
-    put(text, 'hero__sub', item.sub);
+  /* one item = a row in the home's style (media left, name centred, a
+     chevron) that drops down on a tap: words, bullets, stack, links, the
+     form. The first item of a page starts open. */
+  function renderItem(item, first) {
+    const art = el('article', 'mob-item' + (first ? ' is-open' : ''));
+    const head = el('div', 'mob-item__head');
+    const more = el('div', 'mob-item__more');
     const vid = item.video ? (item.video.match(/(?:youtu\.be\/|[?&]v=)([\w-]{6,})/) || [])[1] : null;
     const action = (item.action && !(vid && /youtu/.test(item.action.href))) ? item.action : null;
-    const h1 = el('h1', 'hero__title');
-    if (action) h1.appendChild(link(action.href, '', item.title));
-    else h1.textContent = item.title;
-    text.appendChild(h1);
-    put(text, 'hero__meta', item.meta);
 
-    /* the media: video, photos, or the logo / badge / portrait, LEFT */
+    /* the media, left */
     let media = null;
-    if (vid) {
-      media = el('iframe', 'hero__video');
-      media.src = `https://www.youtube-nocookie.com/embed/${vid}`;
-      media.allow = 'accelerometer; encrypted-media; picture-in-picture; fullscreen';
-      media.allowFullscreen = true;
-      media.loading = 'lazy';
-    } else if (item.photos && item.photos.length) {
-      media = el('div', item.photos.length === 1 ? 'mboard mboard--one' : 'mboard');
-      item.photos.slice(0, 4).forEach(p => {
-        const img = el('img');
-        img.src = 'assets/' + p; img.alt = ''; img.loading = 'lazy';
-        media.appendChild(img);
-      });
+    if (item.photos && item.photos.length) {
+      media = el('img', 'hero__logo');
+      media.src = 'assets/' + item.photos[0]; media.alt = ''; media.loading = 'lazy';
     } else if (item.logo || item.icon) {
       media = el('img', item.person ? 'hero__logo hero__logo--person'
         : item.shape ? 'hero__logo hero__logo--shape' : 'hero__logo');
       media.src = item.icon ? 'assets/afaicon.png' : 'assets/' + item.logo;
       media.alt = ''; media.loading = 'lazy';
+    } else if (item.svg) {
+      media = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      media.setAttribute('viewBox', '0 0 24 24');
+      media.classList.add('glyph');
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', item.svg); p.setAttribute('fill', 'currentColor');
+      media.appendChild(p);
+      art.style.setProperty('--key', item.key);
+    } else if (item.mark) {
+      media = el('span', 'mob-item__mark', item.mark);
+      art.style.setProperty('--key', item.key);
     }
+    const mediaBox = el('div', 'mob-item__media');
+    if (media) mediaBox.appendChild(media);
+    else art.classList.add('mob-item--nomedia');
+    head.appendChild(mediaBox);
 
-    put(text, 'side__desc', item.body);
+    /* the name, centred, with its line */
+    const words = el('div', 'mob-item__words');
+    put(words, 'hero__sub', item.sub);
+    const h1 = el('h1', 'hero__title');
+    if (action) {
+      const a = link(action.href, '', item.title);
+      a.addEventListener('click', e => e.stopPropagation());
+      h1.appendChild(a);
+    } else h1.textContent = item.title;
+    words.appendChild(h1);
+    head.appendChild(words);
+    const chev = el('span', 'mob-item__chev');
+    chev.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';
+    head.appendChild(chev);
+    head.addEventListener('click', () => art.classList.toggle('is-open'));
+
+    /* the drop down */
+    put(more, 'hero__meta', item.meta);
+    if (vid) {
+      const f = el('iframe', 'hero__video');
+      f.src = `https://www.youtube-nocookie.com/embed/${vid}`;
+      f.allow = 'accelerometer; encrypted-media; picture-in-picture; fullscreen';
+      f.allowFullscreen = true;
+      f.loading = 'lazy';
+      more.appendChild(f);
+    }
+    if (item.photos && item.photos.length > 1) {
+      const board = el('div', 'mboard');
+      item.photos.slice(1, 5).forEach(p => {
+        const img = el('img');
+        img.src = 'assets/' + p; img.alt = ''; img.loading = 'lazy';
+        board.appendChild(img);
+      });
+      more.appendChild(board);
+    }
+    put(more, 'side__desc', item.body);
     if (item.bullets && item.bullets.length) {
       const ul = el('ul', 'hero__bullets');
       item.bullets.forEach(b => ul.appendChild(el('li', '', b)));
-      text.appendChild(ul);
+      more.appendChild(ul);
     }
-    put(text, 'hero__stack', item.stack);
-
-    /* links: the action as a button, the cards as text links */
+    put(more, 'hero__stack', item.stack);
     const links = (item.cards || []).filter(c => c.href);
     if (action || links.length) {
       const row = el('div', 'rail-links');
@@ -217,17 +252,12 @@ export function initMobile({ buildRecForm }) {
         if (c.body) a.appendChild(el('span', 'plink__host', c.body));
         row.appendChild(a);
       });
-      text.appendChild(row);
+      more.appendChild(row);
     }
+    if (item.form && buildRecForm) more.appendChild(buildRecForm());
 
-    if (media) {
-      art.classList.add('mob-item--split');
-      const box = el('div', 'mob-item__media');
-      box.appendChild(media);
-      art.appendChild(box);
-    }
-    art.appendChild(text);
-    if (item.form && buildRecForm) art.appendChild(buildRecForm());
+    art.appendChild(head);
+    art.appendChild(more);
     return art;
   }
 
@@ -235,7 +265,7 @@ export function initMobile({ buildRecForm }) {
     const cat = CATEGORIES[i];
     headTitle.textContent = cat.label;
     list.replaceChildren();
-    cat.items.forEach(item => list.appendChild(renderItem(item)));
+    cat.items.forEach((item, n) => list.appendChild(renderItem(item, n === 0)));
     root.classList.add('mob--page');
     page.scrollTop = 0;
     emit('act');

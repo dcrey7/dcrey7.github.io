@@ -1495,12 +1495,15 @@ body.booting .settings:has(#sfxBtn) { display: none; }
    the shared gate, a vertical wheel of the category icons, and one clean
    scroll per category. Not a shrunken desktop. */
 @media (max-width: 759px) {
-  body.mobile .xmb, body.mobile .reflbar, body.mobile .pill,
+  body.mobile .xmb, body.mobile .reflbar,
   body.mobile #keyart, body.mobile .who { display: none !important; }
 
   /* the top bar: icons top left, the date and time in the middle */
   body.mobile .clock { display: block; font-size: .6rem; letter-spacing: .1em; white-space: nowrap; }
-  body.mobile .topbar { padding: 10px 12px; min-height: 52px; }
+  /* the top bar is one 58px row shared by every screen: the clock (home)
+     or the back button (page) sit in it, the hamburger at its right */
+  body.mobile .topbar { position: fixed; top: 0; left: 0; right: 0; height: 58px; min-height: 0; padding: 0; pointer-events: none; }
+  body.mobile.mob-menu-open .sys { pointer-events: auto; }
   body.mobile .sys { margin-left: 0; gap: 8px; min-height: 0; padding: 0; }
   body.mobile .gear { padding: 6px; }
   body.mobile .clock { left: auto; right: 12px; transform: translateY(-50%); }
@@ -1510,28 +1513,42 @@ body.booting .settings:has(#sfxBtn) { display: none; }
 
   /* 2. home: a launcher. Big clock, status line, two widgets, rows. */
   body.mobile .topbar .clock { display: none; }   /* the big one replaces it */
+  .mob-menu { display: none; }
+  body.mobile .mob-menu {
+    display: block; background: none; border: 0; color: var(--chrome);
+    padding: 8px; line-height: 0; cursor: pointer; z-index: 61;
+    position: absolute; top: 9px; right: 10px;   /* top RIGHT, on the row */
+    pointer-events: auto; margin: 0;
+  }
+  body.mobile .sys { display: none; }
+  body.mobile.mob-menu-open .sys {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    position: absolute; top: 50px; right: 10px; left: auto; z-index: 61;
+    padding: 8px; border-radius: 12px;
+    background: color-mix(in oklab, var(--void) 88%, transparent);
+    border: 1px solid var(--chrome);
+  }
   .mob-home {
     position: absolute; inset: 0;
     overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
-    padding: 58px 14px 40px;
+    padding: 0 14px 40px;
     display: flex; flex-direction: column; gap: 12px;
   }
-  .mob-clock { padding: 4px 4px 0; }
-  .mob-clock__time { font-family: 'Archivo', system-ui, sans-serif; font-weight: 300; font-size: 3.4rem; line-height: 1; letter-spacing: .02em; }
-  .mob-clock__date { margin-top: 8px; font-size: .68rem; letter-spacing: .18em; }
-  .mob-status, .mob-widget {
-    background: color-mix(in oklab, var(--void) 62%, transparent);
-    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-    border: 1px solid color-mix(in srgb, var(--chrome) 18%, transparent);
-    border-radius: 12px;
-    color: var(--chrome);
+  /* the clock fills the top row, centred, level with the hamburger */
+  .mob-clock { height: 58px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 0 44px; text-align: center; }
+  /* the player pill, in the flow under the clock, like a lock screen widget */
+  body.mobile .pill {
+    position: static; z-index: auto;
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 4px;
+    background: none; border: 0;   /* no box (user rule) */
   }
-  .mob-status { padding: 9px 14px; font-size: .62rem; letter-spacing: .22em; text-align: center; }
-  .mob-widgets { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
-  .mob-widget { padding: 12px 14px; text-align: left; font: inherit; cursor: pointer; min-height: 88px; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-  .mob-widget__head { font-size: .56rem; letter-spacing: .22em; }
-  .mob-widget__title { font-weight: 700; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .mob-widget__sub { font-size: .7rem; margin-top: auto; }
+  body.mobile .pill[hidden] { display: none; }
+  /* the disc turns all the time on the phone, not only while playing */
+  body.mobile .pill__disc { width: 64px; height: 64px; animation-play-state: running; }
+  body.mobile .pill__meta { width: auto; flex: 1 1 auto; min-width: 0; max-height: none; }
+  .mob-clock__time { font-family: 'Archivo', system-ui, sans-serif; font-weight: 300; font-size: 2.4rem; line-height: 1; letter-spacing: .02em; }
+  .mob-clock__date { margin-top: 3px; font-size: .6rem; letter-spacing: .18em; }
   .mob-rows { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
   /* rows: no box, no border (user rule). The icon left, the name in the
      middle, the chevron right; the selected row is the one whose icon
@@ -1558,34 +1575,47 @@ body.booting .settings:has(#sfxBtn) { display: none; }
   .mob-page {
     position: absolute; inset: 0; display: none;
     overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
-    padding: 60px 18px 80px;
+    padding: 0 18px 80px;
   }
   .mob--page .mob-page { display: block; }
   .mob--page .mob-home { display: none; }
   .mob-head {
     position: sticky; top: 0; z-index: 2;
     display: flex; align-items: center; gap: 10px;
-    padding: 8px 0 12px; margin: 0 -18px 18px; padding-inline: 12px;
+    min-height: 58px; padding: 0 56px 0 10px; margin: 0 -18px 14px;
     background: color-mix(in oklab, var(--void) 78%, transparent);
     -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   }
   .mob-back { background: none; border: 0; color: var(--chrome); padding: 6px; line-height: 0; cursor: pointer; }
   .mob-head__title { font-family: 'Anton', sans-serif; font-weight: 400; font-size: 1.4rem; letter-spacing: .04em; margin: 0; }
-  /* an item: the image or logo LEFT, every word RIGHT (user rule); an
-     item with no media, or the form, takes the full width */
-  .mob-item { display: flex; flex-direction: column; gap: 10px; margin: 0 0 40px; animation: none; }
-  .mob-item--split { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; align-items: start; }
-  .mob-item__media { min-width: 0; }
-  .mob-item__media .hero__logo { width: 100%; height: auto; max-height: none; margin: 0; }
-  .mob-item__media .hero__logo--shape { width: 100%; }
-  .mob-item__media .hero__video { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 8px; }
-  .mob-item__media .mboard { columns: 1; margin: 0; }
-  .mob-item__media .mboard img { margin-bottom: 8px; border-radius: 8px; }
-  .mob-item__text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-  .mob-item__text .hero__title { font-size: clamp(1.45rem, 7vw, 2rem); }
-  .mob-item__text .side__desc { font-size: .92rem; }
-  .mob-item__text .hero__bullets { font-size: .9rem; gap: 6px; }
-  .mob-item .hero__title { font-size: clamp(2rem, 10vw, 2.8rem); max-width: 100%; margin-left: 0; }
+  /* an item is a row in the home's style that DROPS DOWN: media left,
+     the name centred, a chevron; the rest opens under it */
+  .mob-item { display: flex; flex-direction: column; margin: 0 0 6px; animation: none; }
+  .mob-item__head {
+    display: grid; grid-template-columns: 64px minmax(0, 1fr) 24px; gap: 12px;
+    align-items: center; cursor: pointer; padding: 8px 0; min-height: 72px;
+  }
+  .mob-item--nomedia .mob-item__head { grid-template-columns: minmax(0, 1fr) 24px; }
+  .mob-item--nomedia .mob-item__media { display: none; }
+  .mob-item__media { min-width: 0; display: grid; place-items: center; }
+  .mob-item__media .hero__logo { width: 64px; height: 64px; object-fit: cover; max-height: none; margin: 0; border-radius: 12px; }
+  .mob-item__media .hero__logo--shape { object-fit: contain; border-radius: 0; }
+  .mob-item__media .hero__logo--person { object-position: top; }
+  .mob-item__media .glyph { width: 40px; height: 40px; color: var(--key); }
+  .mob-item__mark { font-family: 'Anton', sans-serif; font-size: 1.6rem; color: var(--key); }
+  .mob-item__words { display: flex; flex-direction: column; gap: 6px; min-width: 0; text-align: center; align-items: center; }
+  .mob-item__words .hero__title { font-size: clamp(1.15rem, 5.6vw, 1.5rem); line-height: 1.05; margin: 0; max-width: 100%; text-wrap: balance; }
+  .mob-item__words .hero__sub { font-size: .6rem; }
+  .mob-item__chev { transition: transform .25s var(--ease); line-height: 0; }
+  .mob-item.is-open .mob-item__chev { transform: rotate(180deg); }
+  .mob-item__more { display: none; flex-direction: column; gap: 10px; padding: 2px 0 16px; }
+  .mob-item.is-open .mob-item__more { display: flex; }
+  .mob-item__more .hero__video { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 10px; }
+  .mob-item__more .side__desc { font-size: .95rem; text-align: left; hyphens: none; max-height: none; margin: 0; }
+  .mob-item__more .hero__bullets { font-size: .92rem; gap: 6px; max-width: 100%; }
+  .mob-item__more .mboard { columns: 2 140px; column-gap: 8px; margin: 0; }
+  .mob-item__more .mboard img { margin-bottom: 8px; border-radius: 8px; }
+  .mob-item__more .rail-links { display: flex; flex-wrap: wrap; gap: 12px 18px; justify-content: flex-start; animation: none; }
   .mob-item .hero__title a { text-decoration: none; }
   /* media: full width, natural height; the desktop's viewport maths do not apply */
   .mob-item .hero__logo { width: 100%; height: auto; max-height: none; max-width: 100%; margin-top: 4px; }
