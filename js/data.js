@@ -305,9 +305,9 @@ export const SYSTEM_KEYS = {
 
 /* The theme song: plays from the first key or click, loops between
    loopStart and the end of the file (the file's last bar is a crossfade
-   back into the bar before loopStart, rendered offline; the first 4.62 s
+   back into the bar before loopStart, rendered offline; the first 3.12 s
    of the song are cut, so it starts straight in the music). */
 export const THEME = {
   url: 'assets/theme.mp3', title: 'Silent Echoes', by: 'Flume',
-  loopStart: 10.847, loopEnd: 54.004
+  loopStart: 12.347, loopEnd: 55.504
 };
