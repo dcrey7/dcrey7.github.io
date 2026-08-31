@@ -73,6 +73,10 @@
   --catf: calc(var(--cat) * 1.28);      /* category card height        */
   --catw: var(--catf);                  /* category card width: SQUARE, the
                                            vertical menu box grown up   */
+  /* ONE width for every image in the middle third (user rule): a logo,
+     a school, a badge, a portrait, a video, a photo board. The square
+     side is the same number, capped so a short screen never clips it. */
+  --mediaw: min(clamp(320px, 30vw, 520px), calc(100vh - 470px));
   --imark: calc(var(--cat) * .74);      /* item card height            */
   --imarkw: calc(var(--imark) * 1.6);   /* item card width — same landscape
                                            ratio as the category cards  */
@@ -1046,9 +1050,8 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
 /* a PROPER video frame: exact 16:9 always — the width is capped by the
    height budget, so the player is never letterboxed or squashed */
 .hero__video {
-  /* as big as the middle third allows */
-  /* fill the middle third: whichever of width or height runs out first */
-  width: min(100%, calc((100vh - clamp(260px, 30vh, 380px)) * 16 / 9));
+  /* the same width as every other middle image, in its own 16:9 */
+  width: var(--mediaw);
   aspect-ratio: 16 / 9;
   border: 0;
   border-radius: 16px;
@@ -1223,10 +1226,9 @@ a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(
    portrait, the box is identical. Logos and badges FIT inside it,
    portraits FILL it. */
 .hero__logo {
-  width: min(100%, clamp(320px, 26vw, 540px));
+  width: var(--mediaw);
   aspect-ratio: 1 / 1;
   height: auto;
-  max-height: calc(100vh - 470px);
   object-fit: contain;
   border-radius: 12px;
   margin-top: 10px;
@@ -1241,8 +1243,8 @@ a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(
 
 /* the middle photo board: ordered masonry, hover air, click = lightbox */
 .mboard {
-  width: 100%;   /* the middle third, never past it */
-  columns: 3 260px;
+  width: var(--mediaw);   /* the same width as every other middle image */
+  columns: 2 150px;
   column-gap: 16px;
   margin-top: 10px;
 }
