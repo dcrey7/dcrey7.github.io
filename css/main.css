@@ -1050,8 +1050,9 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
 /* a PROPER video frame: exact 16:9 always — the width is capped by the
    height budget, so the player is never letterboxed or squashed */
 .hero__video {
-  /* the same width as every other middle image, in its own 16:9 */
-  width: var(--mediaw);
+  /* the video is the exception: as big as the middle third allows, it
+     was right before (user rule) */
+  width: min(100%, calc((100vh - clamp(260px, 30vh, 380px)) * 16 / 9));
   aspect-ratio: 16 / 9;
   border: 0;
   border-radius: 16px;
