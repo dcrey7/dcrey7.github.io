@@ -1,0 +1,13 @@
+# The Supabase heartbeat (see worker.js). Deploy:
+#   bash /home/abhishek/.claude/jobs/*/tmp/keepalive-deploy.sh
+# or from this folder: pnpm dlx wrangler deploy
+name = "supabase-keepalive"
+main = "worker.js"
+compatibility_date = "2026-08-30"
+
+[triggers]
+crons = ["0 3 */2 * *"]   # 03:00 UTC every second day
+
+[vars]
+# the anon key is PUBLIC by design (the site ships it to every browser)
+SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6YWh5aHpreGhlZGN1b2JhbGtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0OTQ4MTQsImV4cCI6MjEwMzA3MDgxNH0.YuSi6KVoxIYVPwdzUeej1Hqbqz1cFxCs4hxhuNWk2HE"
