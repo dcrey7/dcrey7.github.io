@@ -131,11 +131,36 @@ body {
   position: fixed;
   inset: 0;
   z-index: -2;
+  /* royal blue, the default: a deep field with light pooling low left,
+     the way the console's own home screen sat */
   background:
-    radial-gradient(80% 62% at 26% 62%, #17346f 0%, transparent 68%),
-    radial-gradient(120% 80% at 50% 118%, #0f2554 0%, transparent 70%),
-    #070d1d;
+    radial-gradient(70% 55% at 22% 58%, #1f4bb4 0%, transparent 66%),
+    radial-gradient(120% 80% at 50% 116%, #12318f 0%, transparent 70%),
+    linear-gradient(#04081c, #0a1c55 58%, #05102e);
 }
+
+
+/* NORTHERN LIGHTS (js/aurora.js): a band low across the sky with rays
+   climbing out of it, painted on a transparent canvas and blended by
+   adding light, so the blue field underneath is untouched. */
+.aurora {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: .95;
+  transition: opacity .6s var(--ease);
+}
+/* a shader theme covers the field, so the lights belong to default only */
+body[data-theme="beach"] .aurora,
+body[data-theme="lava"] .aurora,
+body[data-theme="space"] .aurora { opacity: 0; }
+/* pale sky: the same light, washed out and multiplied instead of added,
+   so it tints the white instead of glowing on it */
+body.light .aurora { opacity: .70; mix-blend-mode: multiply; }
 
 /* The right-side panel. Text marks are ghosted type; a real image (logo,
    photo) shows in FULL colour as its own box — never a transparent slab. */
@@ -550,9 +575,9 @@ body.light {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(80% 62% at 26% 62%, #C8D6F2 0%, transparent 68%),
-    radial-gradient(120% 80% at 50% 118%, #DEE7F7 0%, transparent 70%),
-    #EDF1F8;
+    radial-gradient(80% 62% at 26% 62%, #AFC6F2 0%, transparent 68%),
+    radial-gradient(120% 80% at 50% 118%, #CBDCF8 0%, transparent 70%),
+    #E6EEFB;
   opacity: 0;
   transition: opacity .6s var(--ease);
 }
@@ -1242,14 +1267,28 @@ a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(
   object-position: top;
 }
 
-/* the middle photo board: ordered masonry, hover air, click = lightbox */
+/* the middle photo board: ordered masonry, hover air, click = lightbox.
+   Every photo must be reachable: the board SCROLLS inside the middle
+   third instead of running off the bottom of the screen, with a slim
+   scroller in the site's own chrome so it is obvious there is more. */
 .mboard {
-  /* the gallery takes the whole middle third, like the video */
   width: 100%;
   columns: 3 200px;
   column-gap: 16px;
   margin-top: 10px;
+  max-height: calc(100vh - clamp(300px, 34vh, 430px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--chrome) 45%, transparent) transparent;
 }
+.mboard::-webkit-scrollbar { width: 6px; }
+.mboard::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--chrome) 45%, transparent);
+  border-radius: 3px;
+}
+.mboard::-webkit-scrollbar-track { background: transparent; }
 .mboard img {
   width: 100%;
   height: auto;

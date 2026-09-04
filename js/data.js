@@ -12,13 +12,47 @@ export const ABOUT = {
   title: 'AI ENGINEER',
   sub: 'ABHISHEK THOMAS',
   meta: 'PARIS · OPEN TO WORK',
-  cards: [
-    { kicker: 'NOW', title: 'Vistiq.AI, Paris',
-      body: 'Making LLMs behave, evals, retrieval, and agents on an AI-native SaaS.' },
-    { kicker: 'BEFORE', title: 'Amazon → MathCo → EXL → AXA',
-      body: '5+ years turning data science into systems that shipped and stayed up.' },
-    { kicker: 'ALSO', title: 'Football, GPUs, hackathons',
-      body: 'Masters in Data Science & AI, emlyon 2026. I build small things that win prizes.' }
+  /* the vertical menu under ABOUT: one screen per thing worth knowing */
+  items: [
+    {
+      id: 'intro', title: 'AI ENGINEER', sub: 'ABHISHEK THOMAS',
+      meta: 'PARIS · OPEN TO WORK', icon: true,
+      body: 'I build AI systems that go to production and stay up. Today that means LLM extraction, evaluation and agents at Vistiq.AI in Paris. Before Paris it was six years of data science across Amazon, TheMathCompany, EXL and AXA, in Bangalore and then France. I started as a mechanical engineer and taught myself the rest.',
+      bullets: [
+        'Indian, grew up in Sharjah, live in Paris',
+        'English and Hindi and Malayalam fluent, French in progress',
+        'Football every Saturday, and I film my own games, which is how Kicky AI started'
+      ]
+    },
+    {
+      id: 'building', title: 'BUILDING', sub: 'what I am working on now',
+      mark: 'B', key: '#16A34A',
+      body: 'MemoryBridge AI: a phone call, not an app. It calls an elderly parent living alone every day, remembers the last conversation, scores memory over time, and messages the family within seconds if something is wrong. It works on a feature phone, because that is what the person actually owns. Built for the Malayali corridor first, where the family is 4,000 km away and the money arrives but the company does not.',
+      bullets: [
+        'Won three awards at the Speechmatics hackathon, including first place',
+        'Real phone calls over PSTN, LiveKit and Speechmatics under it',
+        'Malayalam first, because a person with dementia goes back to their mother tongue'
+      ]
+    },
+    {
+      id: 'community', title: 'COMMUNITY', sub: 'cerebras · hugging face · paris',
+      mark: 'C', key: '#F59E0B',
+      body: 'Cerebras Community Ambassador for Paris since July 2026, the only one for this city. I run Cafe Compute Paris: the venue, the room, the demo, the people. Also on the organising team for a Hugging Face robotics workshop, where we built and calibrated SO100 arms and trained them with action chunking transformers.',
+      bullets: [
+        'Cerebras served the 235B teacher model that made my thesis possible, on a free tier, to a student. That is why I said yes',
+        'Hugging Face robotics workshop, SO100 build and calibration',
+        'Paris AI scene: hackathons most months, and I write up what I learn'
+      ]
+    },
+    {
+      id: 'shop', title: 'SHOP', sub: 'clothes I designed',
+      mark: 'S', key: '#EC4899',
+      body: 'I design clothes as well as systems. The prints are mine, the shop prints and ships them.',
+      links: [
+        { label: 'frankly wearing', href: 'https://www.franklywearing.com/creator/dcrey7' },
+        { label: 'instagram', href: 'https://www.instagram.com/dcrey7' }
+      ]
+    }
   ]
 };
 
@@ -27,19 +61,21 @@ export const WORK = [
     company: 'Vistiq.AI', role: 'AI Engineer', where: 'Paris', dates: 'since 2026',
     key: '#2F6BFF', mark: 'V', logo: 'work/vistiq_ai_logo.jpeg',
     bullets: [
-      'LLM evals for long-context retrieval, measured answer accuracy +15%',
-      'RAG over financial corpora, inference cost −40% via retrieval, caching, routing',
-      'MCP + agentic patterns on an AI-native SaaS for PE / VC / family offices'
+      'Rebuilt the document extraction platform end to end: accuracy from 44% to 92% on private equity and venture capital documents, with the source cited for every field',
+      'Built the LLM evaluation system that made model testing and release twice as fast, tracking cost, latency, tokens and quality across providers, wired into CI/CD',
+      'Cut LLM inference cost by 40% through retrieval optimisation, caching and model routing',
+      'Designed and shipped an agent that watches each tenant mailbox, drive and calendar through MCP connectors, pulls the right documents in, extracts the data, matches it to the right fund, and reports every run with validate, undo and rerun'
     ],
-    stack: 'Python · LLMs · RAG · Evals · MCP · TypeScript · PostgreSQL · Redis'
+    stack: 'Python · Go · TypeScript · LLMs · Evals · MCP · PostgreSQL · Redis'
   },
   {
     company: 'AXA France', role: 'Data Scientist', where: 'Paris', dates: '2025 to 26',
     key: '#1B34C8', mark: 'AXA', logo: 'work/axa_france_logo.jpeg',
     bullets: [
-      'Production OCR + KV extraction, fine-tuned Qwen 3.5 4B (Unsloth), +4% accuracy',
-      'GLiNER2 with LoRA distillation of GPT-4o mini, operational cost −85%',
-      'SAM segmentation for property claims +15% · active-learning platform (Label Studio)'
+      'Shipped an extraction pipeline built on GLiNER2 with LoRA distillation of GPT-4o mini, served as a FastAPI service in Docker: operational cost down 85% in production',
+      'Built production OCR and key value extraction for noisy user submitted documents, fine tuning Qwen 3.5 4B with Unsloth on synthetic document images, accuracy up 4%',
+      'Built image segmentation for property claims with SAM, accuracy up 15%',
+      'Designed the active learning and annotation platform on Label Studio, and led internal accelerathons on voice agents and document summarisation'
     ],
     stack: 'PyTorch · Unsloth · LoRA · SAM · FastAPI · Docker · AWS'
   },
@@ -47,9 +83,10 @@ export const WORK = [
     company: 'EXL Services', role: 'Senior Data Scientist', where: 'Bangalore', dates: '2022 to 24',
     key: '#6D28D9', mark: 'EXL', logo: 'work/exl_service_logo.jpeg',
     bullets: [
-      'Production LightGBM models, GINI +6% on large-scale data',
-      'Back-testing, drift detection & compliance monitoring frameworks',
-      'A/B testing for pricing · mentored 3 junior data scientists (SHAP)'
+      'Production LightGBM models on large scale data, GINI up 6%',
+      'Back testing and monitoring frameworks for model stability, drift detection and regulatory compliance across versions',
+      'Churn prediction and segmentation on behavioural data, delivered through Power BI',
+      'A/B testing and experiment design for data driven pricing, and mentored three junior data scientists'
     ],
     stack: 'LightGBM · SHAP · PySpark · MLflow · Power BI'
   },
@@ -57,8 +94,8 @@ export const WORK = [
     company: 'MathCo', role: 'Data Scientist', where: 'Bangalore', dates: '2021 to 22',
     key: '#0EA5A4', mark: 'MC', logo: 'work/themathcompany_logo.jpeg',
     bullets: [
-      'Marketing-mix models (lag, adstock), channel ROI +3%',
-      'Dash & Streamlit apps for KPIs, funnels, engagement',
+      'Marketing mix models with lag, adstock and saturation curves for a global quick service brand: causal inference and time series decomposition, channel ROI up 3%',
+      'Budget simulator that ran scenarios against the optimal spend, in Dash and Streamlit',
       'Scalable ML pipelines on AWS SageMaker'
     ],
     stack: 'Dash · Streamlit · SageMaker · Time Series'
@@ -67,9 +104,9 @@ export const WORK = [
     company: 'Amazon', role: 'Risk Analyst', where: 'Bangalore', dates: '2019 to 21',
     key: '#FF9900', mark: 'AMZ', logo: 'work/amazon_logo.jpeg',
     bullets: [
-      'Fraud & anomaly scoring (XGBoost, KNN), transaction risk −12%',
-      'Power BI dashboards for cross-functional stakeholders',
-      'Improved automated risk-decision frameworks'
+      'Fraud detection and anomaly scoring with XGBoost and KNN on high volume transaction data, transaction risk down 12%',
+      'Power BI dashboards read across teams',
+      'First data science role, taken while finishing a postgraduate diploma at night'
     ],
     stack: 'XGBoost · Scikit-learn · SQL · Power BI'
   }
@@ -82,8 +119,8 @@ export const PROJECTS = [
     video: 'https://www.youtube.com/watch?v=knL8shghyBU',
     desc: 'Zero-label football shot analysis. SAM3 + LocateAnything-3B auto-labels distilled into a fast RF-DETR-Seg detector; on-device VLM coach (MiniCPM-V) + BlazePose. Detects goals, shooting foot, shot speed.',
     links: [
-      { label: '▶ demo', href: 'https://www.youtube.com/watch?v=knL8shghyBU' },
-      { label: '🤗 space', href: 'https://huggingface.co/spaces/build-small-hackathon/kicky-ai' },
+      { label: 'demo', href: 'https://www.youtube.com/watch?v=knL8shghyBU' },
+      { label: 'hugging face space', href: 'https://huggingface.co/spaces/build-small-hackathon/kicky-ai' },
       { label: 'writeup', href: 'https://dcrey7.substack.com/p/world-fut-coach' }
     ]
   },
@@ -106,11 +143,20 @@ export const PROJECTS = [
     links: [{ label: 'github', href: 'https://github.com/dcrey7/jobomatrix-v2' }]
   },
   {
-    name: 'RIZZUME', tag: 'ai resume builder',
+    name: 'REZOUME', tag: 'ai resume builder · live',
     key: '#0891B2', mark: 'RZ',
     video: 'https://youtu.be/QJBjcu8EAlU',
-    desc: 'AI system that generates a tailored resume and cover letter for every job from one master profile, in batch, with dual LLM.',
-    links: [{ label: 'live app', href: 'https://rizzume--dcrey7.replit.app/' }]
+    desc: 'AI system that generates a tailored resume and cover letter for every job from one master profile, in batch, with dual LLM. Live on Cloudflare Workers with real payments.',
+    links: [{ label: 'rezoume.com', href: 'https://rezoume.com' }]
+  },
+  {
+    name: 'COVER SWITCH 2', tag: 'kde plasma · open source',
+    key: '#2F6BFF', mark: 'CS',
+    desc: 'A window switcher for KDE Plasma 6: GNOME styled cover flow, panel aware geometry, morph animations. QML, GPL, installable from the KDE store.',
+    links: [
+      { label: 'github', href: 'https://github.com/dcrey7/coverswitch2' },
+      { label: 'kde store', href: 'https://store.kde.org/p/2308734' }
+    ]
   },
   {
     name: 'ACTIVE GLINER', tag: 'research',
@@ -134,7 +180,7 @@ export const PROJECTS = [
       'projectsandhackthons/mistralgamejam/1737915440270.jpeg'
     ],
     links: [
-      { label: '🤗 space', href: 'https://huggingface.co/spaces/dcrey7/NotMe' },
+      { label: 'hugging face space', href: 'https://huggingface.co/spaces/dcrey7/NotMe' },
       { label: 'the story', href: 'https://www.linkedin.com/posts/dcrey7_mistralai-huggingface-elevenlabs-ugcPost-7289345687324934145-pTog/' }
     ]
   },
@@ -153,7 +199,7 @@ export const PROJECTS = [
   },
   {
     name: 'PIKA PAL AI', tag: 'wids datathon, thales responsible ai award', passed: true,
-    key: '#0D9488', mark: 'PP',
+    key: '#0D9488', mark: 'PP', logo: 'projects/pikapal.png',
     desc: 'Autonomous content moderation agent built to make online spaces safer for children. Won the Thales Responsible AI Excellence Award.',
     photos: [
       'projectsandhackthons/widsshiuggingface/1742974537676.jpeg',
@@ -249,20 +295,46 @@ export const CERTS = [
   { name: 'DGM · IISc', issuer: 'IISc Bangalore', mark: 'DG',
     key: '#7C3AED', logo: 'certifications/dgm-iisc.jpg',
     href: 'https://drive.google.com/file/d/1ILI3O1_qUFbRJsUGlLb8OrcPE5gdJKxf/view' },
-  { name: 'CHITRAKALA', issuer: 'art', mark: '🎨',
+  { name: 'CHITRAKALA', issuer: 'art', mark: 'CK',
     key: '#E11D48',
     href: 'https://drive.google.com/file/d/1nvwbt2sHyTMtxiSNGlekgztIA1lLseQT/view' }
 ];
 
 /* Education, school logos live in assets/education/. */
 export const EDUCATION = [
-  { school: 'EMLYON', line: 'Masters in Data Science & AI · Paris · 2026', mark: 'EM',
+  { school: 'EMLYON', role: 'MSc Data Science and Artificial Intelligence',
+    line: 'Paris · Sep 2024 to Feb 2026', mark: 'EM',
     key: '#C8102E', logo: 'education/emlyon_business_school_logo.jpeg',
+    bullets: [
+      'Machine learning, deep learning, NLP, computer vision, MLOps',
+      'Thesis: Active GLiNER, active learning for span based entity extraction, a small model taught to beat its teacher',
+      'Built during the masters: Mistral hackathon finalist twice, a Thales responsible AI award, a Speechmatics hackathon sweep'
+    ],
+    stack: 'Python · PyTorch · LLMs · NLP · MLOps',
     href: 'https://certificate.bcdiploma.com/check/DB040D4C62396A4CAD0001E4A01FB14D402F43E556B3962C5964899D0A5BD766SGcwRjhKTWpqaUkxSUJPYU8rUG14MTlKcnJ5aHNCT3cyd2l4NHhJZXhPNXFlanhU' },
-  { school: 'MCGILL', line: 'School of Continuing Studies · Montréal', mark: 'MG',
-    key: '#ED1B2F', logo: 'education/mcgill_university_school_of_continuing_studies_logo.jpeg' },
-  { school: 'SVNIT SURAT', line: 'National Institute of Technology', mark: 'SV',
-    key: '#D97706', logo: 'education/sardar_vallabhbhai_national_institute_of_technology_surat_logo.jpeg' }
+  { school: 'MCGILL', role: 'International semester, Data Science and AI',
+    line: 'Montreal · Jan 2025', mark: 'MG',
+    key: '#ED1B2F', logo: 'education/mcgill_university_school_of_continuing_studies_logo.jpeg',
+    bullets: [
+      'School of Continuing Studies, exchange term from emlyon',
+      'Data science and AI coursework in an English speaking cohort in Canada'
+    ] },
+  { school: 'UCHICAGO', role: 'Postgraduate Diploma, Data Science and Machine Learning',
+    line: 'Graham School · 2019 to 2020', mark: 'UC',
+    key: '#800000',
+    bullets: [
+      'Machine learning and deep learning, taken while working full time at Amazon',
+      'The pivot: a mechanical engineer teaching himself the field he now works in'
+    ] },
+  { school: 'SVNIT SURAT', role: 'B.Tech Mechanical Engineering',
+    line: 'National Institute of Technology · Jun 2015 to May 2019', mark: 'SV',
+    key: '#D97706', logo: 'education/nit-surat.svg',
+    bullets: [
+      'Robotics and advanced mathematics alongside the core mechanical syllabus',
+      'Class delegate, the elected voice of the batch to the faculty',
+      'Played football for the university team, and still plays every Saturday in Paris'
+    ],
+    stack: 'Robotics · Advanced mathematics · Thermodynamics · Machine design' }
 ];
 
 /* Supabase project for visitor recommendations (pending → approved flow).
@@ -300,7 +372,7 @@ export const CONTACT = {
 export const SYSTEM_KEYS = {
   people:   { key: '#8B5CF6', mark: '16' },
   trophies: { key: '#F59E0B', mark: '★'  },
-  contact:  { key: '#EC4899', mark: '✉'  }
+  contact:  { key: '#EC4899', mark: 'CT' }
 };
 
 /* The theme song: plays from the first key or click, loops between

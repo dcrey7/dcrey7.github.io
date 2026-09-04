@@ -40,20 +40,30 @@ const PALETTE = ['var(--sys-blue)', 'var(--sys-orange)', 'var(--sys-purple)',
 
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
+/* A transparent file (svg or png) is its own SHAPE: it shows with no box
+   behind it. A jpeg is a photo or a printed card, so it keeps its box. */
+const isShape = f => /\.(svg|png)$/i.test(f || '');
+
 const host = url => {
   try { return new URL(url).hostname.replace(/^www\./, ''); }
   catch { return null; }
 };
 
-/* ---------- ABOUT: one intro item, the afaicon is its image ---------- */
+/* ---------- ABOUT: who he is, what he is building, the community, the shop ---------- */
 const about = {
   id: 'about', label: 'ABOUT', mark: null, svg: ICONS.person, key: 'var(--sys-yellow)',
-  items: [{
-    id: 'intro', mark: null, svg: ICONS.person, key: 'var(--sys-yellow)',
-    title: ABOUT.title, sub: ABOUT.sub, meta: ABOUT.meta, badge: null,
-    body: 'Making LLMs behave at Vistiq.AI, Paris. 5+ years turning data science into shipped systems, Amazon to AXA to AI native startups. Masters in Data Science & AI, emlyon 2026.',
-    action: null, cards: []
-  }]
+  items: ABOUT.items.map(a => ({
+    id: a.id,
+    mark: a.mark || null,
+    svg: a.icon ? ICONS.person : null,
+    icon: a.icon || false,
+    key: a.key || 'var(--sys-yellow)',
+    title: a.title, sub: a.sub, meta: a.meta || null, badge: null,
+    body: a.body,
+    bullets: a.bullets,
+    action: null,
+    cards: (a.links || []).map(l => ({ kicker: 'OPEN', title: l.label, body: host(l.href), href: l.href }))
+  }))
 };
 
 /* ---------- EDUCATION: its own category, right after experience ---------- */
@@ -61,8 +71,14 @@ const education = {
   id: 'education', label: 'EDUCATION', mark: null, svg: ICONS.school, key: 'var(--sys-red)',
   items: EDUCATION.map(e => ({
     id: slug(e.school), mark: e.mark, key: 'var(--sys-red)', logo: e.logo,
-    title: e.school, sub: 'education', meta: null, badge: null,
-    body: e.line,
+    shape: isShape(e.logo),
+    title: e.school,
+    sub: e.role || 'education',
+    meta: e.line,
+    badge: null,
+    body: null,
+    bullets: e.bullets,
+    stack: e.stack,
     action: e.href ? { label: 'verify diploma', href: e.href } : null,
     cards: []
   }))
@@ -73,6 +89,7 @@ const work = {
   id: 'work', label: 'WORK', mark: null, svg: ICONS.work, key: 'var(--sys-blue)',
   items: WORK.map(j => ({
     id: slug(j.company), mark: j.mark, key: 'var(--sys-blue)', logo: j.logo,
+    shape: isShape(j.logo),
     title: j.company.toUpperCase(),
     sub: j.role,
     meta: `${j.where} · ${j.dates}`,
@@ -93,6 +110,7 @@ const play = {
   items: PROJECTS.filter(p => p.video || (p.photos && p.photos.length) || p.logo)
     .map((p, i) => ({
     id: slug(p.name), mark: p.mark, key: PALETTE[i % PALETTE.length], logo: p.logo,
+    shape: isShape(p.logo),
     title: p.name,
     sub: p.tag,
     meta: null,
@@ -138,14 +156,13 @@ const trophies = {
   id: 'trophies', label: 'TROPHIES', mark: null, svg: ICONS.trophy, key: 'var(--sys-orange)',
   items: CERTS.filter(c => c.logo).map(c => ({
     id: slug(c.name), mark: c.mark, key: 'var(--sys-orange)', logo: c.logo,
-    /* a transparent PNG (the AWS hexagon) is its own shape, no box */
-    shape: /\.png$/i.test(c.logo),
+    shape: isShape(c.logo),
     title: c.name,
     sub: c.issuer,
     meta: null,
     badge: null,
     body: null,
-    action: { label: '✓ verify', href: c.href },
+    action: { label: 'verify', href: c.href },
     cards: []
   }))
 };
@@ -155,10 +172,10 @@ const contact = {
   id: 'contact', label: 'CONTACT', mark: null, svg: ICONS.mail, key: 'var(--sys-pink)',
   items: [
     {
-      id: 'email', mark: null, svg: ICONS.mail, key: 'var(--sys-pink)',
+      id: 'email', mark: null, svg: ICONS.mail, key: 'var(--sys-red)',
       title: 'EMAIL', sub: 'the fastest way', meta: CONTACT.where, badge: null,
       body: CONTACT.email,
-      action: { label: `✉ ${CONTACT.email}`, href: `mailto:${CONTACT.email}` },
+      action: { label: CONTACT.email, href: `mailto:${CONTACT.email}` },
       cards: []
     },
     ...CONTACT.links.map(l => ({

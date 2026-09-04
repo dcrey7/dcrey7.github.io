@@ -32,7 +32,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
 
   /* --- the two axes --- */
   say('starts on ABOUT', cat(), 'ABOUT');
-  say('about is one brief intro', nItems(), 1);
+  say('about has 4 screens', nItems(), 4);
   say('intro titled AI ENGINEER', item() === undefined ? hero() : hero(), 'AI ENGINEER');
 
   press('ArrowRight'); await wait();
@@ -57,7 +57,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   /* --- each category remembers its own item --- */
   press('ArrowRight'); await wait();
   say('EDUCATION comes after experience', cat(), 'EDUCATION');
-  say('education has 3 schools', nItems(), 3);
+  say('education has 4 schools', nItems(), 4);
   press('ArrowRight'); await wait();
   say('right to PLAY', cat(), 'PLAY');
   say('play has 6 items (media-less projects cut)', nItems(), 6);

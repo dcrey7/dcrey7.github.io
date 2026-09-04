@@ -7,9 +7,14 @@ import * as theme from './theme.js';
 import { CATEGORIES } from './menu.js';
 import { bus, MOBILE } from './config.js';
 import { initMobile } from './mobile.js';
+import { initAurora } from './aurora.js';
 import { sfx } from './sfx.js';
 
 const xmb = initXmb();
+
+/* the northern lights over the default field */
+const aurora = matchMedia('(prefers-reduced-motion: reduce)').matches
+  ? null : initAurora(document.getElementById('aurora'));
 
 /* ---------- the phone version ----------
    Under 760 px the cross is hidden and js/mobile.js takes over: a wheel of
@@ -399,6 +404,7 @@ function syncFrameMode(light) {
 }
 function applyMode(light) {
   document.body.classList.toggle('light', light);
+  if (aurora) aurora.setLight(light);   /* the sky pales with the page */
   sunI.style.display = light ? 'none' : 'block';
   moonI.style.display = light ? 'block' : 'none';
   modeBtn.setAttribute('aria-label', light ? 'Dark mode' : 'Light mode');
@@ -409,6 +415,9 @@ modeBtn.addEventListener('click', () =>
   applyMode(!document.body.classList.contains('light')));
 let storedMode = 'dark';
 try { storedMode = localStorage.getItem('xmb-mode') || 'dark'; } catch {}
+/* ?mode=light forces it, for screenshots and deep links */
+const modeQ = new URLSearchParams(location.search).get('mode');
+if (modeQ) storedMode = modeQ;
 if (storedMode === 'light') applyMode(true);
 
 /* ---------- translate ----------
@@ -535,8 +544,8 @@ xlObserver.observe(document.body, { childList: true, subtree: true });
 if (curLang) setTimeout(applyLang, 900);
 
 /* the lava lamp is the house default; visitors can change it */
-let storedTheme = 'lava';
-try { storedTheme = localStorage.getItem('xmb-theme') || 'lava'; } catch {}
+let storedTheme = 'default';
+try { storedTheme = localStorage.getItem('xmb-theme') || 'default'; } catch {}
 applyTheme(storedTheme);
 
 /* The clock is pure console theatre, but it is the detail that sells it. */
