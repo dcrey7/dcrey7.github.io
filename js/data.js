@@ -125,8 +125,8 @@ export const PROJECTS = [
     ]
   },
   {
-    name: 'MEMORY BRIDGEAI', tag: 'treble hackathon, winner ×3 awards', passed: true,
-    key: '#DC2626', mark: 'MB',
+    name: 'MEMORY BRIDGEAI', tag: 'speechmatics hackathon, winner ×3 awards', passed: true,
+    key: '#DC2626', mark: 'MB', logo: 'projects/memorybridge.png',
     video: 'https://youtu.be/oadhJjaRd3I',
     desc: 'Proactive voice agent that calls elderly people living alone, remembers past conversations, scores their memory, and alerts a caregiver on WhatsApp within seconds. Real phone calls over PSTN, works on a feature phone. LiveKit · Speechmatics · Backboard.io.',
     photos: [
@@ -138,20 +138,20 @@ export const PROJECTS = [
   },
   {
     name: 'JOBAMATRIX', tag: 'agentic system',
-    key: '#EA580C', mark: 'JM',
+    key: '#EA580C', mark: 'JM', logo: 'projects/jobamatrix.png',
     desc: 'End-to-end agentic job-application system, 290 tests, SQLite, Playwright automation, parallel agent orchestration, MCP.',
     links: [{ label: 'github', href: 'https://github.com/dcrey7/jobomatrix-v2' }]
   },
   {
     name: 'REZOUME', tag: 'ai resume builder · live',
-    key: '#0891B2', mark: 'RZ',
+    key: '#0891B2', mark: 'RZ', logo: 'projects/rezoume.png',
     video: 'https://youtu.be/QJBjcu8EAlU',
     desc: 'AI system that generates a tailored resume and cover letter for every job from one master profile, in batch, with dual LLM. Live on Cloudflare Workers with real payments.',
     links: [{ label: 'rezoume.com', href: 'https://rezoume.com' }]
   },
   {
     name: 'COVER SWITCH 2', tag: 'kde plasma · open source',
-    key: '#2F6BFF', mark: 'CS',
+    key: '#2F6BFF', mark: 'CS', logo: 'projects/coverswitch.png',
     desc: 'A window switcher for KDE Plasma 6: GNOME styled cover flow, panel aware geometry, morph animations. QML, GPL, installable from the KDE store.',
     links: [
       { label: 'github', href: 'https://github.com/dcrey7/coverswitch2' },
@@ -159,8 +159,8 @@ export const PROJECTS = [
     ]
   },
   {
-    name: 'ACTIVE GLINER', tag: 'research',
-    key: '#7C3AED', mark: 'GL',
+    name: 'ACTIVE GLINER', tag: 'research · masters thesis',
+    key: '#7C3AED', mark: 'GL', logo: 'projects/activegliner.png',
     desc: 'Active-learning framework for span-based NER, paper + code.',
     links: [
       { label: 'paper', href: 'https://drive.google.com/file/d/1eo1z6MbX-gSsD8jMPwdCOveldRVPxqrF/view' },
@@ -170,7 +170,7 @@ export const PROJECTS = [
   },
   {
     name: 'NOTME', tag: 'mistral game jam, finalist',
-    key: '#E11D48', mark: 'NM',
+    key: '#E11D48', mark: 'NM', logo: 'projects/notme.png',
     desc: 'Voice imposter detection game built for the Mistral AI Game Jam.',
     photos: [
       'projectsandhackthons/mistralgamejam/1737915427569.jpeg',
@@ -186,7 +186,7 @@ export const PROJECTS = [
   },
   {
     name: 'MEDICAL RAG', tag: 'mistral × alan, finalist',
-    key: '#059669', mark: 'MR',
+    key: '#059669', mark: 'MR', logo: 'projects/medicalrag.png',
     desc: 'RAG + fine-tuning on French medical MCQs.',
     photos: [
       'projectsandhackthons/mistralrag/1728839714292.jpeg',
