@@ -1197,10 +1197,21 @@ a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
-  scrollbar-width: none;
+  overscroll-behavior: contain;
   pointer-events: auto;
   font-family: 'Archivo', system-ui, sans-serif;
+  /* a slim scroller in the site's own chrome: long lists of bullets are
+     common here, and a hidden scrollbar hides that there is more */
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--chrome) 45%, transparent) transparent;
 }
+.keyart-rail::-webkit-scrollbar { width: 6px; }
+.keyart-rail::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--chrome) 45%, transparent);
+  border-radius: 3px;
+}
+.keyart-rail::-webkit-scrollbar-track { background: transparent; }
 /* the right third is centre aligned; the links right aligned above the
    words; everything starts at the TOP of the rail, level with the column
    and the heading */

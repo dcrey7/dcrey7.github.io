@@ -12,45 +12,44 @@ export const ABOUT = {
   title: 'AI ENGINEER',
   sub: 'ABHISHEK THOMAS',
   meta: 'PARIS · OPEN TO WORK',
-  /* the vertical menu under ABOUT: one screen per thing worth knowing */
+  /* the vertical menu under ABOUT. No afaicon on any of these (user
+     rule): the marks are letters, the colours carry them. */
   items: [
     {
       id: 'intro', title: 'AI ENGINEER', sub: 'ABHISHEK THOMAS',
-      meta: 'PARIS · OPEN TO WORK', icon: true,
-      body: 'I build AI systems that go to production and stay up. Today that means LLM extraction, evaluation and agents at Vistiq.AI in Paris. Before Paris it was six years of data science across Amazon, TheMathCompany, EXL and AXA, in Bangalore and then France. I started as a mechanical engineer and taught myself the rest.',
+      meta: 'PARIS · OPEN TO WORK', mark: 'AT', key: '#FFC800',
+      body: 'I build AI systems that reach production and stay up. Document intelligence and computer vision are the parts I care about most: teaching a machine to read a messy page, or to watch a video and understand what happened. Today that is LLM extraction, evaluation and agents at Vistiq.AI in Paris. Before Paris, six years of data science across Amazon, TheMathCompany, EXL and AXA. I started as a mechanical engineer and taught myself the rest.',
       bullets: [
-        'Indian, grew up in Sharjah, live in Paris',
-        'English and Hindi and Malayalam fluent, French in progress',
-        'Football every Saturday, and I film my own games, which is how Kicky AI started'
+        'Document intelligence and computer vision are the work I chase',
+        'Local models on my own GPU, because a model you can run is a model you can trust',
+        'Design too: digital illustration and print, my own clothing prints',
+        'Arsenal. Football every Saturday in Paris, and I film my own games'
       ]
     },
     {
-      id: 'building', title: 'BUILDING', sub: 'what I am working on now',
-      mark: 'B', key: '#16A34A',
-      body: 'MemoryBridge AI: a phone call, not an app. It calls an elderly parent living alone every day, remembers the last conversation, scores memory over time, and messages the family within seconds if something is wrong. It works on a feature phone, because that is what the person actually owns. Built for the Malayali corridor first, where the family is 4,000 km away and the money arrives but the company does not.',
+      id: 'building', title: 'BUILDING', sub: 'what is live right now',
+      mark: 'BD', key: '#16A34A',
+      body: 'Three things I build and run myself, plus the community work in Paris.',
       bullets: [
-        'Won three awards at the Speechmatics hackathon, including first place',
-        'Real phone calls over PSTN, LiveKit and Speechmatics under it',
-        'Malayalam first, because a person with dementia goes back to their mother tongue'
-      ]
-    },
-    {
-      id: 'community', title: 'COMMUNITY', sub: 'cerebras · hugging face · paris',
-      mark: 'C', key: '#F59E0B',
-      body: 'Cerebras Community Ambassador for Paris since July 2026, the only one for this city. I run Cafe Compute Paris: the venue, the room, the demo, the people. Also on the organising team for a Hugging Face robotics workshop, where we built and calibrated SO100 arms and trained them with action chunking transformers.',
-      bullets: [
-        'Cerebras served the 235B teacher model that made my thesis possible, on a free tier, to a student. That is why I said yes',
-        'Hugging Face robotics workshop, SO100 build and calibration',
-        'Paris AI scene: hackathons most months, and I write up what I learn'
-      ]
-    },
-    {
-      id: 'shop', title: 'SHOP', sub: 'clothes I designed',
-      mark: 'S', key: '#EC4899',
-      body: 'I design clothes as well as systems. The prints are mine, the shop prints and ships them.',
+        'Rezoume: a tailored resume and cover letter for every job, from one master profile',
+        'Kicky AI: football shot analysis from a phone on a tripod, zero labels',
+        'Tranzlato: translation, live',
+        'Cerebras Community Ambassador for Paris, the only one for this city, running Cafe Compute'
+      ],
       links: [
-        { label: 'frankly wearing', href: 'https://www.franklywearing.com/creator/dcrey7' },
-        { label: 'instagram', href: 'https://www.instagram.com/dcrey7' }
+        { label: 'rezoume.com', href: 'https://rezoume.com' },
+        { label: 'kickyai.com', href: 'https://kickyai.com' },
+        { label: 'tranzlato.com', href: 'https://tranzlato.com' },
+        { label: 'cerebras', href: 'https://www.cerebras.ai/' }
+      ]
+    },
+    {
+      id: 'extras', title: 'EXTRAS', sub: 'merch and design',
+      mark: 'EX', key: '#EC4899',
+      body: 'The prints are mine. The shop prints and ships them. The design work lives on Instagram.',
+      links: [
+        { label: 'buy the merch', href: 'https://www.franklywearing.com/creator/dcrey7' },
+        { label: 'design portfolio', href: 'https://www.instagram.com/dcrey7' }
       ]
     }
   ]
@@ -115,7 +114,7 @@ export const WORK = [
 export const PROJECTS = [
   {
     name: 'KICKY AI', tag: 'build-small hackathon', passed: true,
-    key: '#16A34A', mark: 'K',
+    key: '#16A34A', mark: 'K', logo: 'projects/kicky.png',
     video: 'https://www.youtube.com/watch?v=knL8shghyBU',
     desc: 'Zero-label football shot analysis. SAM3 + LocateAnything-3B auto-labels distilled into a fast RF-DETR-Seg detector; on-device VLM coach (MiniCPM-V) + BlazePose. Detects goals, shooting foot, shot speed.',
     links: [
@@ -155,7 +154,7 @@ export const PROJECTS = [
     desc: 'A window switcher for KDE Plasma 6: GNOME styled cover flow, panel aware geometry, morph animations. QML, GPL, installable from the KDE store.',
     links: [
       { label: 'github', href: 'https://github.com/dcrey7/coverswitch2' },
-      { label: 'kde store', href: 'https://store.kde.org/p/2308734' }
+      { label: 'kde store', href: 'https://store.kde.org/p/2360549' }
     ]
   },
   {
@@ -170,7 +169,7 @@ export const PROJECTS = [
   },
   {
     name: 'NOTME', tag: 'mistral game jam, finalist',
-    key: '#E11D48', mark: 'NM', logo: 'projects/notme.png',
+    key: '#E11D48', mark: 'NM', logo: 'brands/mistral.png',
     desc: 'Voice imposter detection game built for the Mistral AI Game Jam.',
     photos: [
       'projectsandhackthons/mistralgamejam/1737915427569.jpeg',
@@ -186,7 +185,7 @@ export const PROJECTS = [
   },
   {
     name: 'MEDICAL RAG', tag: 'mistral × alan, finalist',
-    key: '#059669', mark: 'MR', logo: 'projects/medicalrag.png',
+    key: '#059669', mark: 'MR', logo: 'brands/alan.png',
     desc: 'RAG + fine-tuning on French medical MCQs.',
     photos: [
       'projectsandhackthons/mistralrag/1728839714292.jpeg',
@@ -306,9 +305,10 @@ export const EDUCATION = [
     line: 'Paris · Sep 2024 to Feb 2026', mark: 'EM',
     key: '#C8102E', logo: 'education/emlyon_business_school_logo.jpeg',
     bullets: [
+      'Class delegate, elected by the batch to speak for it',
       'Machine learning, deep learning, NLP, computer vision, MLOps',
       'Thesis: Active GLiNER, active learning for span based entity extraction, a small model taught to beat its teacher',
-      'Built during the masters: Mistral hackathon finalist twice, a Thales responsible AI award, a Speechmatics hackathon sweep'
+      'Built during the masters: two Mistral hackathon finals, a Thales responsible AI award, three awards at the Speechmatics hackathon'
     ],
     stack: 'Python · PyTorch · LLMs · NLP · MLOps',
     href: 'https://certificate.bcdiploma.com/check/DB040D4C62396A4CAD0001E4A01FB14D402F43E556B3962C5964899D0A5BD766SGcwRjhKTWpqaUkxSUJPYU8rUG14MTlKcnJ5aHNCT3cyd2l4NHhJZXhPNXFlanhU' },
@@ -317,24 +317,27 @@ export const EDUCATION = [
     key: '#ED1B2F', logo: 'education/mcgill_university_school_of_continuing_studies_logo.jpeg',
     bullets: [
       'School of Continuing Studies, exchange term from emlyon',
-      'Data science and AI coursework in an English speaking cohort in Canada'
-    ] },
-  { school: 'UCHICAGO', role: 'Postgraduate Diploma, Data Science and Machine Learning',
-    line: 'Graham School · 2019 to 2020', mark: 'UC',
-    key: '#800000',
-    bullets: [
-      'Machine learning and deep learning, taken while working full time at Amazon',
-      'The pivot: a mechanical engineer teaching himself the field he now works in'
+      'Data science and AI coursework in a Canadian cohort'
     ] },
   { school: 'SVNIT SURAT', role: 'B.Tech Mechanical Engineering',
-    line: 'National Institute of Technology · Jun 2015 to May 2019', mark: 'SV',
+    line: 'National Institute of Technology · 2015 to 2019', mark: 'SV',
     key: '#D97706', logo: 'education/nit-surat.svg',
     bullets: [
-      'Robotics and advanced mathematics alongside the core mechanical syllabus',
-      'Class delegate, the elected voice of the batch to the faculty',
-      'Played football for the university team, and still plays every Saturday in Paris'
+      'Engineering design, mechatronics, manufacturing engineering, robotics and advanced mathematics',
+      'Thesis: a new baffle plate design for shell and tube heat exchangers, raising heat transfer efficiency',
+      'Ran a solo seminar on origami robots and where they are actually useful',
+      'Captain of the university football team, and runners up at the inter NIT tournament in 2017',
+      'Chief designer of the college magazine, and on the crew that ran the cultural and social events'
     ],
-    stack: 'Robotics · Advanced mathematics · Thermodynamics · Machine design' }
+    stack: 'Engineering design · Mechatronics · Manufacturing · Robotics · Thermodynamics' },
+  { school: 'DPS SHARJAH', role: 'Science and Mathematics, grades 11 and 12',
+    line: 'Delhi Private School · Sharjah, UAE', mark: 'DPS',
+    key: '#0EA5A4',
+    bullets: [
+      'Physics, chemistry and mathematics, the years that pointed at engineering',
+      'Played football at national level in 2012 and 2013',
+      'School from the fourth grade to the twelfth, all of it in Sharjah'
+    ] }
 ];
 
 /* Supabase project for visitor recommendations (pending → approved flow).

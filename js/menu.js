@@ -55,8 +55,8 @@ const about = {
   items: ABOUT.items.map(a => ({
     id: a.id,
     mark: a.mark || null,
-    svg: a.icon ? ICONS.person : null,
-    icon: a.icon || false,
+    svg: null,      /* no afaicon on the about screens (user rule) */
+    icon: false,
     key: a.key || 'var(--sys-yellow)',
     title: a.title, sub: a.sub, meta: a.meta || null, badge: null,
     body: a.body,
