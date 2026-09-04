@@ -136,12 +136,6 @@ export const PROJECTS = [
     links: [{ label: 'the story', href: 'https://www.linkedin.com/posts/dcrey7_hackathon-voiceai-ai-activity-7434207452876800000-Da2X' }]
   },
   {
-    name: 'JOBAMATRIX', tag: 'agentic system',
-    key: '#EA580C', mark: 'JM', logo: 'projects/jobamatrix.png',
-    desc: 'End-to-end agentic job-application system, 290 tests, SQLite, Playwright automation, parallel agent orchestration, MCP.',
-    links: [{ label: 'github', href: 'https://github.com/dcrey7/jobomatrix-v2' }]
-  },
-  {
     name: 'REZOUME', tag: 'ai resume builder · live',
     key: '#0891B2', mark: 'RZ', logo: 'projects/rezoume.png',
     video: 'https://youtu.be/QJBjcu8EAlU',
