@@ -34,7 +34,7 @@ export const ABOUT = {
         { label: 'rezoume.com', href: 'https://rezoume.com', text: ': build a personal resume with AI' },
         { label: 'tranzlato.com', href: 'https://tranzlato.com', text: ': all in one translation services' },
         { label: 'kickyai.com', href: 'https://kickyai.com', text: ': a personal AI coach for your shooting form' },
-        'Building community in Paris'
+        { label: 'Cerebras', href: 'https://www.cerebras.ai/', text: ' Community Ambassador for Paris: I build the AI community here, and run Cafe Compute' }
       ]
     },
     {
