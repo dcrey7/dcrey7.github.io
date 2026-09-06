@@ -1696,3 +1696,35 @@ body.booting .settings:has(#sfxBtn) { display: none; }
   .mob-item .recform { width: 100%; grid-template-columns: 1fr; }
   .mob-item .recform input, .mob-item .recform textarea { width: 100%; min-width: 0; }
 }
+
+/* The live character sits between the title and the shelf. It is a frame,
+   so every control inside it belongs to the playground page. */
+.avatar {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.avatar[hidden] { display: none; }
+.avatar__stage {
+  display: block;
+  width: 100%;
+  height: clamp(220px, 38vh, 420px);
+  border: 0;
+  background: transparent;
+  color-scheme: normal;
+}
+.avatar__hint {
+  margin: 0;
+  color: var(--chrome-dim);
+  font: .6rem/1 'Archivo', system-ui, sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .75;
+}
+@media (max-width: 759px) {
+  .avatar__stage { height: 300px; }
+  .avatar { margin-bottom: 14px; }
+}

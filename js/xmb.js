@@ -7,7 +7,8 @@
 
    Skin is PS5: near-black, one key colour per item driving the whole screen. */
 
-import { emit, REDUCED } from './config.js';
+import { showAvatar } from './avatar.js';
+import { emit, REDUCED, MOBILE } from './config.js';
 import { spin, stop } from './icon3d.js';
 import { CATEGORIES } from './menu.js';
 import { SUPA } from './data.js';
@@ -23,6 +24,7 @@ export function initXmb() {
   const shelfEl  = $('#shelf');
   const keyartEl = $('#keyart');
 
+  let stopAvatar;
   let catI = 0;
   const itemOf = CATEGORIES.map(() => 0);
 
@@ -275,6 +277,8 @@ export function initXmb() {
     const action = (item.action && !(vid && /youtu/.test(item.action.href)))
       ? item.action : null;
 
+    stopAvatar?.();
+    stopAvatar = undefined;
     heroEl.replaceChildren();
     put(heroEl, 'hero__sub', item.sub);
     const h1 = document.createElement('h1');
@@ -292,7 +296,9 @@ export function initXmb() {
     heroEl.appendChild(h1);
     put(heroEl, 'hero__meta', item.meta);
 
-    if (item.form) {
+    if (item.avatar) {
+      if (!MOBILE()) stopAvatar = showAvatar(item.avatar);
+    } else if (item.form) {
       heroEl.appendChild(buildRecForm());
     } else if (vid) {
       const frame = document.createElement('iframe');

@@ -16,7 +16,7 @@ export const ABOUT = {
      A bullet can be { label, href, text }: the label is the link. */
   items: [
     {
-      id: 'intro', title: 'ABOUT ME', sub: 'ABHISHEK THOMAS',
+      id: 'intro', avatar: 'intro', title: 'ABOUT ME', sub: 'ABHISHEK THOMAS',
       meta: 'PARIS', mark: 'AT', key: '#FFC800',
       body: null,
       bullets: [
@@ -27,7 +27,7 @@ export const ABOUT = {
       ]
     },
     {
-      id: 'building', title: 'BUILDING', sub: 'live right now',
+      id: 'building', avatar: 'building', title: 'BUILDING', sub: 'live right now',
       mark: 'BD', key: '#16A34A',
       body: null,
       bullets: [
@@ -38,7 +38,7 @@ export const ABOUT = {
       ]
     },
     {
-      id: 'extras', title: 'EXTRAS', sub: 'merch and design',
+      id: 'extras', avatar: 'extras', title: 'EXTRAS', sub: 'merch and design',
       mark: 'EX', key: '#EC4899',
       body: null,
       bullets: [

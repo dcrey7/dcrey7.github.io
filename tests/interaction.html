@@ -34,9 +34,11 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   say('starts on ABOUT', cat(), 'ABOUT');
   say('about has 3 screens', nItems(), 3);
   say('intro titled ABOUT ME', hero(), 'ABOUT ME');
+  say('ABOUT shows the live character', d.querySelectorAll('.avatar:not([hidden])').length, 1);
 
   press('ArrowRight'); await wait();
   say('right moves category', cat(), 'WORK');
+  say('leaving ABOUT hides the character', d.querySelectorAll('.avatar:not([hidden])').length, 0);
   say('work has 5 items', nItems(), 5);
   say('first job selected', item(), 'VISTIQ.AI');
   say('hero follows item', hero(), 'VISTIQ.AI');

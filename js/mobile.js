@@ -17,6 +17,7 @@
    Runs only under 760 px (config.MOBILE). The desktop cross stays in the
    DOM but hidden, so deep links and the tests keep their meaning. */
 
+import { mountAvatar } from './avatar.js';
 import { CATEGORIES } from './menu.js';
 import { spin } from './icon3d.js';
 import { emit, bus, REDUCED } from './config.js';
@@ -40,6 +41,7 @@ const TAGLINE = {
 };
 
 export function initMobile({ buildRecForm }) {
+  const avatarStops = new Set();
   const N = CATEGORIES.length;
   const TILT = 30 * Math.PI / 180;
   const root = el('div', 'mob');
@@ -215,7 +217,17 @@ export function initMobile({ buildRecForm }) {
     const chev = el('span', 'mob-item__chev');
     chev.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>';
     head.appendChild(chev);
-    head.addEventListener('click', () => art.classList.toggle('is-open'));
+    let stopAvatar;
+    const syncAvatar = () => {
+      if (!item.avatar) return;
+      if (art.classList.contains('is-open')) {
+        if (!stopAvatar) { stopAvatar = mountAvatar(more, item.avatar); avatarStops.add(stopAvatar); }
+      } else if (stopAvatar) {
+        stopAvatar(); avatarStops.delete(stopAvatar); stopAvatar = undefined;
+      }
+    };
+    head.addEventListener('click', () => { art.classList.toggle('is-open'); syncAvatar(); });
+    syncAvatar();
 
     /* the drop down */
     put(more, 'hero__meta', item.meta);
@@ -270,6 +282,8 @@ export function initMobile({ buildRecForm }) {
   }
 
   function open(i) {
+    for (const stop of avatarStops) stop();
+    avatarStops.clear();
     const cat = CATEGORIES[i];
     headTitle.textContent = cat.label;
     list.replaceChildren();
@@ -279,6 +293,9 @@ export function initMobile({ buildRecForm }) {
     emit('act');
   }
   function back() {
+    for (const stop of avatarStops) stop();
+    avatarStops.clear();
+    list.replaceChildren();
     root.classList.remove('mob--page');
     paint();
     emit('cat', { id: CATEGORIES[ci].id });

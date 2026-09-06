@@ -54,6 +54,7 @@ const about = {
   id: 'about', label: 'ABOUT', mark: null, svg: ICONS.person, key: 'var(--sys-yellow)',
   items: ABOUT.items.map(a => ({
     id: a.id,
+    avatar: a.avatar || null,   /* which motion the live character plays */
     mark: a.mark || null,
     svg: null,      /* no afaicon on the about screens (user rule) */
     icon: false,
