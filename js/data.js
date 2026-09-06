@@ -20,10 +20,10 @@ export const ABOUT = {
       meta: 'PARIS', mark: 'AT', key: '#FFC800',
       body: null,
       bullets: [
-        'Document intelligence and computer vision',
-        'Local models on my own GPU',
-        'Digital illustration and print design',
-        'Arsenal, and football every Saturday in Paris'
+        'Document intelligence and computer vision: teaching a machine to read a messy page, or to watch a video and understand what happened',
+        'Local models on my own GPU: a model I can run on my own hardware is a model I can trust, and I test them all',
+        'Digital illustration and print design: the prints on my clothes are my own drawings',
+        'Arsenal supporter, and football every Saturday in Paris, where I film my own games'
       ]
     },
     {
