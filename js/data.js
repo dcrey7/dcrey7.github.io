@@ -9,16 +9,16 @@
 
 export const ABOUT = {
   key: '#FFC800', mark: null,
-  title: 'AI ENGINEER',
+  title: 'ABOUT ME',
   sub: 'ABHISHEK THOMAS',
-  meta: 'PARIS · OPEN TO WORK',
-  /* the vertical menu under ABOUT. No afaicon on any of these (user
-     rule): the marks are letters, the colours carry them. */
+  meta: 'PARIS',
+  /* the vertical menu under ABOUT. No afaicon, no job title as a heading
+     (user rules): the marks are letters, the colours carry them. */
   items: [
     {
-      id: 'intro', title: 'AI ENGINEER', sub: 'ABHISHEK THOMAS',
-      meta: 'PARIS · OPEN TO WORK', mark: 'AT', key: '#FFC800',
-      body: 'I build AI systems that reach production and stay up. Document intelligence and computer vision are the parts I care about most: teaching a machine to read a messy page, or to watch a video and understand what happened. Today that is LLM extraction, evaluation and agents at Vistiq.AI in Paris. Before Paris, six years of data science across Amazon, TheMathCompany, EXL and AXA. I started as a mechanical engineer and taught myself the rest.',
+      id: 'intro', title: 'ABOUT ME', sub: 'ABHISHEK THOMAS',
+      meta: 'PARIS', mark: 'AT', key: '#FFC800',
+      body: 'I build AI systems that reach production and stay up. Document intelligence and computer vision are the parts I care about most: teaching a machine to read a messy page, or to watch a video and understand what happened. I started as a mechanical engineer and taught myself the rest, across six years of data science in Bangalore and Paris.',
       bullets: [
         'Document intelligence and computer vision are the work I chase',
         'Local models on my own GPU, because a model you can run is a model you can trust',
@@ -29,18 +29,17 @@ export const ABOUT = {
     {
       id: 'building', title: 'BUILDING', sub: 'what is live right now',
       mark: 'BD', key: '#16A34A',
-      body: 'Three things I build and run myself, plus the community work in Paris.',
+      body: null,
       bullets: [
-        'Rezoume: a tailored resume and cover letter for every job, from one master profile',
-        'Kicky AI: football shot analysis from a phone on a tripod, zero labels',
-        'Tranzlato: translation, live',
-        'Cerebras Community Ambassador for Paris, the only one for this city, running Cafe Compute'
+        'rezoume.com: build a personal resume with AI',
+        'tranzlato.com: all in one translation services',
+        'kickyai.com: a personal AI coach for your shooting form',
+        'Building community in Paris'
       ],
       links: [
-        { label: 'rezoume.com', href: 'https://rezoume.com' },
-        { label: 'kickyai.com', href: 'https://kickyai.com' },
-        { label: 'tranzlato.com', href: 'https://tranzlato.com' },
-        { label: 'cerebras', href: 'https://www.cerebras.ai/' }
+        { label: 'rezoume', href: 'https://rezoume.com' },
+        { label: 'tranzlato', href: 'https://tranzlato.com' },
+        { label: 'kicky ai', href: 'https://kickyai.com' }
       ]
     },
     {
