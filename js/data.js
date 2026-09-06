@@ -21,7 +21,7 @@ export const ABOUT = {
       body: null,
       bullets: [
         'Traditional and generative AI, from credit risk and fraud detection to document intelligence and computer vision: I have shipped all of it',
-        'Very active in open source and local model building: I run and test models on my own GPU, and a model I can run myself is a model I can trust',
+        'Local models and open source are what I am passionate about: I build with them, run and test them on my own GPU, and contribute back',
         'Digital illustration and print design: the prints on my clothes are my own drawings',
         'Arsenal supporter, and football every Saturday in Paris, where I film my own games'
       ]
