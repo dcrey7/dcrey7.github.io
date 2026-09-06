@@ -1057,6 +1057,15 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   color: var(--chrome);
 }
 .hero__bullets li { padding-left: 1.1em; position: relative; }
+/* a domain that is the link: bold, underlined, in the ink */
+.bullet-link {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: text-decoration-thickness .15s var(--ease);
+}
+.bullet-link:hover { text-decoration-thickness: 2px; }
 .hero__bullets li::before {
   content: '▸';
   position: absolute;

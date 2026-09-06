@@ -12,43 +12,38 @@ export const ABOUT = {
   title: 'ABOUT ME',
   sub: 'ABHISHEK THOMAS',
   meta: 'PARIS',
-  /* the vertical menu under ABOUT. No afaicon, no job title as a heading
-     (user rules): the marks are letters, the colours carry them. */
+  /* the vertical menu under ABOUT. No afaicon, no job title (user rules).
+     A bullet can be { label, href, text }: the label is the link. */
   items: [
     {
       id: 'intro', title: 'ABOUT ME', sub: 'ABHISHEK THOMAS',
       meta: 'PARIS', mark: 'AT', key: '#FFC800',
-      body: 'I build AI systems that reach production and stay up. Document intelligence and computer vision are the parts I care about most: teaching a machine to read a messy page, or to watch a video and understand what happened. I started as a mechanical engineer and taught myself the rest, across six years of data science in Bangalore and Paris.',
+      body: null,
       bullets: [
-        'Document intelligence and computer vision are the work I chase',
-        'Local models on my own GPU, because a model you can run is a model you can trust',
-        'Design too: digital illustration and print, my own clothing prints',
-        'Arsenal. Football every Saturday in Paris, and I film my own games'
+        'Document intelligence and computer vision',
+        'Local models on my own GPU',
+        'Digital illustration and print design',
+        'Arsenal, and football every Saturday in Paris'
       ]
     },
     {
-      id: 'building', title: 'BUILDING', sub: 'what is live right now',
+      id: 'building', title: 'BUILDING', sub: 'live right now',
       mark: 'BD', key: '#16A34A',
       body: null,
       bullets: [
-        'rezoume.com: build a personal resume with AI',
-        'tranzlato.com: all in one translation services',
-        'kickyai.com: a personal AI coach for your shooting form',
+        { label: 'rezoume.com', href: 'https://rezoume.com', text: ': build a personal resume with AI' },
+        { label: 'tranzlato.com', href: 'https://tranzlato.com', text: ': all in one translation services' },
+        { label: 'kickyai.com', href: 'https://kickyai.com', text: ': a personal AI coach for your shooting form' },
         'Building community in Paris'
-      ],
-      links: [
-        { label: 'rezoume', href: 'https://rezoume.com' },
-        { label: 'tranzlato', href: 'https://tranzlato.com' },
-        { label: 'kicky ai', href: 'https://kickyai.com' }
       ]
     },
     {
       id: 'extras', title: 'EXTRAS', sub: 'merch and design',
       mark: 'EX', key: '#EC4899',
-      body: 'The prints are mine. The shop prints and ships them. The design work lives on Instagram.',
-      links: [
-        { label: 'buy the merch', href: 'https://www.franklywearing.com/creator/dcrey7' },
-        { label: 'design portfolio', href: 'https://www.instagram.com/dcrey7' }
+      body: null,
+      bullets: [
+        { label: 'buy the merch', href: 'https://www.franklywearing.com/creator/dcrey7', text: '' },
+        { label: 'design portfolio', href: 'https://www.instagram.com/dcrey7', text: ' on Instagram' }
       ]
     }
   ]

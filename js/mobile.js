@@ -239,7 +239,15 @@ export function initMobile({ buildRecForm }) {
     put(more, 'side__desc', item.body);
     if (item.bullets && item.bullets.length) {
       const ul = el('ul', 'hero__bullets');
-      item.bullets.forEach(b => ul.appendChild(el('li', '', b)));
+      item.bullets.forEach(b => {
+        const li = el('li');
+        if (b && b.href) {
+          const a = link(b.href, 'bullet-link', b.label);
+          li.appendChild(a);
+          li.appendChild(document.createTextNode(b.text));
+        } else li.textContent = b;
+        ul.appendChild(li);
+      });
       more.appendChild(ul);
     }
     put(more, 'hero__stack', item.stack);

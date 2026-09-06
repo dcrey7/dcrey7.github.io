@@ -367,7 +367,19 @@ export function initXmb() {
       ul.className = 'hero__bullets';
       item.bullets.forEach(b => {
         const li = document.createElement('li');
-        li.textContent = b;
+        if (b && b.href) {
+          /* "domain: the rest": the domain IS the link, in bold */
+          const a = document.createElement('a');
+          a.className = 'bullet-link';
+          a.href = b.href;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = b.label;
+          li.appendChild(a);
+          li.appendChild(document.createTextNode(b.text));
+        } else {
+          li.textContent = b;
+        }
         ul.appendChild(li);
       });
       keyartEl.appendChild(ul);
