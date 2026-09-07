@@ -209,3 +209,32 @@ Also bumped the script version in embed.html to 2026-09-07c. It is queried as
 `embed.js?v=...`, so an unchanged token leaves the edge and every browser
 serving the old file no matter what was deployed. That had already bitten the
 eating and drinking swap.
+
+## Filling the middle, 7 Sept
+
+The layout is a category bar across the top and three columns under it: the
+item list on the left, the design and the 3D in the middle, the description on
+the right. Everything in that middle column below the heading belongs to the
+character.
+
+It had a set height, 38vh capped at 420 px, so it left a gap on a large screen
+and crowded the shelf on a small one. It now grows into whatever is left
+between the heading and the shelf, and min-height: 0 lets it shrink instead of
+pushing the shelf off the bottom. Nothing changed inside the viewer: it reads
+the canvas size every frame and sets the lens from it.
+
+Measured, gaps even top and bottom, shelf visible and no page scroll in each:
+
+| Screen | Stage | Gaps |
+|---|---|---|
+| 1920x1080 | 669x527 | 22 px |
+| 1440x900 | 470x441 | 22 px |
+| 1280x640 | 404x245 | 15 px |
+| 390x844 (phone) | 339x354 | drop-down |
+
+The phone has no fixed middle to fill, since the character sits inside an open
+drop-down that scrolls, so there it takes 42vh with a 260 px floor.
+
+Also shortened the browser cache on /css/* and /js/* from four hours to five
+minutes with must-revalidate. Every change so far has needed a hard refresh to
+be seen, and one stale copy swallowed the eating and drinking swap outright.

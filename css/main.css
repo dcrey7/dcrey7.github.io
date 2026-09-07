@@ -1756,24 +1756,33 @@ body.booting .settings:has(#sfxBtn) { display: none; }
 
 /* The live character sits between the title and the shelf. It is a frame,
    so every control inside it belongs to the playground page. */
+/* The character takes the whole middle: everything left between the heading
+   and the shelf, at any screen size. It grows instead of holding a set
+   height, and min-height: 0 lets it shrink on a short screen rather than
+   pushing the shelf off the bottom. The viewer sizes its canvas from this
+   box every frame, so no other change is needed to make it fit. */
 .avatar {
   width: 100%;
   min-width: 0;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2px;
+  align-items: stretch;
 }
 .avatar[hidden] { display: none; }
 .avatar__stage {
   display: block;
   width: 100%;
-  height: clamp(220px, 38vh, 420px);
+  height: 100%;
+  min-height: 0;
   border: 0;
   background: transparent;
   color-scheme: normal;
 }
+/* The phone has no fixed middle to fill: the character sits inside an open
+   drop-down, so give it a share of the screen instead. */
 @media (max-width: 759px) {
-  .avatar__stage { height: 300px; }
-  .avatar { margin-bottom: 14px; }
+  .avatar { flex: 0 0 auto; margin-bottom: 14px; }
+  .avatar__stage { height: 42vh; min-height: 260px; }
 }
