@@ -26967,9 +26967,11 @@ async function computerWork() {
     activity = "computer";
     activityTime = 0;
     focusActivity();
-    controls.target.copy(actor.localToWorld(new Vector3(0.32, 0.65, 0)));
-    camera.position.copy(actor.localToWorld(new Vector3(2.6, 1.75, 2.8)));
-    controls.update();
+    if (!EMBED) {
+      controls.target.copy(actor.localToWorld(new Vector3(0.32, 0.65, 0)));
+      camera.position.copy(actor.localToWorld(new Vector3(2.6, 1.75, 2.8)));
+      controls.update();
+    }
     el("prop-note").textContent = "Your MacBook, an office chair and a minimal desk. Drag to inspect the typing pose.";
   } catch (cause) {
     error("Could not load the workstation: " + String(cause));
@@ -27078,10 +27080,12 @@ function focusActivity() {
   actor.updateMatrixWorld(true);
   const target = actor.localToWorld(new Vector3(0.15, 1.2, 0));
   const position = actor.localToWorld(new Vector3(2.7, 1.9, 2.5));
-  camera.position.copy(position);
-  controls.target.copy(target);
+  if (!EMBED) {
+    camera.position.copy(position);
+    controls.target.copy(target);
+  }
   follow.copy(actor.position).add(new Vector3(0, 1, 0));
-  controls.update();
+  if (!EMBED) controls.update();
 }
 function rotateBoneToward(bone, child, target) {
   const origin = bone.getWorldPosition(new Vector3());

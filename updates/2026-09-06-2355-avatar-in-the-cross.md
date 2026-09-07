@@ -365,3 +365,47 @@ Worst edge use is how close the furthest point of him came to the edge of the
 picture, where 1.0 is touching it. So he fills nearly the whole frame and
 never crosses it, at any angle the camera picks and at the closest zoom
 allowed.
+
+## The jump on changing screens, and the box round the canvas
+
+**The jump.** Three separate causes, found one at a time by measuring the
+biggest single frame camera move across the arrival and six screen changes.
+
+1. **Taking over with a random distance.** On adopting the camera the code
+   read the bearing and height it found but then picked a fresh random amount
+   of air. So arriving at a screen threw the camera to a new distance in one
+   frame. It now reads the air the camera is actually holding.
+2. **The viewer parking the camera.** focusActivity and computerWork move the
+   camera themselves when a clip settles. That can land after the site has
+   taken over, and the two then write to the camera on the same frame. In the
+   site the framing is measured from the model's real bounds, so those two
+   now stand aside. An earlier attempt to adopt their framing instead made it
+   far worse, 2.7 m in a frame, because their move IS the jump.
+3. **The zoom floor.** minDistance was set from the raw fit every frame, and
+   the controls enforce that floor instantly. So when the box grew, the desk
+   appearing, the floor shoved the camera outward in one frame regardless of
+   the eased walk. It now takes the walked distance when that is shorter.
+
+The camera also walks to a new distance rather than snapping, capped at 5 cm a
+frame, roughly 3 m a second.
+
+Measured over 9215 frames covering the arrival and six screen changes:
+
+| | biggest single frame move |
+|---|---|
+| before | 2.73 m |
+| after the viewer stood aside | 0.55 m |
+| after the zoom floor was fixed | 0.063 m |
+
+The final 0.063 m is the capped walk running at its limit: the six largest
+frames are within 0.002 m of each other and consecutive, which is a glide, not
+a jump.
+
+**The box.** Clicking him drew a focus ring, because the canvas carries a
+tabindex so the viewer can hear keys. Rings are off on the canvas and on the
+frame, and a drag no longer selects the controls hidden behind him.
+
+**The field** is a third darker: the royal blue radials and the gradient
+beneath them all came down by about that much. Dark mode and the royal blue
+theme were already the defaults, so darkening the blue itself is the reading
+of "make the royal blue dark as the default" that changes anything.

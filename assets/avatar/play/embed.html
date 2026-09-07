@@ -12,6 +12,11 @@
   main, section { height: 100%; width: 100% }
   canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: grab }
   canvas:active { cursor: grabbing }
+  /* No ring, ever. The canvas takes focus so the viewer can hear keys, but a
+     box drawn round the whole panel on every click is not wanted. */
+  canvas:focus, canvas:focus-visible { outline: none }
+  /* A drag must not start selecting the controls hidden behind him. */
+  body { user-select: none; -webkit-user-select: none }
   #shade {
     position: fixed; inset: 0; display: grid; place-items: center;
     font: 600 12px/1 system-ui, sans-serif; letter-spacing: .14em;
@@ -56,5 +61,5 @@
 
 <div id="shade">LOADING</div>
 
-<script type="module" src="viewer.js?v=2026-09-07f"></script>
-<script type="module" src="embed.js?v=2026-09-07f"></script>
+<script type="module" src="viewer.js?v=2026-09-07g"></script>
+<script type="module" src="embed.js?v=2026-09-07g"></script>

@@ -77,11 +77,16 @@ function pose() {
   const y = camera.position.y - t.y;
   const z = camera.position.z - t.z;
   const d = Math.hypot(x, y, z) || 1;
-  return {
-    az: (Math.atan2(x, z) * 180) / Math.PI,
-    el: (Math.asin(y / d) * 180) / Math.PI,
-    room: between(view.room)
-  };
+  const az = (Math.atan2(x, z) * 180) / Math.PI;
+  const el = (Math.asin(y / d) * 180) / Math.PI;
+  // Read the air it is actually holding, not a fresh random one. Taking over
+  // with a random distance is what made the picture jump on arriving at a
+  // screen: the viewer parks the camera at its own distance and the first
+  // frame of ours threw it somewhere else.
+  const box = measure();
+  const need = box ? fit(box, az, el) : 0;
+  const room = need > 0.001 ? Math.min(Math.max(d / need, 0.6), 3) : between(view.room);
+  return { az, el, room };
 }
 
 const PAD = 0.02;      // a whisker, so a vertex right on the edge still fits
@@ -209,14 +214,33 @@ function fit(box, az, el) {
    a zoom eases in instead of snapping. */
 let bias = { x: 0, y: 0, z: 0 };
 
+/* The distance actually used, eased. The box grows the instant the desk or a
+   prop appears, which is right, because a frame that lags there would clip
+   the new thing. But applying that to the camera in one frame is the jump
+   seen when moving between screens. So the camera walks to the new distance:
+   quickly outward, where the risk is clipping, slowly inward, where the only
+   risk is looking restless. */
+let reach = 0;
+
 function put(p) {
   const { camera, controls } = api();
   const box = measure();
   if (!box) return;
-  const d = fit(box, p.az, p.el) * p.room;
-  // Never let a hand zoom crop him either.
-  controls.minDistance = fit(box, p.az, p.el);
-  controls.maxDistance = d * 1.9;
+  const want = fit(box, p.az, p.el) * p.room;
+  if (!reach) reach = want;
+  // Walk, and never faster than this. A share of the gap alone still lurches
+  // when the gap is large, which is exactly what a desk appearing does to it.
+  const gap = want - reach;
+  const speed = gap > 0 ? 0.25 : 0.06;   // out quickly, in gently
+  const cap = 0.05;                      // metres a frame, about 3 m a second
+  reach += Math.max(-cap, Math.min(cap, gap * speed));
+  const d = reach;
+  // Never let a hand zoom crop him either. Take the walked distance when it
+  // is the shorter of the two: the controls enforce this floor the instant it
+  // is set, so handing them the raw fit while the camera is still walking out
+  // to it snaps the picture, which is the jump on changing screens.
+  controls.minDistance = Math.min(fit(box, p.az, p.el), reach);
+  controls.maxDistance = Math.max(d, reach) * 1.9;
   const tx = box.cx + bias.x, ty = box.cy + bias.y, tz = box.cz + bias.z;
   const flat = Math.cos(rad(p.el)) * d;
   controls.target.set(tx, ty, tz);
@@ -256,6 +280,10 @@ function takeOver() {
   const { controls } = api();
   const box = measure();
   if (!box) return;
+  // Start the walk from where the camera already is, so taking over is silent.
+  const c = api().camera.position;
+  reach = Math.hypot(c.x - controls.target.x, c.y - controls.target.y,
+                     c.z - controls.target.z) || 0;
   bias = {
     x: controls.target.x - box.cx,
     y: controls.target.y - box.cy,
@@ -335,6 +363,7 @@ async function perform(name) {
   // Measure the new motion from scratch: it stands at a different size.
   shot = null;
   skins = null;
+  reach = 0;
   held = null;
   move = null;
   // Open on the framing the viewer chose, then drift away from it.

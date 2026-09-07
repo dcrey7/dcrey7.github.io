@@ -134,9 +134,9 @@ body {
   /* royal blue, the default: a deep field with light pooling low left,
      the way the console's own home screen sat */
   background:
-    radial-gradient(70% 55% at 22% 58%, #1f4bb4 0%, transparent 66%),
-    radial-gradient(120% 80% at 50% 116%, #12318f 0%, transparent 70%),
-    linear-gradient(#04081c, #0a1c55 58%, #05102e);
+    radial-gradient(70% 55% at 22% 58%, #15337a 0%, transparent 66%),
+    radial-gradient(120% 80% at 50% 116%, #0c2161 0%, transparent 70%),
+    linear-gradient(#030614, #07143c 58%, #040b20);
 }
 
 
@@ -1790,6 +1790,8 @@ body.booting .settings:has(#sfxBtn) { display: none; }
   background: transparent;
   color-scheme: normal;
 }
+/* No box round him when he is clicked. */
+.avatar__stage:focus, .avatar__stage:focus-visible { outline: none; }
 /* The phone has no fixed middle to fill: the character sits inside an open
    drop-down, so give it a share of the screen instead. */
 @media (max-width: 759px) {
