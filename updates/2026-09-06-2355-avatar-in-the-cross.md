@@ -148,9 +148,15 @@ Also in this pass, both raised by Abhishek:
   space. It is now off everywhere and switched on for the default theme only,
   in both modes, and the shader stops running when you leave that theme.
   Measured: opacity 0 on all three, 0.74 on default.
-- **The photo wall is a fixed mosaic.** Five pictures at most, one large and
-  the rest tiled around it, in a box of a set height, so nothing scrolls at
-  any screen size. The arrangement follows the count. Tracks are
-  minmax(0, 1fr), because plain 1fr let a tall picture push its row taller and
-  the rows came out uneven. Measured at 1440x900: the four small cells are
-  109x143 each, the lead 229x297, and scrollHeight equals clientHeight.
+- **The photo wall is a fixed pinboard.** Five pictures at most, in a box of
+  a set height, so nothing scrolls at any screen size. The arrangement follows
+  the count. Tracks are minmax(0, 1fr), because plain 1fr let a tall picture
+  push its row taller and the rows came out uneven.
+
+  The first try was one large picture with four small ones beside it, which
+  Abhishek read as a hero shot with thumbnails rather than a wall. It is now
+  quadrants: three big tiles and the fourth quadrant split into a pair of
+  portraits, so the tiles are not all the same shape. Measured at 1440x900:
+  three tiles at 230x184 and two at 110x184, zero overflow. Checked at
+  1280x640 too, where the page still does not scroll; the height eased from
+  42vh to 38vh so a short laptop keeps a margin under it.

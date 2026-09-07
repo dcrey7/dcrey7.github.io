@@ -1297,14 +1297,20 @@ a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(
    scroll. One picture leads and the rest tile around it. The cells crop
    (object-fit: cover) because that is the price of a shape that always
    fits; the lead picture is large enough to carry the story. */
+/* THE PHOTO WALL. A pinboard, never a scroller: at most five pictures laid
+   into quadrants of a box with a set height, so it fits any screen with
+   nothing to scroll. The tiles are deliberately not all the same shape, two
+   of them portrait, so it reads as a wall of pictures rather than a hero
+   shot with thumbnails under it. Cells crop, which is the price of a shape
+   that always fits. */
 .mboard {
   width: 100%;
   display: grid;
-  gap: 12px;
+  gap: 10px;
   margin-top: 10px;
-  height: clamp(190px, 33vh, 400px);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  height: clamp(190px, 38vh, 460px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
 }
 .mboard img {
   width: 100%;
@@ -1324,13 +1330,43 @@ a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(
   box-shadow: 0 22px 60px -20px rgba(0, 0, 0, .7);
 }
 
-/* One arrangement per count, so the box is always filled exactly. */
-.mboard--1 { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
-.mboard--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); }
-.mboard--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.mboard--3 img:first-child { grid-column: span 2; grid-row: span 2; }
-.mboard--5 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.mboard--5 img:first-child { grid-column: span 2; grid-row: span 2; }
+/* One arrangement per count, so the box is always filled exactly.
+   grid-area is row-start / column-start / row-end / column-end. */
+
+/* five: three quadrants, and the fourth split into a pair of portraits */
+.mboard--5 img:nth-child(1) { grid-area: 1 / 1 / 3 / 3; }
+.mboard--5 img:nth-child(2) { grid-area: 1 / 3 / 3 / 5; }
+.mboard--5 img:nth-child(3) { grid-area: 3 / 1 / 5 / 3; }
+.mboard--5 img:nth-child(4) { grid-area: 3 / 3 / 5 / 4; }
+.mboard--5 img:nth-child(5) { grid-area: 3 / 4 / 5 / 5; }
+
+/* four: plain quadrants */
+.mboard--4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+/* three: one tall panel beside two stacked */
+.mboard--3 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+.mboard--3 img:first-child { grid-row: span 2; }
+
+/* two: a pair of tall panels */
+.mboard--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.mboard--1 {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+@media (max-width: 759px) {
+  .mboard { height: clamp(200px, 32vh, 320px); gap: 7px; }
+}
 
 /* a single photo board (PEOPLE) is uniform: same height for every person,
    and shown whole, because cropping a face is not a design choice */
