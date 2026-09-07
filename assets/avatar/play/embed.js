@@ -107,7 +107,7 @@ let skins = null;      // the skinned meshes, and the stride to walk them at
 function bounds() {
   const { actor } = api();
   if (!vec) vec = actor.position.clone();
-  if (!skins) {
+  if (!skins || !skins.length) {
     skins = [];
     let total = 0;
     actor.traverse(o => { if (o.isSkinnedMesh) total += o.geometry.attributes.position.count; });
@@ -330,6 +330,47 @@ function frame(now) {
   put(held);
 }
 
+/* Put the picture back if it is ever empty.
+ *
+ * Racing through the screens can leave the framing in a state it will not
+ * come out of by itself: a measurement taken while the model was between
+ * clips, a number that went to nothing, a frame pointed at where he used to
+ * be. Rather than hunt every possible order of events, check the obvious
+ * thing a few times a second, that some part of him is actually on screen,
+ * and start the framing over when it is not. */
+function watchPicture() {
+  setInterval(() => {
+    if (!view || !api()) return;
+    const { camera, controls } = api();
+    const c = camera.position, t = controls.target;
+    const numbersOk = [c.x, c.y, c.z, t.x, t.y, t.z, reach]
+      .every(n => Number.isFinite(n));
+    let showing = false;
+    if (numbersOk && shot) {
+      // The eight corners of the box he was last measured in. If not one of
+      // them lands on the picture, he is not on it.
+      for (const sx of [-shot.hx, shot.hx]) {
+        for (const sy of [-shot.hy, shot.hy]) {
+          for (const sz of [-shot.hz, shot.hz]) {
+            vec.set(shot.cx + sx, shot.cy + sy, shot.cz + sz).project(camera);
+            if (Math.abs(vec.x) < 1.6 && Math.abs(vec.y) < 1.6 && vec.z < 1) showing = true;
+          }
+        }
+      }
+    }
+    if (numbersOk && showing) { empty = 0; return; }
+    // Two checks in a row before acting: one is just a clip changing over.
+    if (++empty < 2) return;
+    empty = 0;
+    shot = null;
+    skins = null;
+    held = null;
+    reach = 0;
+    bias = { x: 0, y: 0, z: 0 };
+  }, 700);
+}
+let empty = 0;
+
 function watchHands() {
   const { controls } = api();
   const pause = () => { quiet = performance.now() + AFTER_TOUCH; };
@@ -417,6 +458,7 @@ async function main() {
   setTimeout(() => { shade.hidden = true; }, 600);
   started = true;
   watchHands();
+  watchPicture();
   requestAnimationFrame(frame);
   perform(wanted);
   parent.postMessage({ avatarReady: true }, '*');

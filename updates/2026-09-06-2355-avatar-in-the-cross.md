@@ -428,3 +428,36 @@ Measured by catching every anchor the page tries to follow, then clicking each
 item three times across the categories: EDUCATION, PLAY, TROPHIES and CONTACT
 followed 2, 7, 4 and 5 links before, and INTRO followed 2. All of them follow
 none now.
+
+## He vanishes after racing through the screens
+
+Reported: the model disappears completely after moving quickly through the
+pages, and does not come back.
+
+I could not reproduce it. Thirty rapid category changes, fourteen rapid item
+changes, and rounds mixing both, all left him on screen with the right clip,
+every sampled vertex inside the picture, the WebGL context alive and every
+number finite. So the race is real but narrower than anything I could trigger
+from the keyboard.
+
+Rather than keep guessing at the order of events, the framing now checks its
+own work. Twice a second it asks whether any corner of the box he was last
+measured in lands on the picture, and whether the camera numbers are still
+numbers. Two failed checks in a row, so a clip changing over is not mistaken
+for a fault, and it starts the framing over: measurement, sampling, distance
+and aim all reset, and the next frame reframes him from scratch.
+
+Also fixed a way to get stuck for good: the list of skinned meshes was built
+once and kept. Built at a moment when the model was between clips it could
+come back empty, and an empty list is never rebuilt, so the box would then be
+measured from the furniture alone and he would sit outside the shot forever.
+It is rebuilt whenever it is empty.
+
+Verified by breaking it on purpose, three ways, and watching it come back.
+Every sampled vertex is on screen again within a few seconds each time:
+
+| broken deliberately | before | after |
+|---|---|---|
+| camera moved to (400, 400, 400) | 38/38 | 38/38 |
+| aim moved to 900 m up | 38/38 | 38/38 |
+| camera position set to NaN | 38/38 | 38/38 |
