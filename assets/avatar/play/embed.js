@@ -371,6 +371,36 @@ function watchPicture() {
 }
 let empty = 0;
 
+/* Watch for the graphics context being taken away, and come back from it.
+ *
+ * The context can be lost at any time and there is no saving the scene when
+ * it is: every texture, buffer and shader on it is gone. Reloading is the
+ * honest repair. Losing it is not an error to hide, so say so while it comes
+ * back. */
+function watchContext() {
+  const canvas = document.querySelector('canvas');
+  let dead = 0;
+  const rebuild = () => location.reload();
+  canvas.addEventListener('webglcontextlost', (e) => {
+    // Without this the browser will not offer the context back at all.
+    e.preventDefault();
+    const shade = el('shade');
+    shade.hidden = false;
+    shade.classList.remove('gone');
+    shade.textContent = 'ONE MOMENT';
+    // If it is handed back, rebuild on the spot; if not, rebuild anyway.
+    setTimeout(rebuild, 2500);
+  });
+  canvas.addEventListener('webglcontextrestored', rebuild);
+  // Belt and braces: a context can also be found dead without the event ever
+  // arriving, for instance when the tab was asleep as it happened.
+  setInterval(() => {
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    if (!gl || !gl.isContextLost()) { dead = 0; return; }
+    if (++dead >= 2) rebuild();
+  }, 1500);
+}
+
 function watchHands() {
   const { controls } = api();
   const pause = () => { quiet = performance.now() + AFTER_TOUCH; };
@@ -459,6 +489,7 @@ async function main() {
   started = true;
   watchHands();
   watchPicture();
+  watchContext();
   requestAnimationFrame(frame);
   perform(wanted);
   parent.postMessage({ avatarReady: true }, '*');

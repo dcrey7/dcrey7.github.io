@@ -461,3 +461,48 @@ Every sampled vertex is on screen again within a few seconds each time:
 | camera moved to (400, 400, 400) | 38/38 | 38/38 |
 | aim moved to 900 m up | 38/38 | 38/38 |
 | camera position set to NaN | 38/38 | 38/38 |
+
+## He vanishes after sitting on the page, part two
+
+New detail from Abhishek, with a photo of an empty middle third: it goes if you
+STAY on the page, not only when racing through it.
+
+That rules out my framing. Watched for 150 seconds without touching anything:
+the distance held between 2.9 and 3.5 m, every sampled vertex stayed on the
+picture the whole time, and nothing drifted.
+
+The cause is outside the page. A browser can take a WebGL context away from a
+canvas whenever it likes, and a laptop is where it happens: the machine idles,
+the graphics chip switches, the tab sits in the background. Nothing in the
+viewer expects that, so the canvas stays blank for good. That matches the
+symptom exactly, including that it never comes back.
+
+Nothing can be salvaged from a lost context: every texture, buffer and shader
+on it is gone. So the frame rebuilds itself. It listens for the context being
+lost, says ONE MOMENT while it goes, and reloads. It also polls, because a
+context can be found dead without the event ever arriving, for instance when
+the tab was asleep as it happened.
+
+Verified by taking the context away exactly as a browser does, through
+WEBGL_lose_context:
+
+| | context | model on screen |
+|---|---|---|
+| before | alive | 25/25 |
+| context taken away | lost | frozen |
+| 22 s later | alive again | 25/25, eating |
+
+A reload brings the frame back on the motion named in its address, which may
+no longer be the screen you are on, so the site now tells it again on every
+load.
+
+### A cache trap worth knowing
+
+Finding this took three tries because each fix appeared not to work. The chain
+is: index.html holds js/avatar.js, which holds the address of embed.html, which
+holds the script tags. Bumping the version inside embed.html does nothing while
+embed.html itself is the cached copy, and versioning embed.html from
+js/avatar.js does nothing while js/avatar.js is the cached copy. The address of
+embed.html now carries a version. js/avatar.js still cannot, being an ES module
+imported by path, so a change there still waits for the four hour cache or a
+hard refresh.

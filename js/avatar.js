@@ -12,8 +12,12 @@
  * at a time, so there a frame is simply created and thrown away.
  */
 
-const PAGE = 'assets/avatar/play/embed.html?embed=1&act=';
+/* The version belongs here as well as inside the page. Bumping only the
+   script tags inside embed.html is useless while embed.html itself is the
+   cached thing: the browser keeps serving the old page, old tags and all. */
+const PAGE = 'assets/avatar/play/embed.html?v=2026-09-07i&embed=1&act=';
 function build(kind) {
+  const made = { kind };
   const wrap = document.createElement('div');
   wrap.className = 'avatar';
 
@@ -22,9 +26,17 @@ function build(kind) {
   frame.src = PAGE + encodeURIComponent(kind);
   frame.title = 'Abhishek in 3D';
   frame.loading = 'lazy';
+  /* The frame rebuilds itself if the browser takes its graphics context
+     away, and it comes back on the motion named in its address, which by
+     then may not be the screen you are on. Tell it again on every load. */
+  frame.addEventListener('load', () => {
+    frame.contentWindow?.postMessage({ avatarAct: made.kind }, '*');
+  });
   wrap.appendChild(frame);
+  made.wrap = wrap;
+  made.frame = frame;
 
-  return { wrap, frame, kind };
+  return made;
 }
 
 /* ---------- desktop: one frame, reused ---------- */
