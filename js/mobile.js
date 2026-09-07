@@ -17,7 +17,7 @@
    Runs only under 760 px (config.MOBILE). The desktop cross stays in the
    DOM but hidden, so deep links and the tests keep their meaning. */
 
-import { mountAvatar } from './avatar.js';
+import { mountAvatar } from './avatar.js?v=2026-09-07i';
 import { CATEGORIES } from './menu.js';
 import { spin } from './icon3d.js';
 import { emit, bus, REDUCED } from './config.js';

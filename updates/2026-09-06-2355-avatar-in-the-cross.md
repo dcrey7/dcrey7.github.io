@@ -506,3 +506,38 @@ js/avatar.js does nothing while js/avatar.js is the cached copy. The address of
 embed.html now carries a version. js/avatar.js still cannot, being an ES module
 imported by path, so a change there still waits for the four hour cache or a
 hard refresh.
+
+## Still vanishing: watch it from outside
+
+It happened again, on the live site, without him touching anything unusual:
+looked at it, moved through the screens, came back and the middle third was
+empty. The live site was healthy when I looked, so it is intermittent and I
+still cannot make it happen here.
+
+The repair added last time lives INSIDE the frame, which is its weakness: it
+can only run while that page's own script is alive. If the script never runs,
+if the scene fails to build, if the context goes during loading, nothing in
+there can fix anything. So the page now watches the frame from outside, where
+a dead frame can actually be replaced.
+
+Every two seconds, while the character is meant to be on screen and past a
+thirty second grace for loading, it asks three things: can the frame be
+reached, does it hold a 3D scene, and does its canvas still have a live
+context. Three bad answers in a row and the frame is rebuilt at a fresh
+address. This catches every way the picture can end up empty, whatever the
+cause, including causes I have not found.
+
+Verified by blanking the frame outright, which is what a dead script looks
+like from outside:
+
+| | scene | context |
+|---|---|---|
+| before | alive | alive |
+| frame blanked | gone | gone |
+| after the watch noticed | alive | alive |
+| model reloaded | eating, 25/25 points on screen | alive |
+
+Also stopped the module cache hiding these fixes: xmb.js and mobile.js now
+import avatar.js with a version on the address. Without it a change to
+avatar.js sat in the browser for four hours, which is why three separate
+attempts at this looked like they had done nothing.

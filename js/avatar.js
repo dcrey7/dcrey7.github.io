@@ -35,8 +35,43 @@ function build(kind) {
   wrap.appendChild(frame);
   made.wrap = wrap;
   made.frame = frame;
+  made.settleBy = Date.now() + GRACE;
+  watch(made);
 
   return made;
+}
+
+const GRACE = 30000;   // how long a fresh frame is given to load the model
+const BEAT = 2000;     // how often it is checked once it has settled
+const STRIKES = 3;     // consecutive bad checks before it is rebuilt
+
+/** Is there a living 3D scene in there, on a canvas that still has a GPU? */
+function alive(made) {
+  try {
+    const w = made.frame.contentWindow;
+    if (!w || !w.avatarView) return false;
+    const canvas = w.document.querySelector('canvas');
+    if (!canvas) return false;
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    return !!gl && !gl.isContextLost();
+  } catch {
+    return false;   // a frame that cannot be reached is not a working one
+  }
+}
+
+/** Rebuild the frame if the picture is dead while it is meant to be showing. */
+function watch(made) {
+  let strikes = 0;
+  setInterval(() => {
+    if (made.wrap.hidden) return;             // not on screen, nothing to judge
+    if (Date.now() < made.settleBy) return;   // still loading, give it time
+    if (alive(made)) { strikes = 0; return; }
+    if (++strikes < STRIKES) return;
+    strikes = 0;
+    made.settleBy = Date.now() + GRACE;
+    // A new address, so the browser fetches rather than reuses the dead page.
+    made.frame.src = PAGE + encodeURIComponent(made.kind) + '&r=' + Date.now();
+  }, BEAT);
 }
 
 /* ---------- desktop: one frame, reused ---------- */
