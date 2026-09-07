@@ -31,14 +31,14 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   };
 
   /* --- the two axes --- */
-  say('starts on ABOUT', cat(), 'ABOUT');
+  say('starts on INTRO', cat(), 'INTRO');
   say('about has 3 screens', nItems(), 3);
   say('intro titled ABOUT ME', hero(), 'ABOUT ME');
-  say('ABOUT shows the live character', d.querySelectorAll('.avatar:not([hidden])').length, 1);
+  say('INTRO shows the live character', d.querySelectorAll('.avatar:not([hidden])').length, 1);
 
   press('ArrowRight'); await wait();
   say('right moves category', cat(), 'WORK');
-  say('leaving ABOUT hides the character', d.querySelectorAll('.avatar:not([hidden])').length, 0);
+  say('leaving INTRO hides the character', d.querySelectorAll('.avatar:not([hidden])').length, 0);
   say('work has 5 items', nItems(), 5);
   say('first job selected', item(), 'VISTIQ.AI');
   say('hero follows item', hero(), 'VISTIQ.AI');
@@ -85,11 +85,11 @@ document.getElementById('f').onload = () => setTimeout(async () => {
   await new Promise(r => setTimeout(r, 360));
   const contactSlots = deckSlots();
   say('CONTACT shows one previous icon', contactSlots.TROPHIES, -1);
-  say('CONTACT does not pull ABOUT to the next side', contactSlots.ABOUT < 0, 'true');
+  say('CONTACT does not pull INTRO to the next side', contactSlots.INTRO < 0, 'true');
   press('ArrowRight'); await wait();
-  say('right from CONTACT wraps to ABOUT', cat(), 'ABOUT');
+  say('right from CONTACT wraps to INTRO', cat(), 'INTRO');
   press('ArrowLeft'); await wait();
-  say('left from ABOUT returns to CONTACT', cat(), 'CONTACT');
+  say('left from INTRO returns to CONTACT', cat(), 'CONTACT');
   press('ArrowLeft'); await wait();
   say('back to TROPHIES', cat(), 'TROPHIES');
   press('ArrowLeft'); await wait();
@@ -108,7 +108,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
 
   /* --- category wraps, matching a console bar --- */
   for (let i = 0; i < 3; i++) { press('ArrowRight'); await wait(); }
-  say('category wraps past the end', cat(), 'ABOUT');
+  say('category wraps past the end', cat(), 'INTRO');
 
   /* --- clicking --- */
   d.querySelectorAll('#bar .cat')[5].click(); await wait();
@@ -165,7 +165,7 @@ document.getElementById('f').onload = () => setTimeout(async () => {
              categoryX, itemY };
   };
   const crosses = {};
-  for (const n of ['ABOUT', 'WORK', 'PLAY', 'PEOPLE', 'CONTACT']) {
+  for (const n of ['INTRO', 'WORK', 'PLAY', 'PEOPLE', 'CONTACT']) {
     crosses[n] = await crossAt(n);
     say(`column aligns under ${n}`, crosses[n].ok, 'true');
   }

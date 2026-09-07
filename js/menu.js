@@ -51,7 +51,9 @@ const host = url => {
 
 /* ---------- ABOUT: who he is, what he is building, the community, the shop ---------- */
 const about = {
-  id: 'about', label: 'ABOUT', mark: null, svg: ICONS.person, key: 'var(--sys-yellow)',
+  /* the id stays 'about': it is the deep link and the avatar key */
+  id: 'about', label: 'INTRO', mark: null, svg: ICONS.person,
+  key: 'var(--sys-yellow)',
   items: ABOUT.items.map(a => ({
     id: a.id,
     avatar: a.avatar || null,   /* which motion the live character plays */
