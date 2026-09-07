@@ -68,45 +68,70 @@ let quiet = 0;
 
 const api = () => window.avatarView;
 
-/** Read where the camera is now, as an angle and a distance. */
+/* A framing is an angle, a distance, and the point being looked at. The
+   look-at point has to travel with the rest of it. Reading the angle against
+   where the camera is aimed now, and then snapping the aim to a fixed spot on
+   the first frame of a move, is what made the picture jump before it glided:
+   after a zoom the two aims can sit 10 to 15 cm apart. */
+
+/** Read the framing the camera is in right now. */
 function pose() {
   const { camera, controls } = api();
-  const x = camera.position.x - controls.target.x;
-  const y = camera.position.y - controls.target.y;
-  const z = camera.position.z - controls.target.z;
+  const t = controls.target;
+  const x = camera.position.x - t.x;
+  const y = camera.position.y - t.y;
+  const z = camera.position.z - t.z;
   const d = Math.hypot(x, y, z) || 1;
   return {
     d,
     az: (Math.atan2(x, z) * 180) / Math.PI,
-    el: (Math.asin(y / d) * 180) / Math.PI
+    el: (Math.asin(y / d) * 180) / Math.PI,
+    tx: t.x, ty: t.y, tz: t.z
+  };
+}
+
+/** The point this kind of shot looks at, in world space. */
+function aim() {
+  const { actor } = api();
+  const [tx, ty, tz] = view.target;
+  return {
+    tx: actor.position.x + tx,
+    ty: actor.position.y + ty,
+    tz: actor.position.z + tz
   };
 }
 
 function put(p) {
-  const { camera, controls, actor } = api();
-  const [tx, ty, tz] = view.target;
-  const t = {
-    x: actor.position.x + tx,
-    y: actor.position.y + ty,
-    z: actor.position.z + tz
-  };
+  const { camera, controls } = api();
   const flat = Math.cos(rad(p.el)) * p.d;
-  controls.target.set(t.x, t.y, t.z);
+  controls.target.set(p.tx, p.ty, p.tz);
   camera.position.set(
-    t.x + flat * Math.sin(rad(p.az)),
-    t.y + Math.sin(rad(p.el)) * p.d,
-    t.z + flat * Math.cos(rad(p.az))
+    p.tx + flat * Math.sin(rad(p.az)),
+    p.ty + Math.sin(rad(p.el)) * p.d,
+    p.tz + flat * Math.cos(rad(p.az))
   );
   controls.update();
 }
 
+/** The short way round from one bearing to another, in degrees.
+ *  Bearings come back from atan2 inside -180 to 180, so a turn from -170 to
+ *  80 is 110 degrees one way and 250 the other. Straight interpolation takes
+ *  the long way and swings the camera right around him. */
+function arc(from, to) {
+  let d = (to - from) % 360;
+  if (d > 180) d -= 360;
+  if (d < -180) d += 360;
+  return d;
+}
+
 /** Choose the next framing. Make it a real change, not a nudge. */
 function next(from) {
+  const at = aim();
   for (let tries = 0; tries < 24; tries++) {
-    const p = { d: between(view.dist), az: between(view.az), el: between(view.el) };
-    if (Math.abs(p.az - from.az) > 22 || Math.abs(p.d - from.d) > 0.55) return p;
+    const p = { d: between(view.dist), az: between(view.az), el: between(view.el), ...at };
+    if (Math.abs(arc(from.az, p.az)) > 22 || Math.abs(p.d - from.d) > 0.55) return p;
   }
-  return { d: between(view.dist), az: between(view.az), el: between(view.el) };
+  return { d: between(view.dist), az: between(view.az), el: between(view.el), ...at };
 }
 
 function frame(now) {
@@ -116,16 +141,21 @@ function frame(now) {
   // Hands off while someone is dragging or zooming, and for a while after.
   if (now < quiet) {
     move = null;
-    hold = now + HOLD;
+    // Pick up again shortly after they let go, not a further five seconds on.
+    hold = now + 1200;
     return;
   }
   if (move) {
     const p = Math.min(1, (now - move.at) / MOVE);
     const k = ease(p);
+    const { from, to } = move;
     put({
-      d: mix(move.from.d, move.to.d, k),
-      az: mix(move.from.az, move.to.az, k),
-      el: mix(move.from.el, move.to.el, k)
+      d: mix(from.d, to.d, k),
+      az: from.az + arc(from.az, to.az) * k,
+      el: mix(from.el, to.el, k),
+      tx: mix(from.tx, to.tx, k),
+      ty: mix(from.ty, to.ty, k),
+      tz: mix(from.tz, to.tz, k)
     });
     if (p >= 1) {
       move = null;

@@ -168,3 +168,44 @@ Also in this pass, both raised by Abhishek:
   step; NOTME's five run 166, 166, 225, 107 and 283. Zero overflow in both.
   Checked at 1280x640 too, where the page still does not scroll; the height
   eased from 42vh to 38vh so a short laptop keeps a margin under it.
+
+## The camera jump, 7 Sept
+
+Abhishek: "when you scrool befor and come back there is like a small readjust
+and then it transtion to the new angle".
+
+A framing is three things: an angle, a distance, and the point being looked at.
+The drift only ever carried the first two. It read the current angle against
+wherever the camera happened to be aimed, then on the first frame of a move it
+snapped the aim to its own fixed spot and glided from there. Hence a jump
+followed by a smooth move.
+
+The two aims really do differ. The viewer's own `focusActivity()` looks at
+1.20 m up the body; the standing shot looks at 1.30 m. So every first move
+after a screen loaded jumped 10 cm, and the desk shot 15 cm. Panning or the
+viewer following the actor moved it further.
+
+Fixed by carrying the look-at point through the move with everything else, so
+it eases across instead of snapping.
+
+Two more things were making it feel wrong:
+
+- **The long way round.** Bearings come back from atan2 between -180 and 180.
+  Going from -170 to 80 is 110 degrees one way and 250 the other, and straight
+  interpolation took the long way, swinging the camera right around him. Moves
+  now take the short way.
+- **The dead wait.** After a drag the camera sat still for six seconds and then
+  a further five before moving, so the resume felt disconnected from the
+  gesture. It now picks up 1.2 s after they let go.
+
+Measured, 2304 frames across a scroll, the pause and the resume: the largest
+single frame camera step is 0.0159 m, and the four largest are within 0.0002 m
+of each other inside the same 20 ms, which is the peak of an ease rather than a
+jump. Over a separate 3168 frame run the largest step is 0.0236 m with the same
+flat distribution. The old snap was 0.10 m in one frame, roughly six times any
+real step.
+
+Also bumped the script version in embed.html to 2026-09-07c. It is queried as
+`embed.js?v=...`, so an unchanged token leaves the edge and every browser
+serving the old file no matter what was deployed. That had already bitten the
+eating and drinking swap.
