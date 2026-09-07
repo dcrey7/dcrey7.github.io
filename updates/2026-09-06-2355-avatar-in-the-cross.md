@@ -541,3 +541,54 @@ Also stopped the module cache hiding these fixes: xmb.js and mobile.js now
 import avatar.js with a version on the address. Without it a change to
 avatar.js sat in the browser for four hours, which is why three separate
 attempts at this looked like they had done nothing.
+
+## Found it: a hidden panel has no size, and no size is not a number
+
+His steps, given exactly: refresh, look at all three about screens, go through
+every category, come back to the intro. Gone. On both his machines, and a
+reload always brings it back.
+
+That last part is the tell. It rules out hardware and rules out the graphics
+context: it is state inside the page that a reload clears.
+
+Reproduced on the live site first try with those steps:
+
+| step | canvas | camera |
+|---|---|---|
+| start | 380x908 | fine |
+| after all three screens | 380x908 | fine |
+| left the category | **0 x 0** | **not a number** |
+| back on the intro | 380x908 | still not a number |
+| five seconds later | 380x908 | still not a number |
+
+Leaving the category hides the panel, and a hidden panel measures zero by
+zero. The framing divides the width by the height to know the shape of the
+picture, and zero divided by zero is not a number. From there it spreads into
+the distance, the aim and the camera itself, and nothing later can undo it,
+because every sum involving it is also not a number. Coming back gives the
+canvas its size again but the camera is already ruined, so he never reappears.
+
+Worth noting that the guard meant to catch this, `Math.max(shape, 0.2)`, does
+nothing: Math.max carries a NaN straight through. The check has to be
+explicit.
+
+Fixed at both ends.
+
+- **Prevented.** Nothing is framed while the panel measures less than two
+  pixels across. The camera is left exactly as it was until there is something
+  to see. And the aspect guard is now an explicit finite check.
+- **Cured.** The watchdog used to clear only its own workings, which was
+  useless while the camera itself held rubbish, because everything is read
+  back from the camera and so came back rubbish. It now stands the camera
+  somewhere real first.
+
+Verified with his exact steps, then three more rounds of the same:
+
+| | camera | on screen |
+|---|---|---|
+| his steps, back on the intro | fine | 21/21 |
+| six seconds later | fine | 21/21 |
+| round 1, 2, 3 of the same | fine | 21/21 each |
+
+This is the bug behind every report of him vanishing. The two watchdogs added
+before it was found stay: they cost nothing and they catch anything else.

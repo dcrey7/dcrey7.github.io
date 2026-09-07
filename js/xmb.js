@@ -7,7 +7,7 @@
 
    Skin is PS5: near-black, one key colour per item driving the whole screen. */
 
-import { showAvatar } from './avatar.js?v=2026-09-07i';
+import { showAvatar } from './avatar.js?v=2026-09-07j';
 import { emit, REDUCED, MOBILE } from './config.js';
 import { spin, stop } from './icon3d.js';
 import { CATEGORIES } from './menu.js';

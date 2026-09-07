@@ -185,7 +185,9 @@ function measure() {
  *  instead, and the one that needs the most room wins. */
 function fit(box, az, el) {
   const canvas = document.querySelector('canvas');
-  const aspect = Math.max(canvas.clientWidth / canvas.clientHeight, 0.2);
+  // Math.max carries a NaN straight through, so the guard has to be explicit.
+  const shape = canvas.clientWidth / canvas.clientHeight;
+  const aspect = Number.isFinite(shape) && shape > 0.2 ? shape : 0.2;
   const a = rad(az), e = rad(el);
   // The camera's own axes, from the bearing and the height it sits at.
   const right = { x: Math.cos(a), y: 0, z: -Math.sin(a) };
@@ -296,6 +298,11 @@ let held = null;   // the framing being held between moves
 function frame(now) {
   requestAnimationFrame(frame);
   if (!view || !api()) return;
+  // A hidden panel measures zero by zero, and the shape of the picture cannot
+  // be worked out from that. Leave the camera exactly as it is until there is
+  // something to see.
+  const canvas = document.querySelector('canvas');
+  if (!canvas || canvas.clientWidth < 2 || canvas.clientHeight < 2) return;
 
   // Hands off while someone is dragging or zooming, and for a while after.
   if (now < quiet) {
@@ -362,6 +369,15 @@ function watchPicture() {
     // Two checks in a row before acting: one is just a clip changing over.
     if (++empty < 2) return;
     empty = 0;
+    if (!numbersOk) {
+      // Clearing our own workings is not enough while the camera itself holds
+      // rubbish: everything is read back from it, so it would be read back
+      // rubbish. Stand it somewhere real first.
+      const a = api().actor.position;
+      controls.target.set(a.x, a.y + 1, a.z);
+      camera.position.set(a.x + 2.5, a.y + 1.6, a.z + 2.5);
+      camera.updateProjectionMatrix();
+    }
     shot = null;
     skins = null;
     held = null;
