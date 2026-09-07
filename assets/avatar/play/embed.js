@@ -11,9 +11,9 @@ const el = (id) => document.getElementById(id);
 /* One motion per screen. Each is a button rather than a clip name, because
    the button also brings the prop with it. */
 const ACTS = {
-  about: { button: 'drink', settled: /drink/i, view: 'stand' },
+  about: { button: 'eat', settled: /noodle/i, view: 'stand' },
   building: { button: 'computer', settled: /computer/i, view: 'desk' },
-  extras: { button: 'eat', settled: /noodle/i, view: 'stand' }
+  extras: { button: 'drink', settled: /drink/i, view: 'stand' }
 };
 
 /* Where the camera may go, per kind of shot.

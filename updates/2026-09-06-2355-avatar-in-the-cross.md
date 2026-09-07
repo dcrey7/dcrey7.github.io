@@ -112,7 +112,9 @@ back is instant.
 New requirements from Abhishek: one motion per screen, no hint line, zoom
 limits, and a camera that moves by itself.
 
-- **One motion per screen.** ABOUT ME drinks, BUILDING types, EXTRAS eats.
+- **One motion per screen.** ABOUT ME eats noodles, BUILDING types, EXTRAS
+  drinks. (Eating and drinking were the other way round at first and were
+  swapped on 7 Sept at his request.)
   The clip cycling is gone, and with it four clips. The bundle now carries
   five: the sip, plus the resting loop and the neutral idle the drink cycle is
   blended from, plus typing and noodles.
