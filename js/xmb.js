@@ -242,10 +242,11 @@ export function initXmb() {
       name.textContent = item.title;
       b.appendChild(name);
 
-      b.addEventListener('click', () => {
-        if (i === itemOf[catI]) act();
-        else setItem(i);
-      });
+      /* Choosing an item only chooses it. Clicking the one already chosen
+         used to open its link, so a second click anywhere in the cross menu
+         threw you off the site. The heading carries the same link with an
+         arrow on it, and the rail lists the rest: those are still clicks. */
+      b.addEventListener('click', () => setItem(i));
       colTrack.appendChild(b);
     });
   }
@@ -520,8 +521,12 @@ export function initXmb() {
   }
 
   function act() {
-    /* enter opens the primary action at the heading, else a rail link */
-    const a = heroEl.querySelector('a') || keyartEl.querySelector('a');
+    /* ONLY the heading's own link. It used to fall back to the first link
+       anywhere on the screen, so clicking an item in the cross menu opened
+       whatever the right rail happened to list first: BUILDING went to
+       rezoume.com. Choosing an item is navigation inside the site, never out
+       of it. The rail links are still there to be clicked directly. */
+    const a = heroEl.querySelector('.hero__title a');
     if (a) { emit('act'); a.click(); }
   }
 

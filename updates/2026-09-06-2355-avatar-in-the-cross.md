@@ -409,3 +409,22 @@ frame, and a drag no longer selects the controls hidden behind him.
 beneath them all came down by about that much. Dark mode and the royal blue
 theme were already the defaults, so darkening the blue itself is the reading
 of "make the royal blue dark as the default" that changes anything.
+
+## Choosing an item was leaving the site
+
+Clicking an item in the vertical menu a second time called act(), which took
+"the primary action at the heading, else a rail link". So BUILDING opened
+rezoume.com and EXTRAS opened the shop: the first link the right rail happened
+to list. Choosing where to look inside the site should never take you out of
+it.
+
+Two changes. act() now only ever follows the heading's own link, never a rail
+link. And an item click no longer calls act() at all: it selects, and nothing
+else. Enter still opens the heading link, and every link on the screen, the
+heading with its arrow and the rail bullets, is still a link you can click
+directly.
+
+Measured by catching every anchor the page tries to follow, then clicking each
+item three times across the categories: EDUCATION, PLAY, TROPHIES and CONTACT
+followed 2, 7, 4 and 5 links before, and INTRO followed 2. All of them follow
+none now.
