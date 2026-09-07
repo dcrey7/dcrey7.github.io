@@ -15,7 +15,7 @@
 /* The version belongs here as well as inside the page. Bumping only the
    script tags inside embed.html is useless while embed.html itself is the
    cached thing: the browser keeps serving the old page, old tags and all. */
-const PAGE = 'assets/avatar/play/embed.html?v=2026-09-07j&embed=1&act=';
+const PAGE = 'assets/avatar/play/embed.html?v=2026-09-07k&embed=1&act=';
 function build(kind) {
   const made = { kind };
   const wrap = document.createElement('div');

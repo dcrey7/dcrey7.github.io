@@ -383,6 +383,7 @@ function watchPicture() {
     held = null;
     reach = 0;
     bias = { x: 0, y: 0, z: 0 };
+    veil(false);   // never leave it hidden after a repair
   }, 700);
 }
 let empty = 0;
@@ -429,20 +430,33 @@ function watchHands() {
 
 let run = 0;
 
+/** Fade the picture out and in around a change of motion. */
+function veil(hide) {
+  const canvas = document.querySelector('canvas');
+  if (canvas) canvas.style.opacity = hide ? '0' : '1';
+}
+
 async function perform(name) {
   const act = ACTS[name] || ACTS.about;
   const mine = ++run;
 
+  // Between letting go of one clip and starting the next, the model falls
+  // back to the pose it was built in, arms straight out. The props arrive in
+  // the same moment and the framing opens up to fit them. Draw the curtain.
+  veil(true);
+
   // Every one of these motions carries a prop, and the button refuses to run
   // until the prop list has arrived. It loads separately from the model.
-  await until(() => el('prop').options.length > 1, 30000);
+  const ready = await until(() => el('prop').options.length > 1, 30000);
   if (mine !== run) return;
+  if (!ready) { veil(false); return; }
 
   el(act.button)?.click();
-  // The button loads a clip and a prop, and parks the camera itself. Wait for
-  // it to land before taking the camera over, or the first move fights it.
-  await until(() => act.settled.test(el('current').textContent), 30000);
+  // The button loads a clip and a prop. Wait for it to land before taking the
+  // camera over, or the first move fights it.
+  const landed = await until(() => act.settled.test(el('current').textContent), 30000);
   if (mine !== run) return;
+  if (!landed) { veil(false); return; }
   await wait(500);
   if (mine !== run) return;
 
@@ -456,6 +470,10 @@ async function perform(name) {
   // Open on the framing the viewer chose, then drift away from it.
   hold = performance.now() + 1400;
   guard(act, mine);
+
+  // Let the framing settle on the new shape before showing it again.
+  await wait(650);
+  if (mine === run) veil(false);
 }
 
 /* Put the motion back if the viewer drops it.

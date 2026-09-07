@@ -592,3 +592,29 @@ Verified with his exact steps, then three more rounds of the same:
 
 This is the bug behind every report of him vanishing. The two watchdogs added
 before it was found stay: they cost nothing and they catch anything else.
+
+## The flash on changing screens
+
+"all the t pose and everything is showing up for the about me, building and
+extras for a very very less time."
+
+That is the whole of it. Changing screens means loading a different clip, and
+between letting go of the old one and starting the new one the model falls
+back to the pose it was built in: arms straight out, a T. The props appear in
+the same moment. And the framing, which measures him honestly, opens right up
+to fit those outstretched arms and closes again once they come down. The flash
+and the lurch are the same event.
+
+Measured first, to be sure it was the change and not the motion: sitting on
+the eating screen for 40 seconds, 5759 frames, the largest single frame camera
+move is 0.031 m, and the largest few are consecutive, which is an ease at its
+peak. Nothing wrong while it plays.
+
+None of the handover is worth watching, so it now happens behind a fade. The
+picture goes out the moment a change is asked for and comes back 650 ms after
+the new framing has settled on the new shape.
+
+Measured across a change: the picture is hidden from 200 ms after the key to
+1.3 s after it, about 1.1 seconds, covering the whole swap, and the fade is
+0.3 s each way. The repair watchdog also lifts the curtain, so a fault during
+a change can never leave it hidden.
