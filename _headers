@@ -16,13 +16,3 @@
 /themes/*
   ! Content-Security-Policy
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self'
-
-# The site is edited often and its CSS and JS are small. Four hours of browser
-# cache meant every change needed a hard refresh to be seen, and a stale copy
-# once swallowed a change entirely. Five minutes, then revalidate: Cloudflare
-# still serves it from the edge, and a repeat visit is a cheap 304.
-/css/*
-  Cache-Control: public, max-age=300, must-revalidate
-
-/js/*
-  Cache-Control: public, max-age=300, must-revalidate

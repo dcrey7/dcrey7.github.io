@@ -235,6 +235,23 @@ Measured, gaps even top and bottom, shelf visible and no page scroll in each:
 The phone has no fixed middle to fill, since the character sits inside an open
 drop-down that scrolls, so there it takes 42vh with a 260 px floor.
 
-Also shortened the browser cache on /css/* and /js/* from four hours to five
-minutes with must-revalidate. Every change so far has needed a hard refresh to
-be seen, and one stale copy swallowed the eating and drinking swap outright.
+### The cache, and what does not work
+
+Every change so far has needed a hard refresh to be seen, and one stale copy
+swallowed the eating and drinking swap outright, so this was worth solving.
+
+Setting `Cache-Control` on /css/* and /js/* in `_headers` does NOT work on
+Cloudflare Pages. Pages sets its own value for static assets and overrides it.
+Measured on a cache MISS, straight from the origin, it still came back
+`max-age=14400`. That block was removed rather than left in place implying
+something untrue.
+
+What does work is a version in the URL. The stylesheet is now linked as
+`css/main.css?v=2026-09-07`, so a bump reaches everyone at once. The avatar
+scripts already carry one.
+
+This does not cover the ES modules under js/. Only the entry point is named in
+index.html; everything it imports resolves to a plain path with no version, so
+those still sit in the browser for four hours. Fixing that properly needs a
+build step to rewrite the import paths, which this site deliberately does not
+have. For now a JS change still wants a hard refresh.
