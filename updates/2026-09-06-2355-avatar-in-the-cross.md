@@ -255,3 +255,32 @@ index.html; everything it imports resolves to a plain path with no version, so
 those still sit in the browser for four hours. Fixing that properly needs a
 build step to rewrite the import paths, which this site deliberately does not
 have. For now a JS change still wants a hard refresh.
+
+### The gap under the heading
+
+Abhishek saw a gap between PARIS and the top of his head on ABOUT ME, and said
+EXTRAS looked right. Both screens use the same standing shot, so the act was
+never the cause: the camera drifts between 2.2 m and 3.6 m, the aim was fixed
+at 1.30 m up the body, and the further back it went the further down the frame
+his head sank. He caught it on one screen at a far framing and the other at a
+near one.
+
+The shot now works back from the top of the frame instead of fixing the aim.
+The lens shows about 0.37 * distance of height above whatever it looks at,
+close enough across the tilts used here, so aiming that far below his crown
+holds his head just under the top edge at every distance.
+
+The crown is read from the Head bone each time rather than assumed. A first
+try used a fixed 2.05 m and left the head at 19 to 27 percent down the panel,
+because eating bends him over the bowl and his head never reaches 2.05.
+Reading the bone adapts to the pose.
+
+Measured, head top as a percentage down the panel:
+
+| | before | after |
+|---|---|---|
+| ABOUT ME, eating | 19 to 27 | 3 to 6 |
+| EXTRAS, drinking | - | 3 to 6, feet at 69 to 84 |
+
+The desk shot keeps its fixed aim: it frames furniture as well as a person, so
+pinning his head would push the desk out of shot.

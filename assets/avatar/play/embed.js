@@ -28,10 +28,14 @@ const ACTS = {
  */
 const VIEWS = {
   stand: {
-    /* Aim high on the body. At the closest framing something must leave the
-       frame, and it should be his shins, never the top of his head. */
-    target: [0.15, 1.30, 0], dist: [2.2, 3.6],
-    el: [-2, 18], az: [10, 92], near: 2.0, far: 3.8
+    /* headroom pins the TOP of the frame, in metres up the body, instead of
+       fixing the point the camera looks at. He is two metres tall, so 2.05
+       leaves a few centimetres over his head and no more. Without this the
+       aim sits still while the distance drifts, and the head sinks down the
+       frame as the camera pulls back, opening a gap under the heading. */
+    target: [0.15, 1.30, 0], headroom: true, air: 0.05,
+    dist: [2.2, 3.1],
+    el: [-2, 16], az: [10, 92], near: 2.0, far: 3.6
   },
   desk: {
     target: [0.32, 0.80, 0], dist: [2.8, 4.3],
@@ -90,13 +94,38 @@ function pose() {
   };
 }
 
-/** The point this kind of shot looks at, in world space. */
-function aim() {
+/* Where the top of his head is, in metres, right now. Read from the skeleton
+   rather than assumed: eating bends him over the bowl and drinking stands him
+   up, so a fixed number would frame one of them wrong. */
+let headBone;
+function headTop() {
+  const { actor } = api();
+  if (!headBone) actor.traverse(o => { if (!headBone && o.name === 'Head') headBone = o; });
+  if (!headBone) return null;
+  const p = headBone.getWorldPosition(headBone.position.clone());
+  return p.y + SKULL;
+}
+const SKULL = 0.16;   // the bone sits inside the skull; this clears the hair
+
+/** The point this kind of shot looks at, in world space.
+ *
+ *  A shot with headroom works back from the top of the frame instead of
+ *  fixing the aim: the lens shows about 0.37 * distance of height above
+ *  whatever it is aimed at, near enough across the tilts used here, so aiming
+ *  that far below his crown keeps his head just under the top edge whatever
+ *  distance the drift picks. Fixing the aim instead let the head sink down
+ *  the frame as the camera pulled back, which opened a gap under the heading. */
+function aim(d) {
   const { actor } = api();
   const [tx, ty, tz] = view.target;
+  let y = ty;
+  if (view.headroom) {
+    const crown = headTop();
+    y = (crown === null ? view.headroom : crown - actor.position.y + view.air) - 0.37 * d;
+  }
   return {
     tx: actor.position.x + tx,
-    ty: actor.position.y + ty,
+    ty: actor.position.y + y,
     tz: actor.position.z + tz
   };
 }
@@ -126,12 +155,15 @@ function arc(from, to) {
 
 /** Choose the next framing. Make it a real change, not a nudge. */
 function next(from) {
-  const at = aim();
+  const pick = () => {
+    const d = between(view.dist);
+    return { d, az: between(view.az), el: between(view.el), ...aim(d) };
+  };
   for (let tries = 0; tries < 24; tries++) {
-    const p = { d: between(view.dist), az: between(view.az), el: between(view.el), ...at };
+    const p = pick();
     if (Math.abs(arc(from.az, p.az)) > 22 || Math.abs(p.d - from.d) > 0.55) return p;
   }
-  return { d: between(view.dist), az: between(view.az), el: between(view.el), ...at };
+  return pick();
 }
 
 function frame(now) {
