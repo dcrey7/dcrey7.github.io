@@ -1330,42 +1330,52 @@ a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(
   box-shadow: 0 22px 60px -20px rgba(0, 0, 0, .7);
 }
 
-/* One arrangement per count, so the box is always filled exactly.
+/* One arrangement per count. No layout is a grid of equal squares and none
+   line up into quadrants: the tiles in each column have different heights so
+   the seams between them never meet across the wall. That offset is what
+   makes a pinboard read as a pinboard.
    grid-area is row-start / column-start / row-end / column-end. */
 
-/* five: three quadrants, and the fourth split into a pair of portraits */
-.mboard--5 img:nth-child(1) { grid-area: 1 / 1 / 3 / 3; }
-.mboard--5 img:nth-child(2) { grid-area: 1 / 3 / 3 / 5; }
-.mboard--5 img:nth-child(3) { grid-area: 3 / 1 / 5 / 3; }
-.mboard--5 img:nth-child(4) { grid-area: 3 / 3 / 5 / 4; }
-.mboard--5 img:nth-child(5) { grid-area: 3 / 4 / 5 / 5; }
-
-/* four: plain quadrants */
-.mboard--4 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-
-/* three: one tall panel beside two stacked */
-.mboard--3 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-.mboard--3 img:first-child { grid-row: span 2; }
-
-/* two: a pair of tall panels */
+/* two: a wide panel and a narrow one */
 .mboard--2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 3fr 2fr;
   grid-template-rows: minmax(0, 1fr);
 }
+
+/* three: a stacked column beside one full height picture */
+.mboard--3 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+}
+.mboard--3 img:nth-child(1) { grid-area: 1 / 1 / 4 / 2; }
+.mboard--3 img:nth-child(2) { grid-area: 4 / 1 / 8 / 2; }
+.mboard--3 img:nth-child(3) { grid-area: 1 / 2 / 8 / 3; }
+
+/* four: two columns whose seams are out of step, 3+4 against 4+3 */
+.mboard--4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(7, minmax(0, 1fr));
+}
+.mboard--4 img:nth-child(1) { grid-area: 1 / 1 / 4 / 2; }
+.mboard--4 img:nth-child(2) { grid-area: 4 / 1 / 8 / 2; }
+.mboard--4 img:nth-child(3) { grid-area: 1 / 2 / 5 / 3; }
+.mboard--4 img:nth-child(4) { grid-area: 5 / 2 / 8 / 3; }
+
+/* five: three columns, every tile a different height, and the last column
+   stops short so the bottom edge is ragged the way a real board is */
+.mboard--5 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(6, minmax(0, 1fr));
+}
+.mboard--5 img:nth-child(1) { grid-area: 1 / 1 / 4 / 2; }
+.mboard--5 img:nth-child(2) { grid-area: 4 / 1 / 7 / 2; }
+.mboard--5 img:nth-child(3) { grid-area: 1 / 2 / 5 / 3; }
+.mboard--5 img:nth-child(4) { grid-area: 5 / 2 / 7 / 3; }
+.mboard--5 img:nth-child(5) { grid-area: 1 / 3 / 6 / 4; }
 
 .mboard--1 {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
-}
-
-@media (max-width: 759px) {
-  .mboard { height: clamp(200px, 32vh, 320px); gap: 7px; }
 }
 
 /* a single photo board (PEOPLE) is uniform: same height for every person,

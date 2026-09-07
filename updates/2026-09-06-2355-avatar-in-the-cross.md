@@ -153,10 +153,16 @@ Also in this pass, both raised by Abhishek:
   the count. Tracks are minmax(0, 1fr), because plain 1fr let a tall picture
   push its row taller and the rows came out uneven.
 
-  The first try was one large picture with four small ones beside it, which
-  Abhishek read as a hero shot with thumbnails rather than a wall. It is now
-  quadrants: three big tiles and the fourth quadrant split into a pair of
-  portraits, so the tiles are not all the same shape. Measured at 1440x900:
-  three tiles at 230x184 and two at 110x184, zero overflow. Checked at
-  1280x640 too, where the page still does not scroll; the height eased from
-  42vh to 38vh so a short laptop keeps a margin under it.
+  Three tries. First one large picture with four small ones beside it, which
+  read as a hero shot with thumbnails. Then quadrants, which he did not want
+  either, and the four picture item stayed a plain 2x2 of equal squares.
+
+  It is now masonry. Every count gets its own arrangement and no two tiles in
+  a column share a height, so the seams never line up across the wall, which
+  is the thing that makes a pinboard look like one. Five pictures go in three
+  columns and the last column stops short, so the bottom edge is ragged the
+  way a real board is. Measured at 1440x900: PIKA PAL's four tiles are 141 and
+  191 tall on the left against 191 and 141 on the right, seams 50 px out of
+  step; NOTME's five run 166, 166, 225, 107 and 283. Zero overflow in both.
+  Checked at 1280x640 too, where the page still does not scroll; the height
+  eased from 42vh to 38vh so a short laptop keeps a margin under it.
