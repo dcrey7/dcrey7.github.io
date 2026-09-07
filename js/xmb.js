@@ -310,9 +310,13 @@ export function initXmb() {
       frame.allowFullscreen = true;
       heroEl.appendChild(frame);
     } else if (photos.length) {
+      /* Five at most, and the count picks the arrangement: the wall is a
+         fixed shape that fits the screen, never something you scroll. */
+      const shown = photos.slice(0, 5);
       const board = document.createElement('div');
-      board.className = photos.length === 1 ? 'mboard mboard--one' : 'mboard';
-      photos.slice(0, 6).forEach(f => {
+      board.className = shown.length === 1
+        ? 'mboard mboard--one' : 'mboard mboard--' + shown.length;
+      shown.forEach(f => {
         const img = document.createElement('img');
         img.src = 'assets/' + f;
         img.alt = '';

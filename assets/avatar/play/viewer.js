@@ -26531,6 +26531,8 @@ controls.maxDistance = 30;
 controls.minDistance = 1.5;
 var actor = new Group();
 scene.add(actor);
+// The site runs its own slow camera moves, so hand it the controls.
+if (EMBED) window.avatarView = { camera, controls, actor };
 var loader = new GLTFLoader();
 var face;
 var root;
@@ -27675,7 +27677,8 @@ function render() {
       actor.position.addScaledVector(move, dt * (running ? 3.8 : 1.6));
       actor.rotation.y = Math.atan2(-move.z, move.x);
     }
-    const finished = !!active && active.time >= active.getClip().duration - 1e-3;
+    const finished = !!active && !(EMBED && active.loop === LoopRepeat)
+      && active.time >= active.getClip().duration - 1e-3;
     if (!el("showcase").checked && !pending && actor.position.y === 0 && (locomotion || finished)) {
       const wanted = moving ? movementMotion(running) : equipped && aiming ? choose(/^GUN_Aim_Idle$/) : idle();
       if (wanted && wanted.id !== current?.id) void play(wanted, true);

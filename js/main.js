@@ -265,6 +265,9 @@ function applyTheme(name) {
     });
     document.body.prepend(f);
   }
+  /* The lights belong to the royal blue field. On a shader theme they are
+     hidden, so stop the shader too rather than paint a canvas nobody sees. */
+  if (aurora) name === 'default' ? aurora.start() : aurora.stop();
   themenu.querySelectorAll('button').forEach(b =>
     b.setAttribute('aria-current', String(b.dataset.theme === name)));
   try { localStorage.setItem('xmb-theme', name); } catch {}

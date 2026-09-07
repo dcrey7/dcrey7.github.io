@@ -106,3 +106,51 @@ back is instant.
 ## Changelog
 
 - 2026-09-06 23:55 CEST - Written.
+
+## Second pass, 2026-09-07
+
+New requirements from Abhishek: one motion per screen, no hint line, zoom
+limits, and a camera that moves by itself.
+
+- **One motion per screen.** ABOUT ME drinks, BUILDING types, EXTRAS eats.
+  The clip cycling is gone, and with it four clips. The bundle now carries
+  five: the sip, plus the resting loop and the neutral idle the drink cycle is
+  blended from, plus typing and noodles.
+- **The hint line is gone.**
+- **Zoom limits.** In stops at 2.0 m, which frames about three quarters of the
+  body; out stops at 3.8 m standing and 4.8 m at the desk, where the whole
+  motion still sits inside the frame. The standing shots now aim at 1.30 m up
+  the body so the tight framing cuts his shins and never the top of his head.
+- **The camera drifts.** Every 5.2 s it eases over 3 s to a new random angle,
+  distance and height inside those limits, always in front of him. A drag or a
+  scroll stops it for 6 s, and it picks up from wherever the visitor left it.
+
+Three bugs fixed on the way:
+
+1. **Drinking never worked.** The viewer synthesises its drink loop from three
+   clips, and only the sip was shipped, so the button failed with "Drinking
+   needs both idle and sip clips." The eating shot had masked it.
+2. **The button fired too early.** All three motions carry a prop, and the
+   prop list loads separately from the model. Clicking before it arrived was a
+   silent no-op. It now waits for the list.
+3. **The drink loop dropped to an idle every 8 seconds.** When a clip reaches
+   its last frame the viewer's loop falls back to a standing idle, and an
+   eight second cycle trips that on every lap. A repeating action now never
+   counts as finished. There is also a watchdog in the driver that presses the
+   button again and holds the camera in place, in case anything else drops the
+   motion. Measured 28 s of unbroken drinking, 14 samples, zero drops.
+
+Also in this pass, both raised by Abhishek:
+
+- **The northern lights leaked onto the other themes.** The CSS named the
+  three shader themes and set them to zero, but the light mode rule came after
+  and re-lit them, so in light mode the aurora glowed over beach, lava and
+  space. It is now off everywhere and switched on for the default theme only,
+  in both modes, and the shader stops running when you leave that theme.
+  Measured: opacity 0 on all three, 0.74 on default.
+- **The photo wall is a fixed mosaic.** Five pictures at most, one large and
+  the rest tiled around it, in a box of a set height, so nothing scrolls at
+  any screen size. The arrangement follows the count. Tracks are
+  minmax(0, 1fr), because plain 1fr let a tall picture push its row taller and
+  the rows came out uneven. Measured at 1440x900: the four small cells are
+  109x143 each, the lead 229x297, and scrollHeight equals clientHeight.

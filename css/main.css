@@ -151,16 +151,17 @@ body {
   z-index: -1;
   pointer-events: none;
   mix-blend-mode: screen;
-  opacity: .95;
   transition: opacity .6s var(--ease);
 }
-/* a shader theme covers the field, so the lights belong to default only */
-body[data-theme="beach"] .aurora,
-body[data-theme="lava"] .aurora,
-body[data-theme="space"] .aurora { opacity: 0; }
+/* The lights belong to the royal blue field and to nothing else. Naming the
+   three shader themes here was the wrong way round: the light mode rule that
+   followed re-lit them, so the aurora bled over beach, lava and space. Turn
+   it off everywhere and switch it on for default only. */
+.aurora { opacity: 0; }
+body[data-theme="default"] .aurora { opacity: .95; }
 /* pale sky: the same light, washed out and multiplied instead of added,
    so it tints the white instead of glowing on it */
-body.light .aurora { opacity: .70; mix-blend-mode: multiply; }
+body.light[data-theme="default"] .aurora { opacity: .70; mix-blend-mode: multiply; }
 
 /* The right-side panel. Text marks are ghosted type; a real image (logo,
    photo) shows in FULL colour as its own box — never a transparent slab. */
@@ -1291,30 +1292,25 @@ a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(
    Every photo must be reachable: the board SCROLLS inside the middle
    third instead of running off the bottom of the screen, with a slim
    scroller in the site's own chrome so it is obvious there is more. */
+/* THE PHOTO WALL. A fixed mosaic, never a scroller: at most five pictures,
+   laid into a box of a set height so it fits any screen with nothing to
+   scroll. One picture leads and the rest tile around it. The cells crop
+   (object-fit: cover) because that is the price of a shape that always
+   fits; the lead picture is large enough to carry the story. */
 .mboard {
   width: 100%;
-  columns: 3 200px;
-  column-gap: 16px;
+  display: grid;
+  gap: 12px;
   margin-top: 10px;
-  max-height: calc(100vh - clamp(300px, 34vh, 430px));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding-right: 6px;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--chrome) 45%, transparent) transparent;
+  height: clamp(190px, 33vh, 400px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
 }
-.mboard::-webkit-scrollbar { width: 6px; }
-.mboard::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--chrome) 45%, transparent);
-  border-radius: 3px;
-}
-.mboard::-webkit-scrollbar-track { background: transparent; }
 .mboard img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   display: block;
-  margin-bottom: 16px;
-  break-inside: avoid;
   border-radius: 12px;
   position: relative;
   z-index: 1;
@@ -1328,15 +1324,30 @@ a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(
   box-shadow: 0 22px 60px -20px rgba(0, 0, 0, .7);
 }
 
-/* a single photo board (PEOPLE) is uniform: same height for every
-   person, never touching the bottom of the screen */
-.mboard--one { column-count: 1; }
+/* One arrangement per count, so the box is always filled exactly. */
+.mboard--1 { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+.mboard--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); }
+.mboard--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mboard--3 img:first-child { grid-column: span 2; grid-row: span 2; }
+.mboard--5 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.mboard--5 img:first-child { grid-column: span 2; grid-row: span 2; }
+
+/* a single photo board (PEOPLE) is uniform: same height for every person,
+   and shown whole, because cropping a face is not a design choice */
+.mboard--one {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  height: clamp(280px, 52vh, 620px);
+}
 .mboard--one img {
   width: auto;
   max-width: 100%;
-  height: clamp(280px, 52vh, 620px);
-  display: block;
-  margin: 0;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+@media (max-width: 759px) {
+  .mboard { height: clamp(170px, 26vh, 260px); gap: 8px; }
 }
 
 /* ---------- the ADD YOURS form ---------- */
@@ -1715,14 +1726,6 @@ body.booting .settings:has(#sfxBtn) { display: none; }
   border: 0;
   background: transparent;
   color-scheme: normal;
-}
-.avatar__hint {
-  margin: 0;
-  color: var(--chrome-dim);
-  font: .6rem/1 'Archivo', system-ui, sans-serif;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  opacity: .75;
 }
 @media (max-width: 759px) {
   .avatar__stage { height: 300px; }

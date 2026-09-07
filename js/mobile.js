@@ -240,8 +240,9 @@ export function initMobile({ buildRecForm }) {
       more.appendChild(f);
     }
     if (item.photos && item.photos.length > 1) {
-      const board = el('div', 'mboard');
-      item.photos.slice(1, 5).forEach(p => {
+      const shown = item.photos.slice(1, 6);
+      const board = el('div', 'mboard mboard--' + shown.length);
+      shown.forEach(p => {
         const img = el('img');
         img.src = 'assets/' + p; img.alt = ''; img.loading = 'lazy';
         board.appendChild(img);

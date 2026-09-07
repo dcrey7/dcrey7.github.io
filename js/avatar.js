@@ -13,10 +13,6 @@
  */
 
 const PAGE = 'assets/avatar/play/embed.html?embed=1&act=';
-const HINT = () => matchMedia('(pointer: coarse)').matches
-  ? 'drag to turn, pinch to zoom'
-  : 'drag to turn, scroll to zoom';
-
 function build(kind) {
   const wrap = document.createElement('div');
   wrap.className = 'avatar';
@@ -27,11 +23,6 @@ function build(kind) {
   frame.title = 'Abhishek in 3D';
   frame.loading = 'lazy';
   wrap.appendChild(frame);
-
-  const hint = document.createElement('p');
-  hint.className = 'avatar__hint';
-  hint.textContent = HINT();
-  wrap.appendChild(hint);
 
   return { wrap, frame, kind };
 }
