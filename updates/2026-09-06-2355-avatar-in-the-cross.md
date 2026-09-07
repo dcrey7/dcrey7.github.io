@@ -327,3 +327,41 @@ and counting anything outside the picture:
 Worst edge use is how close the furthest point came to the edge, where 1.0 is
 touching it. So he fills the frame almost exactly and never crosses it. The
 earlier version of this fit sat at 0.73, which is what left him looking small.
+
+### Still cutting, and why the check had missed it
+
+Abhishek, on the version above: it is too big and cutting off, on the camera's
+own angle changes and on zoom.
+
+Two mistakes, both mine.
+
+**The camera was allowed inside the fit.** To make him bigger I had set the
+drift to sit at 0.90 of the fitting distance, and told myself the padding
+would absorb it. Sitting a tenth closer than the distance at which everything
+fits IS a crop. The drift now never goes closer than the fit, and the hand
+zoom limit is the fit itself, so neither the automatic camera nor a visitor
+can get inside it.
+
+**The box was drawn round the skeleton, not the skin.** Loose trousers,
+shoulders, hair and a bowl held out at arm's length all reach well past the
+bone inside them. My check had the same blind spot: it projected bone points,
+so it reported nothing off screen while the edges of him were over the line.
+The box is now taken from the posed skin, 900 vertices spread over the body,
+read where they actually are each frame. A skinned mesh cannot simply be asked
+for its bounds, because it keeps the ones from the pose it was built in.
+
+Verified against the real surface this time, every third vertex, plus every
+rigid corner. No input at all in the first three rows, so this is the camera's
+own angle changes and its own zooming:
+
+| | points a frame | watched | cut off | worst edge use |
+|---|---|---|---|---|
+| ABOUT ME, drifting | 2421 | 30 s | 0 | 0.878 |
+| BUILDING, drifting | 2421 | 29 s | 0 | 0.907 |
+| ABOUT ME, held at full zoom | 2421 | 9 s | 0 | 0.886 |
+| BUILDING, held at full zoom | 2421 | 8 s | 0 | 0.933 |
+
+Worst edge use is how close the furthest point of him came to the edge of the
+picture, where 1.0 is touching it. So he fills nearly the whole frame and
+never crosses it, at any angle the camera picks and at the closest zoom
+allowed.

@@ -29,8 +29,8 @@ const ACTS = {
  * because that is the only way to promise nothing is ever cut off.
  */
 const VIEWS = {
-  stand: { el: [-2, 16], az: [10, 92], room: [0.90, 1.04] },
-  desk: { el: [4, 24], az: [10, 78], room: [0.94, 1.08] }
+  stand: { el: [-2, 16], az: [10, 92], room: [1.0, 1.12] },
+  desk: { el: [4, 24], az: [10, 78], room: [1.0, 1.14] }
 };
 
 const HOLD = 5200;        // how long a framing is held before the next move
@@ -84,37 +84,58 @@ function pose() {
   };
 }
 
-const SKIN = 0.13;   // bones sit inside the body: this covers flesh and hair
-let vec;             // a scratch vector, borrowed from the scene's own class
+const PAD = 0.02;      // a whisker, so a vertex right on the edge still fits
+const SAMPLES = 900;   // vertices to test per frame, spread over the whole body
+let vec;               // a scratch vector, borrowed from the scene's own class
+let skins = null;      // the skinned meshes, and the stride to walk them at
 
 /** The box that holds everything on screen, in world space.
  *
- *  Bones for the character, because a skinned mesh keeps the bounding box of
- *  the pose it was built in and would not follow the animation. Real corners
- *  for anything rigid: the desk, the chair, the laptop, the bowl. */
+ *  Taken from the actual posed skin. Bones alone are not enough: loose
+ *  trousers, shoulders, hair and a bowl held out at arm's length all reach
+ *  well past the bone inside them, so a box drawn round the skeleton lets the
+ *  edges of him cross the edge of the picture. A skinned mesh cannot be asked
+ *  for its bounding box either, because it keeps the one from the pose it was
+ *  built in and never follows the animation. So the vertices are read where
+ *  they actually are, a fixed number of them spread over the whole body,
+ *  which is cheap and close. Rigid things keep their real corners. */
 function bounds() {
   const { actor } = api();
   if (!vec) vec = actor.position.clone();
+  if (!skins) {
+    skins = [];
+    let total = 0;
+    actor.traverse(o => { if (o.isSkinnedMesh) total += o.geometry.attributes.position.count; });
+    actor.traverse(o => {
+      if (!o.isSkinnedMesh) return;
+      const n = o.geometry.attributes.position.count;
+      skins.push({ mesh: o, count: n, step: Math.max(1, Math.round(total / SAMPLES)) });
+    });
+  }
   let lo = [Infinity, Infinity, Infinity];
   let hi = [-Infinity, -Infinity, -Infinity];
-  const eat = (x, y, z, pad) => {
-    lo = [Math.min(lo[0], x - pad), Math.min(lo[1], y - pad), Math.min(lo[2], z - pad)];
-    hi = [Math.max(hi[0], x + pad), Math.max(hi[1], y + pad), Math.max(hi[2], z + pad)];
+  const eat = () => {
+    lo = [Math.min(lo[0], vec.x - PAD), Math.min(lo[1], vec.y - PAD), Math.min(lo[2], vec.z - PAD)];
+    hi = [Math.max(hi[0], vec.x + PAD), Math.max(hi[1], vec.y + PAD), Math.max(hi[2], vec.z + PAD)];
   };
+  for (const s of skins) {
+    s.mesh.skeleton.update();
+    for (let i = 0; i < s.count; i += s.step) {
+      s.mesh.getVertexPosition(i, vec);
+      vec.applyMatrix4(s.mesh.matrixWorld);
+      eat();
+    }
+  }
   actor.traverse(o => {
-    if (o.isBone) {
-      o.getWorldPosition(vec);
-      eat(vec.x, vec.y, vec.z, SKIN);
-    } else if (o.isMesh && !o.isSkinnedMesh) {
-      const g = o.geometry;
-      if (!g.boundingBox) g.computeBoundingBox();
-      const b = g.boundingBox;
-      for (const x of [b.min.x, b.max.x]) {
-        for (const y of [b.min.y, b.max.y]) {
-          for (const z of [b.min.z, b.max.z]) {
-            vec.set(x, y, z).applyMatrix4(o.matrixWorld);
-            eat(vec.x, vec.y, vec.z, 0);
-          }
+    if (!o.isMesh || o.isSkinnedMesh) return;
+    const g = o.geometry;
+    if (!g.boundingBox) g.computeBoundingBox();
+    const b = g.boundingBox;
+    for (const x of [b.min.x, b.max.x]) {
+      for (const y of [b.min.y, b.max.y]) {
+        for (const z of [b.min.z, b.max.z]) {
+          vec.set(x, y, z).applyMatrix4(o.matrixWorld);
+          eat();
         }
       }
     }
@@ -194,7 +215,7 @@ function put(p) {
   if (!box) return;
   const d = fit(box, p.az, p.el) * p.room;
   // Never let a hand zoom crop him either.
-  controls.minDistance = d * 0.99;
+  controls.minDistance = fit(box, p.az, p.el);
   controls.maxDistance = d * 1.9;
   const tx = box.cx + bias.x, ty = box.cy + bias.y, tz = box.cz + bias.z;
   const flat = Math.cos(rad(p.el)) * d;
@@ -313,6 +334,7 @@ async function perform(name) {
   view = VIEWS[act.view];
   // Measure the new motion from scratch: it stands at a different size.
   shot = null;
+  skins = null;
   held = null;
   move = null;
   // Open on the framing the viewer chose, then drift away from it.
