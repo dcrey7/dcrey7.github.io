@@ -284,3 +284,46 @@ Measured, head top as a percentage down the panel:
 
 The desk shot keeps its fixed aim: it frames furniture as well as a person, so
 pinning his head would push the desk out of shot.
+
+## His own layer, and nothing cut, 7 Sept
+
+Two asks in one pass: the character should be the top layer of the middle
+column rather than a box under the heading, and nothing about him should ever
+be cut off.
+
+**The layer.** The middle column is now two grid rows, everything above the
+shelf and then the shelf. The heading and the character are both placed in
+that first row, one over the other, and he sits on top. His canvas is clear
+glass everywhere he is not, so the words still read around him. The stage went
+from 470x441 to 470x549 at 1440x900, and he is free to stand right through
+where the words sit.
+
+**Nothing cut.** The framing no longer picks a distance or a point to look at.
+Both are measured every frame from where his body and his props actually are:
+
+- The box comes from the bones, not the meshes. A skinned mesh keeps the
+  bounding box of the pose it was built in, so it does not follow the
+  animation. Rigid things, the desk, the chair, the laptop, the bowl, use
+  their real corners.
+- The box grows the instant he reaches out and shrinks over about a second, so
+  a shot never crops him mid movement and the picture never breathes in and
+  out with his chewing.
+- The distance is solved corner by corner. Combining the box's widest reach
+  upward with its nearest face assumes the highest point is also the closest,
+  which for a person it is not: his head sits in the middle of his depth. That
+  cost about a tenth of the distance and left him small. Asking each corner
+  for itself and taking the largest answer put that back.
+- The hand zoom limits are set from the same number, so a visitor cannot crop
+  him either.
+
+Measured by projecting every bone and every rigid corner, 89 points a frame,
+and counting anything outside the picture:
+
+| | frames | off screen | worst edge use |
+|---|---|---|---|
+| ABOUT ME, eating | 220 | 0 | 0.954 |
+| BUILDING, at the desk | 150 | 0 | 0.879 |
+
+Worst edge use is how close the furthest point came to the edge, where 1.0 is
+touching it. So he fills the frame almost exactly and never crosses it. The
+earlier version of this fit sat at 0.73, which is what left him looking small.

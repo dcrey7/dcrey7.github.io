@@ -18,29 +18,19 @@ const ACTS = {
 
 /* Where the camera may go, per kind of shot.
  *
- * target   metres from his feet: the point the camera looks at.
- * dist     how far the camera sits, in metres.
- * el, az   elevation and compass angle, in degrees. Azimuth stays in front of
- *          him: swing past this and you film his back.
- * near/far the hand zoom limits. This lens shows 0.767 * distance metres of
- *          height, so 2.0 m frames about three quarters of a 2 m body, and
- *          3.8 m still holds the whole motion inside the frame.
+ * el, az  elevation and compass angle, in degrees. Azimuth stays in front of
+ *         him: swing past this and you film his back.
+ * room    how much further back than the closest fitting distance the camera
+ *         may drift. 1.0 is everything just touching the edges of the frame,
+ *         1.25 leaves a quarter again of air around it.
+ *
+ * There is no distance in metres here and no point to look at. Both are
+ * worked out from where his body and his props actually are, every frame,
+ * because that is the only way to promise nothing is ever cut off.
  */
 const VIEWS = {
-  stand: {
-    /* headroom pins the TOP of the frame, in metres up the body, instead of
-       fixing the point the camera looks at. He is two metres tall, so 2.05
-       leaves a few centimetres over his head and no more. Without this the
-       aim sits still while the distance drifts, and the head sinks down the
-       frame as the camera pulls back, opening a gap under the heading. */
-    target: [0.15, 1.30, 0], headroom: true, air: 0.05,
-    dist: [2.2, 3.1],
-    el: [-2, 16], az: [10, 92], near: 2.0, far: 3.6
-  },
-  desk: {
-    target: [0.32, 0.80, 0], dist: [2.8, 4.3],
-    el: [4, 26], az: [10, 78], near: 2.5, far: 4.8
-  }
+  stand: { el: [-2, 16], az: [10, 92], room: [0.90, 1.04] },
+  desk: { el: [4, 24], az: [10, 78], room: [0.94, 1.08] }
 };
 
 const HOLD = 5200;        // how long a framing is held before the next move
@@ -72,13 +62,14 @@ let quiet = 0;
 
 const api = () => window.avatarView;
 
-/* A framing is an angle, a distance, and the point being looked at. The
-   look-at point has to travel with the rest of it. Reading the angle against
-   where the camera is aimed now, and then snapping the aim to a fixed spot on
-   the first frame of a move, is what made the picture jump before it glided:
-   after a zoom the two aims can sit 10 to 15 cm apart. */
+/* A framing is a bearing, a height, and how much air to leave. The distance
+   and the point to look at are not chosen: they are measured, every frame,
+   from where his body and his props actually are. That is the only way to
+   promise nothing is ever cut off, at any angle, in any pose. Pinning the top
+   of his head was not enough, because a raised arm, a bowl or the desk can
+   all reach outside a frame his head fits inside. */
 
-/** Read the framing the camera is in right now. */
+/** Read the bearing and height the camera is at right now. */
 function pose() {
   const { camera, controls } = api();
   const t = controls.target;
@@ -87,57 +78,131 @@ function pose() {
   const z = camera.position.z - t.z;
   const d = Math.hypot(x, y, z) || 1;
   return {
-    d,
     az: (Math.atan2(x, z) * 180) / Math.PI,
     el: (Math.asin(y / d) * 180) / Math.PI,
-    tx: t.x, ty: t.y, tz: t.z
+    room: between(view.room)
   };
 }
 
-/* Where the top of his head is, in metres, right now. Read from the skeleton
-   rather than assumed: eating bends him over the bowl and drinking stands him
-   up, so a fixed number would frame one of them wrong. */
-let headBone;
-function headTop() {
-  const { actor } = api();
-  if (!headBone) actor.traverse(o => { if (!headBone && o.name === 'Head') headBone = o; });
-  if (!headBone) return null;
-  const p = headBone.getWorldPosition(headBone.position.clone());
-  return p.y + SKULL;
-}
-const SKULL = 0.16;   // the bone sits inside the skull; this clears the hair
+const SKIN = 0.13;   // bones sit inside the body: this covers flesh and hair
+let vec;             // a scratch vector, borrowed from the scene's own class
 
-/** The point this kind of shot looks at, in world space.
+/** The box that holds everything on screen, in world space.
  *
- *  A shot with headroom works back from the top of the frame instead of
- *  fixing the aim: the lens shows about 0.37 * distance of height above
- *  whatever it is aimed at, near enough across the tilts used here, so aiming
- *  that far below his crown keeps his head just under the top edge whatever
- *  distance the drift picks. Fixing the aim instead let the head sink down
- *  the frame as the camera pulled back, which opened a gap under the heading. */
-function aim(d) {
+ *  Bones for the character, because a skinned mesh keeps the bounding box of
+ *  the pose it was built in and would not follow the animation. Real corners
+ *  for anything rigid: the desk, the chair, the laptop, the bowl. */
+function bounds() {
   const { actor } = api();
-  const [tx, ty, tz] = view.target;
-  let y = ty;
-  if (view.headroom) {
-    const crown = headTop();
-    y = (crown === null ? view.headroom : crown - actor.position.y + view.air) - 0.37 * d;
-  }
+  if (!vec) vec = actor.position.clone();
+  let lo = [Infinity, Infinity, Infinity];
+  let hi = [-Infinity, -Infinity, -Infinity];
+  const eat = (x, y, z, pad) => {
+    lo = [Math.min(lo[0], x - pad), Math.min(lo[1], y - pad), Math.min(lo[2], z - pad)];
+    hi = [Math.max(hi[0], x + pad), Math.max(hi[1], y + pad), Math.max(hi[2], z + pad)];
+  };
+  actor.traverse(o => {
+    if (o.isBone) {
+      o.getWorldPosition(vec);
+      eat(vec.x, vec.y, vec.z, SKIN);
+    } else if (o.isMesh && !o.isSkinnedMesh) {
+      const g = o.geometry;
+      if (!g.boundingBox) g.computeBoundingBox();
+      const b = g.boundingBox;
+      for (const x of [b.min.x, b.max.x]) {
+        for (const y of [b.min.y, b.max.y]) {
+          for (const z of [b.min.z, b.max.z]) {
+            vec.set(x, y, z).applyMatrix4(o.matrixWorld);
+            eat(vec.x, vec.y, vec.z, 0);
+          }
+        }
+      }
+    }
+  });
+  if (!Number.isFinite(lo[0])) return null;
   return {
-    tx: actor.position.x + tx,
-    ty: actor.position.y + y,
-    tz: actor.position.z + tz
+    cx: (lo[0] + hi[0]) / 2, cy: (lo[1] + hi[1]) / 2, cz: (lo[2] + hi[2]) / 2,
+    hx: (hi[0] - lo[0]) / 2, hy: (hi[1] - lo[1]) / 2, hz: (hi[2] - lo[2]) / 2
   };
 }
+
+/* The box measured this frame, smoothed. It grows the instant he reaches out
+   and shrinks slowly, so a shot never crops him mid movement and the camera
+   never breathes in and out with his chewing. */
+let shot = null;
+
+function measure() {
+  const b = bounds();
+  if (!b) return shot;
+  if (!shot) { shot = b; return shot; }
+  // Grow at once, shrink over about a second. Any slower and the frame
+  // stays wide long after he lowers his arm, and he looks small for it.
+  const hold = (was, now) => (now > was ? now : was + (now - was) * 0.03);
+  shot = {
+    cx: shot.cx + (b.cx - shot.cx) * 0.05,
+    cy: shot.cy + (b.cy - shot.cy) * 0.05,
+    cz: shot.cz + (b.cz - shot.cz) * 0.05,
+    hx: hold(shot.hx, b.hx),
+    hy: hold(shot.hy, b.hy),
+    hz: hold(shot.hz, b.hz)
+  };
+  return shot;
+}
+
+/** How far back the camera must sit for the whole box to fit the frame.
+ *
+ *  Worked out corner by corner. Taking the box's widest reach upward and its
+ *  nearest face and adding them assumes the highest point is also the closest
+ *  one, which for a person it is not: his head sits in the middle of his
+ *  depth. That pushed the camera about a tenth further back than it needed to
+ *  be and left him small in the frame. Each corner is asked for itself
+ *  instead, and the one that needs the most room wins. */
+function fit(box, az, el) {
+  const canvas = document.querySelector('canvas');
+  const aspect = Math.max(canvas.clientWidth / canvas.clientHeight, 0.2);
+  const a = rad(az), e = rad(el);
+  // The camera's own axes, from the bearing and the height it sits at.
+  const right = { x: Math.cos(a), y: 0, z: -Math.sin(a) };
+  const up = { x: -Math.sin(e) * Math.sin(a), y: Math.cos(e), z: -Math.sin(e) * Math.cos(a) };
+  const back = { x: Math.sin(a) * Math.cos(e), y: Math.sin(e), z: Math.cos(a) * Math.cos(e) };
+  const dot = (c, v) => c[0] * v.x + c[1] * v.y + c[2] * v.z;
+  const tanUp = Math.tan(rad(21));            // half of the 42 degree lens
+  const tanSide = tanUp * aspect;
+  let need = 0;
+  for (const sx of [-box.hx, box.hx]) {
+    for (const sy of [-box.hy, box.hy]) {
+      for (const sz of [-box.hz, box.hz]) {
+        const c = [sx, sy, sz];
+        const depth = dot(c, back);   // how much nearer this corner sits
+        need = Math.max(need,
+          Math.abs(dot(c, up)) / tanUp + depth,
+          Math.abs(dot(c, right)) / tanSide + depth);
+      }
+    }
+  }
+  return need;
+}
+
+/* Where the camera was pointed when we took over, minus where we want it.
+   It is walked to nothing over a second or so, so picking up after a drag or
+   a zoom eases in instead of snapping. */
+let bias = { x: 0, y: 0, z: 0 };
 
 function put(p) {
   const { camera, controls } = api();
-  const flat = Math.cos(rad(p.el)) * p.d;
-  controls.target.set(p.tx, p.ty, p.tz);
+  const box = measure();
+  if (!box) return;
+  const d = fit(box, p.az, p.el) * p.room;
+  // Never let a hand zoom crop him either.
+  controls.minDistance = d * 0.99;
+  controls.maxDistance = d * 1.9;
+  const tx = box.cx + bias.x, ty = box.cy + bias.y, tz = box.cz + bias.z;
+  const flat = Math.cos(rad(p.el)) * d;
+  controls.target.set(tx, ty, tz);
   camera.position.set(
-    p.tx + flat * Math.sin(rad(p.az)),
-    p.ty + Math.sin(rad(p.el)) * p.d,
-    p.tz + flat * Math.cos(rad(p.az))
+    tx + flat * Math.sin(rad(p.az)),
+    ty + Math.sin(rad(p.el)) * d,
+    tz + flat * Math.cos(rad(p.az))
   );
   controls.update();
 }
@@ -155,16 +220,29 @@ function arc(from, to) {
 
 /** Choose the next framing. Make it a real change, not a nudge. */
 function next(from) {
-  const pick = () => {
-    const d = between(view.dist);
-    return { d, az: between(view.az), el: between(view.el), ...aim(d) };
-  };
+  const pick = () => ({
+    az: between(view.az), el: between(view.el), room: between(view.room)
+  });
   for (let tries = 0; tries < 24; tries++) {
     const p = pick();
-    if (Math.abs(arc(from.az, p.az)) > 22 || Math.abs(p.d - from.d) > 0.55) return p;
+    if (Math.abs(arc(from.az, p.az)) > 22 || Math.abs(p.el - from.el) > 6) return p;
   }
   return pick();
 }
+
+/** Take the camera over from wherever a person left it, without a jump. */
+function takeOver() {
+  const { controls } = api();
+  const box = measure();
+  if (!box) return;
+  bias = {
+    x: controls.target.x - box.cx,
+    y: controls.target.y - box.cy,
+    z: controls.target.z - box.cz
+  };
+}
+
+let held = null;   // the framing being held between moves
 
 function frame(now) {
   requestAnimationFrame(frame);
@@ -173,32 +251,34 @@ function frame(now) {
   // Hands off while someone is dragging or zooming, and for a while after.
   if (now < quiet) {
     move = null;
-    // Pick up again shortly after they let go, not a further five seconds on.
+    held = null;
     hold = now + 1200;
     return;
+  }
+  if (!held) {
+    held = pose();
+    takeOver();
   }
   if (move) {
     const p = Math.min(1, (now - move.at) / MOVE);
     const k = ease(p);
     const { from, to } = move;
-    put({
-      d: mix(from.d, to.d, k),
+    held = {
       az: from.az + arc(from.az, to.az) * k,
       el: mix(from.el, to.el, k),
-      tx: mix(from.tx, to.tx, k),
-      ty: mix(from.ty, to.ty, k),
-      tz: mix(from.tz, to.tz, k)
-    });
+      room: mix(from.room, to.room, k)
+    };
     if (p >= 1) {
       move = null;
       hold = now + HOLD;
     }
-    return;
+  } else if (now >= hold) {
+    move = { at: now, from: held, to: next(held) };
   }
-  if (now >= hold) {
-    const from = pose();
-    move = { at: now, from, to: next(from) };
-  }
+  // Fade out whatever gap we inherited, then re-fit every frame, moving or
+  // not, so no pose can ever grow out of the picture.
+  bias = { x: bias.x * 0.96, y: bias.y * 0.96, z: bias.z * 0.96 };
+  put(held);
 }
 
 function watchHands() {
@@ -231,12 +311,12 @@ async function perform(name) {
   if (mine !== run) return;
 
   view = VIEWS[act.view];
-  const { controls } = api();
-  controls.minDistance = view.near;
-  controls.maxDistance = view.far;
+  // Measure the new motion from scratch: it stands at a different size.
+  shot = null;
+  held = null;
+  move = null;
   // Open on the framing the viewer chose, then drift away from it.
   hold = performance.now() + 1400;
-  move = null;
   guard(act, mine);
 }
 
@@ -251,9 +331,10 @@ function guard(act, mine) {
   const beat = setInterval(() => {
     if (mine !== run) return clearInterval(beat);
     if (act.settled.test(el('current').textContent)) return;
-    const where = pose();
     el(act.button)?.click();
-    setTimeout(() => { if (mine === run && view) put(where); }, 260);
+    // The button parks the camera itself. Take it back where it was, easing
+    // out the difference rather than snapping.
+    setTimeout(() => { if (mine === run && held) takeOver(held); }, 260);
   }, 1500);
 }
 

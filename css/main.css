@@ -976,16 +976,22 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
    stays pinned to the bottom; the photos live on the middle right. */
 /* The screen is three thirds: menu | heading + media | words. The middle
    column ends where the right rail begins and NEVER extends into it. */
+/* Two rows: everything above the shelf, then the shelf. The heading and the
+   3D character are both placed in that first row, one on top of the other, so
+   the character owns the full height of the column instead of starting below
+   the heading. That is what lets him be big without the words cropping him. */
 .detail {
   flex: 1 1 auto;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
   gap: clamp(12px, 2.4vh, 22px);
   padding: 6px 0 4px;
   margin-right: calc(clamp(300px, 23vw, 620px) + 3.5vw);
 }
+.detail > .hero { grid-area: 1 / 1; z-index: 1; }
+.detail > .shelf { grid-area: 2 / 1; }
 
 .hero {
   display: flex;
@@ -1762,9 +1768,13 @@ body.booting .settings:has(#sfxBtn) { display: none; }
    pushing the shelf off the bottom. The viewer sizes its canvas from this
    box every frame, so no other change is needed to make it fit. */
 .avatar {
+  /* The same cell as the heading, and on top of it. His canvas is clear
+     glass everywhere he is not, so the words still read around him, and he
+     is free to stand right through where they sit. */
+  grid-area: 1 / 1;
+  z-index: 3;
   width: 100%;
   min-width: 0;
-  flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
