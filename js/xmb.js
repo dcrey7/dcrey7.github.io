@@ -7,9 +7,9 @@
 
    Skin is PS5: near-black, one key colour per item driving the whole screen. */
 
-import { showAvatar } from './avatar.js?v=2026-09-07k';
-import { emit, REDUCED, MOBILE } from './config.js';
-import { spin, stop } from './icon3d.js';
+import { showAvatar } from './avatar.js?v=2026-09-08g';
+import { emit, MOBILE } from './config.js';
+import { spin, stop } from './props3d.js?v=2026-09-08g';
 import { CATEGORIES } from './menu.js';
 import { SUPA } from './data.js';
 
@@ -192,6 +192,7 @@ export function initXmb() {
       if (cat.svg) {
         const cv = document.createElement('canvas');
         cv.className = 'glyph3d';
+        cv.dataset.prop = cat.id;
         cv.dataset.d = cat.svg;
         icon.appendChild(cv);
       }
@@ -498,7 +499,7 @@ export function initXmb() {
     });
     buildColumn();
     slideBar();
-    if (!REDUCED) {
+    {
       /* the selected icon revolves; its two neighbours stand still at the
          cover flow slant (the side that faces the selection swings back) */
       const TILT = 38 * Math.PI / 180;
@@ -507,9 +508,9 @@ export function initXmb() {
         if (!cv) return;
         /* ONE previous, EVERY next (user rule): the previous and all the
            nexts stand still at the slant, the selected one revolves */
-        if (d === 0) spin(cv, { group: 'deck-i' + n, fit: .85, speed: 1, reflect: true });
+        if (d === 0) spin(cv, { group: 'deck-i' + n, fit: .95, speed: 1, reflect: true });
         else if (d === -1 || d >= 1) {
-          spin(cv, { group: 'deck-i' + n, fit: .6,
+          spin(cv, { group: 'deck-i' + n, fit: .7,
                      angle: d < 0 ? TILT : -TILT, speed: 0, reflect: true });
         } else {
           stop('deck-i' + n);

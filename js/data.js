@@ -287,10 +287,12 @@ export const CERTS = [
     href: 'https://drive.google.com/file/d/1nvwbt2sHyTMtxiSNGlekgztIA1lLseQT/view' }
 ];
 
-/* Education, school logos live in assets/education/. */
+/* Education, school logos live in assets/education/.
+   Three lines on screen: the course, the school, then place and years.
+   The school is never spelt out twice. */
 export const EDUCATION = [
   { school: 'EMLYON', role: 'MSc Data Science and Artificial Intelligence',
-    line: 'Paris · Sep 2024 to Feb 2026', mark: 'EM',
+    line: 'Paris, France · Sep 2024 to Feb 2026', mark: 'EM',
     key: '#C8102E', logo: 'education/emlyon_business_school_logo.jpeg',
     bullets: [
       'Class delegate, elected by the batch to speak for it',
@@ -301,14 +303,14 @@ export const EDUCATION = [
     stack: 'Python · PyTorch · LLMs · NLP · MLOps',
     href: 'https://certificate.bcdiploma.com/check/DB040D4C62396A4CAD0001E4A01FB14D402F43E556B3962C5964899D0A5BD766SGcwRjhKTWpqaUkxSUJPYU8rUG14MTlKcnJ5aHNCT3cyd2l4NHhJZXhPNXFlanhU' },
   { school: 'MCGILL', role: 'International semester, Data Science and AI',
-    line: 'Montreal · Jan 2025', mark: 'MG',
+    line: 'Montreal, Canada · Jan 2025', mark: 'MG',
     key: '#ED1B2F', logo: 'education/mcgill_university_school_of_continuing_studies_logo.jpeg',
     bullets: [
       'School of Continuing Studies, exchange term from emlyon',
       'Data science and AI coursework in a Canadian cohort'
     ] },
   { school: 'SVNIT SURAT', role: 'B.Tech Mechanical Engineering',
-    line: 'National Institute of Technology · 2015 to 2019', mark: 'SV',
+    line: 'Surat, India · 2015 to 2019', mark: 'SV',
     key: '#D97706', logo: 'education/nit-surat.svg',
     bullets: [
       'Engineering design, mechatronics, manufacturing engineering, robotics and advanced mathematics',
@@ -319,8 +321,8 @@ export const EDUCATION = [
     ],
     stack: 'Engineering design · Mechatronics · Manufacturing · Robotics · Thermodynamics' },
   { school: 'DPS SHARJAH', role: 'Science and Mathematics, grades 11 and 12',
-    line: 'Delhi Private School · Sharjah, UAE', mark: 'DPS',
-    key: '#0EA5A4',
+    line: 'Sharjah, UAE · 2013 to 2015', mark: 'DPS',
+    key: '#0EA5A4', logo: 'education/dps-sharjah.png',
     bullets: [
       'Physics, chemistry and mathematics, the years that pointed at engineering',
       'Played football at national level in 2012 and 2013',

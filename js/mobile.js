@@ -17,10 +17,10 @@
    Runs only under 760 px (config.MOBILE). The desktop cross stays in the
    DOM but hidden, so deep links and the tests keep their meaning. */
 
-import { mountAvatar } from './avatar.js?v=2026-09-07k';
+import { mountAvatar } from './avatar.js?v=2026-09-08g';
 import { CATEGORIES } from './menu.js';
-import { spin } from './icon3d.js';
-import { emit, bus, REDUCED } from './config.js';
+import { spin } from './props3d.js?v=2026-09-08g';
+import { emit, bus } from './config.js';
 
 const el = (tag, cls, text) => {
   const e = document.createElement(tag);
@@ -98,6 +98,7 @@ export function initMobile({ buildRecForm }) {
     r.type = 'button';
     r.style.setProperty('--key', cat.key);
     const cv = el('canvas', 'glyph3d');
+    cv.dataset.prop = cat.id;
     cv.dataset.d = cat.svg || '';
     const text = el('div', 'mob-row__text');
     text.appendChild(el('div', 'mob-row__name', cat.label));
@@ -116,10 +117,9 @@ export function initMobile({ buildRecForm }) {
   function paint() {
     rowEls.forEach(({ r, cv }, i) => {
       r.classList.toggle('is-on', i === ci);
-      if (REDUCED) return;
       spin(cv, i === ci
-        ? { group: 'm-row-' + i, fit: .8, speed: 1 }
-        : { group: 'm-row-' + i, fit: .72, angle: TILT, speed: 0 });
+        ? { group: 'm-row-' + i, fit: .88, speed: 1 }
+        : { group: 'm-row-' + i, fit: .8, angle: TILT, speed: 0 });
     });
   }
   function select(i) {

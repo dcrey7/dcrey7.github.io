@@ -940,24 +940,15 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   object-fit: cover;
   border-radius: 10px;
 }
-/* only an image square casts a shadow; the selected one casts deeper */
-.item .item__mark.has-img {
-  box-shadow: 0 8px 20px -10px rgba(0, 0, 0, .45);
-}
-.item.is-on .item__mark.has-img {
-  box-shadow: 0 14px 34px -12px rgba(0, 0, 0, .6);
-}
+/* No shadows on the tiles (user rule): the soft dark halo read as a
+   smudge down the left side of the list. A tile sits flat on the field. */
+.item .item__mark.has-img,
+.item.is-on .item__mark.has-img { box-shadow: none; }
 /* A badge with a transparent background is its OWN shape (the AWS hexagon):
-   no box, no rounded rectangle, and the shadow follows the alpha edge of
-   the symbol instead of a square behind it. */
-.item__mark--shape, .item.is-on .item__mark--shape { box-shadow: none; }
+   no box, no rounded rectangle. */
 .item__mark.has-img.item__mark--shape img {
   object-fit: contain;
   border-radius: 0;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .35));
-}
-.item.is-on .item__mark.has-img.item__mark--shape img {
-  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, .45));
 }
 
 .item__name {

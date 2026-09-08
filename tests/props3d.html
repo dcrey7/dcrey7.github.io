@@ -1,0 +1,43 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Category prop kit</title>
+<style>
+  :root { --sys-yellow: #FFD60A; --sys-blue: #0A84FF; --sys-red: #FF453A;
+    --sys-green: #30D158; --sys-purple: #BF5AF2; --sys-orange: #FF9F0A; --sys-pink: #FF375F; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px; background: #24252a; color: #e9ded0; font: 15px system-ui; }
+  h1 { margin: 0 0 8px; font-size: 26px; }
+  p { color: #bdb4a8; margin: 0 0 20px; }
+  main { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+  article { text-align: center; background: #303137; border-radius: 8px; padding: 12px 0; }
+  canvas { display: block; width: 100%; height: 180px; }
+  .small { width: 60px; height: 60px; margin: 16px auto 4px; }
+  footer { margin-top: 24px; color: #bdb4a8; }
+</style>
+<h1>Category props</h1>
+<p>One kit. One painted atlas. The avatar keeps its own texture.</p>
+<main></main>
+<footer>Large view and 60 px view. Fixed angle. The site uses these same models and renderer.</footer>
+<script type="module">
+  import * as props from '../js/props3d.js';
+  import { CATEGORIES } from '../js/menu.js';
+  window.props = props;
+  for (const cat of CATEGORIES) {
+    const article = document.createElement('article');
+    for (const small of [false, true]) {
+      const canvas = document.createElement('canvas');
+      canvas.dataset.prop = cat.id;
+      canvas.dataset.d = cat.svg;
+      canvas.style.color = cat.key;
+      if (small) canvas.className = 'small';
+      article.append(canvas);
+    }
+    const label = document.createElement('div');
+    label.textContent = cat.id;
+    article.append(label);
+    document.querySelector('main').append(article);
+    for (const canvas of article.querySelectorAll('canvas')) {
+      props.spin(canvas, { group: cat.id + canvas.className, angle: -0.28, speed: 0, fit: 0.82 });
+    }
+  }
+</script>

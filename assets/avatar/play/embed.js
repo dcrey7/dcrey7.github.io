@@ -294,6 +294,7 @@ function takeOver() {
 }
 
 let held = null;   // the framing being held between moves
+let snap = false;  // the next take over is a cut, not a hand over
 
 function frame(now) {
   requestAnimationFrame(frame);
@@ -314,6 +315,16 @@ function frame(now) {
   if (!held) {
     held = pose();
     takeOver();
+  }
+  if (snap) {
+    // A screen change, behind the curtain. The bearing and the height stay,
+    // a drift in progress included: the same angle, only now on the new
+    // pose. The distance and the centre cut straight to fit it. The hand
+    // over above is for picking up after a drag; here it walked the picture
+    // sideways for a second after the curtain had already risen.
+    snap = false;
+    bias = { x: 0, y: 0, z: 0 };
+    reach = 0;
   }
   if (move) {
     const p = Math.min(1, (now - move.at) / MOVE);
@@ -430,20 +441,28 @@ function watchHands() {
 
 let run = 0;
 
+/* The curtain. Out fast, back gently. */
+const CLOSE = 70;    // ms to go dark
+const OPEN = 140;    // ms to come back
+
 /** Fade the picture out and in around a change of motion. */
 function veil(hide) {
   const canvas = document.querySelector('canvas');
-  if (canvas) canvas.style.opacity = hide ? '0' : '1';
+  if (!canvas) return;
+  canvas.style.transition = `opacity ${hide ? CLOSE : OPEN}ms ease`;
+  canvas.style.opacity = hide ? '0' : '1';
 }
 
 async function perform(name) {
   const act = ACTS[name] || ACTS.about;
   const mine = ++run;
 
-  // Between letting go of one clip and starting the next, the model falls
-  // back to the pose it was built in, arms straight out. The props arrive in
-  // the same moment and the framing opens up to fit them. Draw the curtain.
+  // Draw the curtain, and let it close before anything changes behind it.
+  // Switching in the same instant it starts to fall showed the new motion
+  // through a half closed curtain, then a blank, then the same motion again.
   veil(true);
+  await wait(CLOSE + 5);
+  if (mine !== run) return;
 
   // Every one of these motions carries a prop, and the button refuses to run
   // until the prop list has arrived. It loads separately from the model.
@@ -457,23 +476,49 @@ async function perform(name) {
   const landed = await until(() => act.settled.test(el('current').textContent), 30000);
   if (mine !== run) return;
   if (!landed) { veil(false); return; }
-  await wait(500);
   if (mine !== run) return;
 
   view = VIEWS[act.view];
-  // Measure the new motion from scratch: it stands at a different size.
-  shot = null;
+  // The clip is still blending in for 120 ms and the desk lands after it.
+  // A box taken now is wrong, and the frame would then chase the right one
+  // in full view. Wait for the pose to stop changing first.
   skins = null;
-  reach = 0;
-  held = null;
-  move = null;
-  // Open on the framing the viewer chose, then drift away from it.
-  hold = performance.now() + 1400;
+  await settled(450);
+  if (mine !== run) return;
+  // Measure the new motion from scratch: it stands at a different size.
+  // The angle is kept, and so is any drift under way: only the fit changes.
+  shot = null;
+  snap = true;
+  if (!move) hold = performance.now() + 1400;
   guard(act, mine);
 
-  // Let the framing settle on the new shape before showing it again.
-  await wait(650);
+  // Let the framing run at least once on the new shape, then raise the
+  // curtain. Two frames: the framing's own tick is queued before this one.
+  await new Promise(r => requestAnimationFrame(r));
+  await new Promise(r => requestAnimationFrame(r));
   if (mine === run) veil(false);
+}
+
+/** Resolve once the body's box holds still for three frames, or at the cap.
+ *  Still means under 1.5 cm a frame: typing and chewing move less than that,
+ *  a stand to sit blend moves three centimetres a frame. */
+function settled(cap) {
+  return new Promise(done => {
+    const t0 = performance.now();
+    let last = null, calm = 0;
+    const look = () => {
+      const b = bounds();
+      if (b && last) {
+        const still = ['cx', 'cy', 'cz', 'hx', 'hy', 'hz']
+          .every(k => Math.abs(b[k] - last[k]) < 0.015);
+        calm = still ? calm + 1 : 0;
+      }
+      last = b;
+      if (calm >= 3 || performance.now() - t0 > cap) return done();
+      requestAnimationFrame(look);
+    };
+    requestAnimationFrame(look);
+  });
 }
 
 /* Put the motion back if the viewer drops it.
