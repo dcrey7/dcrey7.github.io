@@ -16,7 +16,7 @@
    frames every one of them the same way. */
 
 import { spin as flatSpin, stop as flatStop,
-         setSpeed as flatSetSpeed, recolour as flatRecolour } from './icon3d.js';
+         setSpeed as flatSetSpeed, recolour as flatRecolour } from './icon3d.js?v=2026-09-09a';
 
 const THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.min.js';
 const LOADER_URL = './vendor/GLTFLoader.js';
@@ -49,8 +49,21 @@ let three = null, loader = null, renderer = null, scene = null, camera = null;
 let raf = 0, last = 0;
 let broken = false;         /* once WebGL fails, stay on the flat icons */
 
-/** Load three and the loader once, and build the one renderer. */
-async function boot() {
+/** Load three and the loader once, and build the one renderer.
+ *
+ *  Once means once. Every icon on the page calls this in the same tick,
+ *  long before the first import has resolved, so a guard on `renderer`
+ *  alone let fourteen boots run and open fourteen WebGL contexts. Chrome
+ *  allows about sixteen: the phone, with its seven rows on top of the
+ *  hidden desktop bar, tipped over, the oldest context was lost, and every
+ *  icon fell back to the flat glyph. The promise is the guard. */
+let booting = null;
+function boot() {
+  if (!booting) booting = bootOnce();
+  return booting;
+}
+
+async function bootOnce() {
   if (renderer || broken) return !broken;
   try {
     const [T, L] = await Promise.all([import(THREE_URL), import(LOADER_URL)]);

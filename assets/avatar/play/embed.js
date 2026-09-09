@@ -562,6 +562,10 @@ async function main() {
     shade.textContent = 'COULD NOT LOAD';
     return;
   }
+  // The curtain is down before the shade lifts, and perform() raises it
+  // only once the first motion has landed. Between the two the model may
+  // still be in the pose it was built in, and nobody should see that.
+  veil(true);
   shade.classList.add('gone');
   // Take it out of the layout once it has faded, so it can never sit over him.
   setTimeout(() => { shade.hidden = true; }, 600);

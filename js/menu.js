@@ -11,7 +11,7 @@
    'work/amazon_logo.jpeg'). If the file is missing the renderer falls back
    to `mark`, so images can be dropped in later without touching code. */
 
-import { ABOUT, WORK, PROJECTS, PEOPLE, TROPHIES, CERTS, EDUCATION, CONTACT } from './data.js';
+import { ABOUT, WORK, PROJECTS, PEOPLE, TROPHIES, CERTS, EDUCATION, CONTACT } from './data.js?v=2026-09-09a';
 
 /* One consistent icon family for the deck: Google Material Icons
    (Apache 2.0), 24px paths, drawn inline so nothing is fetched. */

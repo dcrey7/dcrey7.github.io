@@ -15,7 +15,7 @@
 /* The version belongs here as well as inside the page. Bumping only the
    script tags inside embed.html is useless while embed.html itself is the
    cached thing: the browser keeps serving the old page, old tags and all. */
-const PAGE = 'assets/avatar/play/embed.html?v=2026-09-08f&embed=1&act=';
+const PAGE = 'assets/avatar/play/embed.html?v=2026-09-09a&embed=1&act=';
 function build(kind) {
   const made = { kind };
   const wrap = document.createElement('div');
@@ -108,6 +108,9 @@ export function hideAvatar() {
 
 export function mountAvatar(host, kind) {
   const made = build(kind);
-  host.appendChild(made.wrap);
+  // First in the drop-down, always. The first item mounts before its words
+  // are added and an item tapped later mounts after them, so appending put
+  // the character above the text on one and below it on the next.
+  host.prepend(made.wrap);
   return () => made.wrap.remove();
 }

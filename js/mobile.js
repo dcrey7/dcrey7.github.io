@@ -17,10 +17,10 @@
    Runs only under 760 px (config.MOBILE). The desktop cross stays in the
    DOM but hidden, so deep links and the tests keep their meaning. */
 
-import { mountAvatar } from './avatar.js?v=2026-09-08g';
-import { CATEGORIES } from './menu.js';
-import { spin } from './props3d.js?v=2026-09-08g';
-import { emit, bus } from './config.js';
+import { mountAvatar } from './avatar.js?v=2026-09-09a';
+import { CATEGORIES } from './menu.js?v=2026-09-09a';
+import { spin } from './props3d.js?v=2026-09-09a';
+import { emit, bus } from './config.js?v=2026-09-09a';
 
 const el = (tag, cls, text) => {
   const e = document.createElement(tag);

@@ -1389,7 +1389,7 @@ a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(
   margin: 0 auto;
 }
 
-@media (max-width: 759px) {
+@media (max-width: 759px), (max-width: 1024px) and (orientation: portrait) {
   .mboard { height: clamp(170px, 26vh, 260px); gap: 8px; }
 }
 
@@ -1550,7 +1550,7 @@ body.booting .settings:has(#sfxBtn) { display: none; }
 
 /* Phones: the cross stacks. Categories across the top, items in a row of
    their own beneath, detail below that — the same two axes, folded. */
-@media (max-width: 759px) {
+@media (max-width: 759px), (max-width: 1024px) and (orientation: portrait) {
   .brand span, .clock { display: none; }
   .topbar { padding-block: 12px; }
 
@@ -1611,7 +1611,7 @@ body.booting .settings:has(#sfxBtn) { display: none; }
    Under 760 px the desktop cross is hidden and three screens take over:
    the shared gate, a vertical wheel of the category icons, and one clean
    scroll per category. Not a shrunken desktop. */
-@media (max-width: 759px) {
+@media (max-width: 759px), (max-width: 1024px) and (orientation: portrait) {
   body.mobile .xmb, body.mobile .reflbar,
   body.mobile #keyart, body.mobile .who { display: none !important; }
 
@@ -1661,9 +1661,15 @@ body.booting .settings:has(#sfxBtn) { display: none; }
     background: none; border: 0;   /* no box (user rule) */
   }
   body.mobile .pill[hidden] { display: none; }
-  /* the disc turns all the time on the phone, not only while playing */
-  body.mobile .pill__disc { width: 64px; height: 64px; animation-play-state: running; }
-  body.mobile .pill__meta { width: auto; flex: 1 1 auto; min-width: 0; max-height: none; }
+  /* a small widget: the disc turns only while a song plays, as on the
+     desktop, and the whole thing sits low under the clock */
+  body.mobile .pill { gap: 10px; padding: 2px 4px; }
+  body.mobile .pill__disc { width: 44px; height: 44px; }
+  body.mobile .pill__meta { width: auto; flex: 1 1 auto; min-width: 0; max-height: 44px; gap: 2px; }
+  body.mobile .pill__line { font-size: .5rem; gap: 8px; }
+  body.mobile .pill__title { font-size: .54rem; }
+  body.mobile .pill__bar { height: 2px; }
+  body.mobile .pill__btn { font-size: .58rem; padding: 1px 0; }
   .mob-clock__time { font-family: 'Archivo', system-ui, sans-serif; font-weight: 300; font-size: 2.4rem; line-height: 1; letter-spacing: .02em; }
   .mob-clock__date { margin-top: 3px; font-size: .6rem; letter-spacing: .18em; }
   .mob-rows { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
@@ -1785,7 +1791,7 @@ body.booting .settings:has(#sfxBtn) { display: none; }
 .avatar__stage:focus, .avatar__stage:focus-visible { outline: none; }
 /* The phone has no fixed middle to fill: the character sits inside an open
    drop-down, so give it a share of the screen instead. */
-@media (max-width: 759px) {
+@media (max-width: 759px), (max-width: 1024px) and (orientation: portrait) {
   .avatar { flex: 0 0 auto; margin-bottom: 14px; }
   .avatar__stage { height: 42vh; min-height: 260px; }
 }

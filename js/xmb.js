@@ -7,11 +7,11 @@
 
    Skin is PS5: near-black, one key colour per item driving the whole screen. */
 
-import { showAvatar } from './avatar.js?v=2026-09-08g';
-import { emit, MOBILE } from './config.js';
-import { spin, stop } from './props3d.js?v=2026-09-08g';
-import { CATEGORIES } from './menu.js';
-import { SUPA } from './data.js';
+import { showAvatar } from './avatar.js?v=2026-09-09a';
+import { emit, MOBILE } from './config.js?v=2026-09-09a';
+import { spin, stop } from './props3d.js?v=2026-09-09a';
+import { CATEGORIES } from './menu.js?v=2026-09-09a';
+import { SUPA } from './data.js?v=2026-09-09a';
 
 const $ = s => document.querySelector(s);
 
@@ -506,6 +506,8 @@ export function initXmb() {
       [...barEl.children].forEach((el, n) => {
         const d = n - catI, cv = el.querySelector('.glyph3d');
         if (!cv) return;
+        // On a phone this bar is hidden and the phone rows draw their own.
+        if (MOBILE()) { stop('deck-i' + n); return; }
         /* ONE previous, EVERY next (user rule): the previous and all the
            nexts stand still at the slant, the selected one revolves */
         if (d === 0) spin(cv, { group: 'deck-i' + n, fit: .95, speed: 1, reflect: true });
