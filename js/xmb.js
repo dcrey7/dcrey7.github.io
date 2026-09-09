@@ -7,11 +7,11 @@
 
    Skin is PS5: near-black, one key colour per item driving the whole screen. */
 
-import { showAvatar } from './avatar.js?v=2026-09-09a';
-import { emit, MOBILE } from './config.js?v=2026-09-09a';
-import { spin, stop } from './props3d.js?v=2026-09-09a';
-import { CATEGORIES } from './menu.js?v=2026-09-09a';
-import { SUPA } from './data.js?v=2026-09-09a';
+import { showAvatar } from './avatar.js?v=2026-09-09b';
+import { emit, MOBILE } from './config.js?v=2026-09-09b';
+import { spin, stop } from './props3d.js?v=2026-09-09b';
+import { CATEGORIES } from './menu.js?v=2026-09-09b';
+import { SUPA } from './data.js?v=2026-09-09b';
 
 const $ = s => document.querySelector(s);
 

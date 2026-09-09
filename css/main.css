@@ -1793,5 +1793,9 @@ body.booting .settings:has(#sfxBtn) { display: none; }
    drop-down, so give it a share of the screen instead. */
 @media (max-width: 759px), (max-width: 1024px) and (orientation: portrait) {
   .avatar { flex: 0 0 auto; margin-bottom: 14px; }
-  .avatar__stage { height: 42vh; min-height: 260px; }
+  /* The frame takes no touches on the phone. Its canvas asks for every
+     touch to orbit him, so a swipe that started on the character did not
+     scroll the page, and with a frame this tall the links under it were
+     out of reach. The camera drifts on its own; it needs no finger. */
+  .avatar__stage { height: 42vh; min-height: 260px; pointer-events: none; }
 }
