@@ -4,6 +4,13 @@
 
 The site is an interactive menu in the style of a game console. The facts below are the same facts the site shows.
 
+## About
+
+- Traditional and generative AI, from credit risk and fraud detection to document intelligence and computer vision: he has shipped all of it.
+- Local models and open source: he builds with them, runs and tests them on his own GPU, and contributes back.
+- Digital illustration and print design: the prints on his clothes are his own drawings.
+- Arsenal supporter, and football every Saturday in Paris, where he films his own games.
+
 ## Work
 
 - Vistiq.AI, AI Engineer, Paris, since 2026: document extraction accuracy from 44% to 92% on private equity and venture capital documents, an LLM evaluation system wired into CI/CD, LLM inference cost cut by 40%, and an agent that uses MCP connectors.

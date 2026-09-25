@@ -2,6 +2,7 @@
 
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -162,3 +163,31 @@ def test_www_canonical_and_indexing_headers(monkeypatch, noindex_path):
     report = seo.audit()
     assert report["technical"] == ("fail" if noindex_path == "index.html" else "pass")
     assert len(report["warnings"]) == 1
+
+
+NOSCRIPT_SPEC = importlib.util.spec_from_file_location(
+    "noscript", ROOT / "scripts/noscript.py"
+)
+noscript = importlib.util.module_from_spec(NOSCRIPT_SPEC)
+NOSCRIPT_SPEC.loader.exec_module(noscript)
+
+
+def test_noscript_block_matches_llms_txt():
+    # llms.txt is the one source; run scripts/noscript.py after editing it.
+    assert noscript.block() in (ROOT / "index.html").read_text()
+
+
+def test_page_has_real_text_without_javascript():
+    source = (ROOT / "index.html").read_text()
+    inner = source[source.index("<noscript>\n<article") : source.index("</article>")]
+    words = re.sub(r"<[^>]+>", " ", inner).split()
+    assert len(words) > 300
+    for fact in ("Abhishek Thomas", "Vistiq.AI", "emlyon", "rezoume", "tranzlato"):
+        assert fact in inner
+
+
+def test_www_function_redirects_only_www():
+    source = (ROOT / "functions/index.ts").read_text()
+    assert '"www.hiabhi.com"' in source and "301" in source and "next()" in source
+    routes = json.loads((ROOT / "_routes.json").read_text())
+    assert routes["include"] == ["/"]  # the function never touches assets
