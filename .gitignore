@@ -2,3 +2,8 @@
 .env
 .wrangler/
 .playwright-mcp/
+results/seo/
+results/seo-input/
+__pycache__/
+.pytest_cache/
+.ruff_cache/

@@ -1,0 +1,11 @@
+[Unit]
+Description=Check hiabhi.com SEO and save a local report
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Downloads/work/portfolio/portfolio-4/.claude/worktrees/ps5-ui
+ExecStart=/usr/bin/uv run --no-project python scripts/seo_audit.py
+UMask=0077
+TimeoutStartSec=5min

@@ -1,0 +1,46 @@
+# Abhishek Thomas
+
+> AI engineer in Paris, France. LLM evaluation, retrieval augmented generation (RAG), AI agents and document intelligence. Five years of data science shipped to production. This is his personal site, hiabhi.com, also called HiAbhi. His handle is dcrey7.
+
+The site is an interactive menu in the style of a game console. The facts below are the same facts the site shows.
+
+## Work
+
+- Vistiq.AI, AI Engineer, Paris, since 2026: document extraction accuracy from 44% to 92% on private equity and venture capital documents, an LLM evaluation system wired into CI/CD, LLM inference cost cut by 40%, and an agent that uses MCP connectors.
+- AXA France, Data Scientist, Paris, 2025 to 2026.
+- EXL Services, Senior Data Scientist, Bangalore, 2022 to 2024.
+- MathCo, Data Scientist, Bangalore, 2021 to 2022.
+- Amazon, Risk Analyst, Bangalore, 2019 to 2021.
+
+## Education
+
+- emlyon business school, Paris: MSc Data Science and Artificial Intelligence, 2024 to 2026. Class delegate. Thesis: Active GLiNER, active learning for span based entity extraction.
+- McGill University, Montreal: international semester, 2025.
+- SVNIT Surat (Sardar Vallabhbhai National Institute of Technology), India: B.Tech Mechanical Engineering, 2015 to 2019. Captain of the university football team.
+
+## Products he builds
+
+- [rezoume](https://rezoume.com/): build a personal resume with AI.
+- [tranzlato](https://tranzlato.com/): AI language tutor for real conversation practice.
+- [Kicky AI](https://kickyai.com/): a personal AI coach for your football shooting form.
+
+## Projects and awards
+
+- Memory BridgeAI: Speechmatics hackathon, winner of three awards.
+- NOTME: Mistral game jam, finalist.
+- Medical RAG: Mistral and Alan hackathon, finalist.
+- Pika Pal AI: WiDS datathon, Thales responsible AI award.
+- Cover Switch 2: open source window switcher for KDE Plasma.
+- Active GLiNER: research, masters thesis.
+- Cerebras Community Ambassador for Paris.
+
+## Certifications
+
+AWS Machine Learning Specialty, AWS Cloud Practitioner, Google Cloud skills badge, Generative AI with LLMs (DeepLearning.AI), Cohere.
+
+## Links
+
+- Site: https://hiabhi.com/
+- GitHub: https://github.com/dcrey7
+- LinkedIn: https://www.linkedin.com/in/dcrey7/
+- Hugging Face: https://huggingface.co/dcrey7

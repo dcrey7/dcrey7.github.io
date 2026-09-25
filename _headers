@@ -16,3 +16,7 @@
 /themes/*
   ! Content-Security-Policy
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self'
+
+# The theme pages are demos, not the profile: keep them out of search.
+/themes/*
+  X-Robots-Tag: noindex, follow
