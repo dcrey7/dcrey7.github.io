@@ -1,14 +1,14 @@
 /* Boot order: cross media bar renders → boot gate → player → clock. */
 
-import { initXmb } from './xmb.js?v=2026-09-25a';
-import { initBoot } from './boot.js?v=2026-09-25a';
-import { YT_PLAYLISTS, THEME } from './data.js?v=2026-09-25a';
-import * as theme from './theme.js?v=2026-09-25a';
-import { CATEGORIES } from './menu.js?v=2026-09-25a';
-import { bus, MOBILE } from './config.js?v=2026-09-25a';
-import { initMobile } from './mobile.js?v=2026-09-25a';
-import { initAurora } from './aurora.js?v=2026-09-25a';
-import { sfx } from './sfx.js?v=2026-09-25a';
+import { initXmb } from './xmb.js?v=2026-09-25b';
+import { initBoot } from './boot.js?v=2026-09-25b';
+import { YT_PLAYLISTS, THEME } from './data.js?v=2026-09-25b';
+import * as theme from './theme.js?v=2026-09-25b';
+import { CATEGORIES } from './menu.js?v=2026-09-25b';
+import { bus, MOBILE } from './config.js?v=2026-09-25b';
+import { initMobile } from './mobile.js?v=2026-09-25b';
+import { initAurora } from './aurora.js?v=2026-09-25b';
+import { sfx } from './sfx.js?v=2026-09-25b';
 
 const xmb = initXmb();
 

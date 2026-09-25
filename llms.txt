@@ -30,11 +30,10 @@ The site is an interactive menu in the style of a game console. The facts below 
 - [rezoume](https://rezoume.com/): build a personal resume with AI.
 - [tranzlato](https://tranzlato.com/): AI language tutor for real conversation practice.
 - [Kicky AI](https://kickyai.com/): a personal AI coach for your football shooting form.
-- [Recolli AI](https://recolli.com/): a daily call that remembers. It calls elderly parents on any phone, remembers each conversation, and tells the family when something changes. It grew out of Memory BridgeAI, his Speechmatics hackathon winner.
+- [Recolli](https://recolli.com/): a daily call that remembers. It calls elderly parents on any phone, remembers each conversation, and tells the family when something changes. Winner of three awards at the Speechmatics hackathon.
 
 ## Projects and awards
 
-- Memory BridgeAI: Speechmatics hackathon, winner of three awards. Now becoming Recolli AI, at recolli.com.
 - NOTME: Mistral game jam, finalist.
 - Medical RAG: Mistral and Alan hackathon, finalist.
 - Pika Pal AI: WiDS datathon, Thales responsible AI award.

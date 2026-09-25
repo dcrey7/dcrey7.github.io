@@ -1,7 +1,7 @@
 /* Opt-in synth sound: short blips, no audio assets.
    The console plays a tick per tile and a sting per tab. */
 
-import { bus } from './config.js?v=2026-09-25a';
+import { bus } from './config.js?v=2026-09-25b';
 
 let audio = null, on = false;
 

@@ -119,10 +119,10 @@ export const PROJECTS = [
     ]
   },
   {
-    name: 'MEMORY BRIDGEAI', tag: 'speechmatics hackathon, winner ×3 awards', passed: true,
-    key: '#DC2626', mark: 'MB', logo: 'projects/memorybridge.png',
+    name: 'RECOLLI', tag: 'speechmatics hackathon, winner ×3 awards', passed: true,
+    key: '#2E7D32', mark: 'RC', logo: 'projects/recolli.png',
     video: 'https://youtu.be/oadhJjaRd3I',
-    desc: 'Proactive voice agent that calls elderly people living alone, remembers past conversations, scores their memory, and alerts a caregiver on WhatsApp within seconds. Real phone calls over PSTN, works on a feature phone. LiveKit · Speechmatics · Backboard.io. It is now becoming a product: Recolli AI, at recolli.com.',
+    desc: 'A daily call that remembers. A voice agent calls elderly parents living alone on any phone, remembers past conversations, scores their memory, and alerts the family on WhatsApp within seconds when something changes. Real phone calls over PSTN, works on a feature phone. LiveKit · Speechmatics · Backboard.io.',
     photos: [
       'projectsandhackthons/speechmatics/1772453175497.jpeg',
       'projectsandhackthons/speechmatics/1772453176051.jpeg',
