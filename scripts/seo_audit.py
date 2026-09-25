@@ -13,7 +13,13 @@ from xml.etree import ElementTree
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = "https://hiabhi.com"
-CARD = "/assets/og-card.png"  # the 1200 x 630 share card
+CARD = "/assets/og-card.png"
+PRODUCTS = (
+    "rezoume.com",
+    "tranzlato.com",
+    "kickyai.com",
+    "recolli.com",
+)  # the 1200 x 630 share card
 LIMIT = 2_000_000
 
 
@@ -120,6 +126,9 @@ def check_llms(source):
         issues.append("llms.txt must open with his name as the title")
     if ORIGIN + "/" not in source:
         issues.append("llms.txt must link the site")
+    issues.extend(
+        f"llms.txt must name {product}" for product in PRODUCTS if product not in source
+    )
     return issues
 
 

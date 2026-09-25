@@ -34,6 +34,7 @@ export const ABOUT = {
         { label: 'rezoume.com', href: 'https://rezoume.com', text: ': build a personal resume with AI' },
         { label: 'tranzlato.com', href: 'https://tranzlato.com', text: ': all in one translation services' },
         { label: 'kickyai.com', href: 'https://kickyai.com', text: ': a personal AI coach for your shooting form' },
+        { label: 'recolli.com', href: 'https://recolli.com', text: ': a daily call that remembers, for elderly parents living alone' },
         { label: 'Cerebras', href: 'https://www.cerebras.ai/', text: ' Community Ambassador for Paris: I build the AI community here, and run Cafe Compute' }
       ]
     },
@@ -121,13 +122,16 @@ export const PROJECTS = [
     name: 'MEMORY BRIDGEAI', tag: 'speechmatics hackathon, winner ×3 awards', passed: true,
     key: '#DC2626', mark: 'MB', logo: 'projects/memorybridge.png',
     video: 'https://youtu.be/oadhJjaRd3I',
-    desc: 'Proactive voice agent that calls elderly people living alone, remembers past conversations, scores their memory, and alerts a caregiver on WhatsApp within seconds. Real phone calls over PSTN, works on a feature phone. LiveKit · Speechmatics · Backboard.io.',
+    desc: 'Proactive voice agent that calls elderly people living alone, remembers past conversations, scores their memory, and alerts a caregiver on WhatsApp within seconds. Real phone calls over PSTN, works on a feature phone. LiveKit · Speechmatics · Backboard.io. It is now becoming a product: Recolli AI, at recolli.com.',
     photos: [
       'projectsandhackthons/speechmatics/1772453175497.jpeg',
       'projectsandhackthons/speechmatics/1772453176051.jpeg',
       'projectsandhackthons/speechmatics/b388a5b5-50b5-416f-89de-c4c800b4afd1.jpeg'
     ],
-    links: [{ label: 'the story', href: 'https://www.linkedin.com/posts/dcrey7_hackathon-voiceai-ai-activity-7434207452876800000-Da2X' }]
+    links: [
+      { label: 'recolli.com', href: 'https://recolli.com' },
+      { label: 'the story', href: 'https://www.linkedin.com/posts/dcrey7_hackathon-voiceai-ai-activity-7434207452876800000-Da2X' }
+    ]
   },
   {
     name: 'REZOUME', tag: 'ai resume builder · live',

@@ -16,7 +16,7 @@
    frames every one of them the same way. */
 
 import { spin as flatSpin, stop as flatStop,
-         setSpeed as flatSetSpeed, recolour as flatRecolour } from './icon3d.js?v=2026-09-09b';
+         setSpeed as flatSetSpeed, recolour as flatRecolour } from './icon3d.js?v=2026-09-25a';
 
 const THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.min.js';
 const LOADER_URL = './vendor/GLTFLoader.js';
