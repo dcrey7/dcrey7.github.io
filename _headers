@@ -20,3 +20,7 @@
 # The theme pages are demos, not the profile: keep them out of search.
 /themes/*
   X-Robots-Tag: noindex, follow
+
+# Hidden privacy page for the youtube-dcrey7-stats OAuth app. Not linked, not indexed.
+/privacy*
+  X-Robots-Tag: noindex, nofollow
