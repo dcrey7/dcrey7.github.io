@@ -209,7 +209,8 @@ export const PROJECTS = [
 ];
 
 /* All 16 LinkedIn recommendations, in full, exact titles and companies as
-   they appear on LinkedIn, with the relationship and its date. Photos live
+   they appear on LinkedIn, with the relationship and its date. They are
+   shown unedited (the PEOPLE screen says so). Photos live
    in assets/reccomendations/ (Anamika has none, initials fall back). */
 export const PEOPLE = [
   { init:'PF', name:'Philippe Fraisse', role:'Head of AI Lab @ AXA France',
@@ -334,13 +335,18 @@ export const EDUCATION = [
     ] }
 ];
 
-/* Supabase project for visitor recommendations (pending → approved flow).
-   Create a free project at supabase.com, then paste its URL and anon key. */
-/* The anon key is a PUBLIC value by design: row level security on the
-   server decides what it can do (insert pending, read approved). */
+/* Visitor recommendations (the ADD YOURS form).
+   OFF since 2026-10-22: the Supabase project tzahyhzkxhedcuobalkr was
+   deleted (its address no longer resolves), so the form could not save.
+   To switch it back on: create or restore a Supabase project, run
+   supabase/schema.sql, paste its URL and anon key below, set open: true,
+   and add the project's URL to connect-src and img-src in _headers.
+   The anon key is a PUBLIC value by design: row level security on the
+   server decides what it can do. */
 export const SUPA = {
-  url: 'https://tzahyhzkxhedcuobalkr.supabase.co',
-  anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6YWh5aHpreGhlZGN1b2JhbGtyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0OTQ4MTQsImV4cCI6MjEwMzA3MDgxNH0.YuSi6KVoxIYVPwdzUeej1Hqbqz1cFxCs4hxhuNWk2HE'
+  open: false,
+  url: '',
+  anon: ''
 };
 
 /* The radio, saloon.wtf style: paste YOUR YouTube playlist link(s) here.

@@ -21,6 +21,7 @@ import { mountAvatar } from './avatar.js?v=2026-09-25b';
 import { CATEGORIES } from './menu.js?v=2026-09-25b';
 import { spin } from './props3d.js?v=2026-09-25b';
 import { emit, bus } from './config.js?v=2026-09-25b';
+import { videoOnClick } from './ytclick.js?v=2026-10-22';
 
 const el = (tag, cls, text) => {
   const e = document.createElement(tag);
@@ -35,7 +36,7 @@ const TAGLINE = {
   work: 'Amazon to AXA to AI native startups',
   education: 'the schools, with the diplomas',
   play: 'projects with a demo to watch',
-  people: 'what colleagues say, add yours',
+  people: 'what colleagues say on LinkedIn',
   trophies: 'certifications, click to verify',
   contact: 'email, GitHub, LinkedIn, Hugging Face'
 };
@@ -69,6 +70,9 @@ export function initMobile({ buildRecForm }) {
      script keeps working, it holds the children by id) */
   const pill = document.getElementById('pill');
   if (pill) home.appendChild(pill);
+  /* the radio's visible YouTube card (hidden until play) goes with it */
+  const radio = document.getElementById('radio');
+  if (radio) home.appendChild(radio);
 
   /* the top bar: a hamburger opens the controls */
   const topbar = document.querySelector('.topbar');
@@ -162,7 +166,7 @@ export function initMobile({ buildRecForm }) {
   const link = (href, cls, text) => {
     const a = el('a', cls, text);
     a.href = href;
-    if (!href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
+    if (/^https?:/.test(href)) { a.target = '_blank'; a.rel = 'noopener'; }
     return a;
   };
 
@@ -180,12 +184,14 @@ export function initMobile({ buildRecForm }) {
     let media = null;
     if (item.photos && item.photos.length) {
       media = el('img', 'hero__logo');
-      media.src = 'assets/' + item.photos[0]; media.alt = ''; media.loading = 'lazy';
+      media.src = 'assets/' + item.photos[0];
+      media.alt = `${item.photoAlt || item.title}, photo 1`; media.loading = 'lazy';
     } else if (item.logo || item.icon) {
       media = el('img', item.person ? 'hero__logo hero__logo--person'
         : item.shape ? 'hero__logo hero__logo--shape' : 'hero__logo');
       media.src = item.icon ? 'assets/afaicon.png' : 'assets/' + item.logo;
-      media.alt = ''; media.loading = 'lazy';
+      media.alt = item.icon ? 'afaicon, the hand drawn smiley of Abhishek Thomas'
+        : (item.alt || item.title || ''); media.loading = 'lazy';
     } else if (item.svg) {
       media = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       media.setAttribute('viewBox', '0 0 24 24');
@@ -231,20 +237,14 @@ export function initMobile({ buildRecForm }) {
 
     /* the drop down */
     put(more, 'hero__meta', item.meta);
-    if (vid) {
-      const f = el('iframe', 'hero__video');
-      f.src = `https://www.youtube-nocookie.com/embed/${vid}`;
-      f.allow = 'accelerometer; encrypted-media; picture-in-picture; fullscreen';
-      f.allowFullscreen = true;
-      f.loading = 'lazy';
-      more.appendChild(f);
-    }
+    if (vid) more.appendChild(videoOnClick(vid, item.title));   /* YouTube on click only */
     if (item.photos && item.photos.length > 1) {
       const shown = item.photos.slice(1, 6);
       const board = el('div', 'mboard mboard--' + shown.length);
-      shown.forEach(p => {
+      shown.forEach((p, n) => {
         const img = el('img');
-        img.src = 'assets/' + p; img.alt = ''; img.loading = 'lazy';
+        img.src = 'assets/' + p; img.loading = 'lazy';
+        img.alt = `${item.photoAlt || item.title}, photo ${n + 2}`;
         board.appendChild(img);
       });
       more.appendChild(board);

@@ -1,0 +1,64 @@
+/* The plain text pages: /legal, /privacy and the 404 page.
+   Same ink and type as the main site, no effects. One ink per mode. */
+:root {
+  --void: #08090B;
+  --chrome: #EDEFF3;
+  --yellow: #FFC800;
+}
+* { box-sizing: border-box; }
+html { font-size: 17px; }
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--chrome);
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-weight: 300;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.doc {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 16px 80px;
+}
+.doc__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  font-size: .78rem;
+}
+.doc__top nav { display: flex; gap: 16px; }
+a { color: var(--chrome); text-underline-offset: 3px; }
+a:hover { color: var(--yellow); }
+h1, h2 {
+  font-family: 'Anton', sans-serif;
+  font-weight: 400;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+h1 { font-size: clamp(2rem, 7vw, 3.2rem); margin: 0 0 8px; }
+h2 { font-size: 1.35rem; margin: 40px 0 8px; }
+h3 { font-size: 1rem; font-weight: 600; margin: 24px 0 4px; letter-spacing: .02em; }
+p, ul, dl { margin: 0 0 12px; }
+ul { padding-left: 1.2em; }
+li { margin-bottom: 6px; }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; }
+dt { font-weight: 600; }
+dd { margin: 0; }
+@media (max-width: 520px) {
+  dl { grid-template-columns: 1fr; }
+  dd { margin-bottom: 8px; }
+}
+code { font-size: .9em; }
+.lang {
+  border-top: 1px solid var(--chrome);
+  margin-top: 56px;
+  padding-top: 24px;
+}
+.small { font-size: .85rem; }

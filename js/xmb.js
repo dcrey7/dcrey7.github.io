@@ -12,8 +12,11 @@ import { emit, MOBILE } from './config.js?v=2026-09-25b';
 import { spin, stop } from './props3d.js?v=2026-09-25b';
 import { CATEGORIES } from './menu.js?v=2026-09-25b';
 import { SUPA } from './data.js?v=2026-09-25b';
+import { videoOnClick } from './ytclick.js?v=2026-10-22';
 
 const $ = s => document.querySelector(s);
+/* links to other sites open in a new tab; mailto and our own pages do not */
+const isExternal = href => /^https?:/.test(href);
 
 export function initXmb() {
   const barEl    = $('#bar');
@@ -56,6 +59,7 @@ export function initXmb() {
       <input name="year" placeholder="year we worked together">
       <input name="contact" placeholder="linkedin or email">
       <textarea name="quote" rows="5" placeholder="your recommendation" required></textarea>
+      <p class="recform__legal">Your words go to my review queue at Supabase. See the <a href="/legal/#privacy">privacy notice</a>.</p>
       <button type="submit">submit for approval</button>
       <p class="recform__note" hidden></p>`;
 
@@ -69,8 +73,8 @@ export function initXmb() {
       e.preventDefault();
       const note = f.querySelector('.recform__note');
       note.hidden = false;
-      if (!SUPA.url || !SUPA.anon) {
-        note.textContent = 'Submissions are switching on very soon. Come back in a day!';
+      if (!SUPA.open || !SUPA.url || !SUPA.anon) {
+        note.textContent = 'The form is paused. Please send your recommendation by email.';
         return;
       }
       note.textContent = 'Sending…';
@@ -133,14 +137,14 @@ export function initXmb() {
     if (entry.icon) {
       const img = document.createElement('img');
       img.src = 'assets/afaicon.png';
-      img.alt = '';
+      img.alt = 'afaicon, the hand drawn smiley of Abhishek Thomas';
       el.appendChild(img);
       return;
     }
     if (entry.logo) {
       const img = document.createElement('img');
       img.src = 'assets/' + entry.logo;
-      img.alt = '';
+      img.alt = entry.alt || entry.title || '';
       img.className = 'logo';
       img.addEventListener('error', () => {
         /* A 404 arrives asynchronously, by which time this render may already
@@ -288,7 +292,7 @@ export function initXmb() {
     if (action) {
       const a = document.createElement('a');
       a.href = action.href;
-      if (!action.href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
+      if (isExternal(action.href)) { a.target = '_blank'; a.rel = 'noopener'; }
       a.textContent = item.title;
       a.title = action.label;
       h1.appendChild(a);
@@ -303,14 +307,8 @@ export function initXmb() {
     } else if (item.form) {
       heroEl.appendChild(buildRecForm());
     } else if (vid) {
-      const frame = document.createElement('iframe');
-      frame.className = 'hero__video';
-      frame.src = `https://www.youtube-nocookie.com/embed/${vid}`;
-      frame.title = `${item.title} demo`;
-      frame.loading = 'lazy';
-      frame.allow = 'accelerometer; encrypted-media; picture-in-picture; fullscreen';
-      frame.allowFullscreen = true;
-      heroEl.appendChild(frame);
+      /* YouTube loads only on a click on this box */
+      heroEl.appendChild(videoOnClick(vid, item.title));
     } else if (photos.length) {
       /* Five at most, and the count picks the arrangement: the wall is a
          fixed shape that fits the screen, never something you scroll. */
@@ -318,10 +316,10 @@ export function initXmb() {
       const board = document.createElement('div');
       board.className = shown.length === 1
         ? 'mboard mboard--one' : 'mboard mboard--' + shown.length;
-      shown.forEach(f => {
+      shown.forEach((f, n) => {
         const img = document.createElement('img');
         img.src = 'assets/' + f;
-        img.alt = '';
+        img.alt = `${item.photoAlt || item.title}, photo ${n + 1} of ${shown.length}`;
         img.loading = 'lazy';
         img.addEventListener('click', () => openLightbox(img.src));
         board.appendChild(img);
@@ -332,12 +330,13 @@ export function initXmb() {
       img.className = item.person ? 'hero__logo hero__logo--person'
                     : item.shape ? 'hero__logo hero__logo--shape' : 'hero__logo';
       img.src = item.icon ? 'assets/afaicon.png' : 'assets/' + item.logo;
-      img.alt = '';
+      img.alt = item.icon ? 'afaicon, the hand drawn smiley of Abhishek Thomas'
+        : (item.alt || item.title || '');
       if (action) {
         /* the logo itself is the action too */
         const a = document.createElement('a');
         a.href = action.href;
-        if (!action.href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
+        if (isExternal(action.href)) { a.target = '_blank'; a.rel = 'noopener'; }
         a.appendChild(img);
         heroEl.appendChild(a);
       } else {
@@ -361,7 +360,7 @@ export function initXmb() {
         const a = document.createElement('a');
         a.className = 'plink';
         a.href = l.href;
-        if (!l.href.startsWith('mailto:')) { a.target = '_blank'; a.rel = 'noopener'; }
+        if (isExternal(l.href)) { a.target = '_blank'; a.rel = 'noopener'; }
         a.textContent = l.title;
         if (l.host) {
           const h = document.createElement('span');

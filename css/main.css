@@ -429,18 +429,46 @@ body.light[data-theme="default"] .aurora { opacity: .70; mix-blend-mode: multipl
 }
 .pill__btn--main:hover { color: var(--chrome); }
 
-/* The embed that actually plays the audio: parked OFF-SCREEN at real size,
-   never display:none or 1px — browsers throttle invisible media iframes,
-   which cut playback after a few seconds. */
-#radio-host {
+/* The radio's YouTube player. It exists only after the visitor presses
+   play, and then it is VISIBLE: YouTube's terms forbid a hidden player
+   and ask for at least 200 x 200 px. It floats in the bottom
+   right corner above the name card, like a picture in picture window,
+   with a one line note and a close button (close = pause and hide). */
+.radio {
   position: fixed;
-  left: -9999px;
-  bottom: 0;
-  width: 320px;
-  height: 152px;
-  pointer-events: none;
+  right: clamp(16px, 4vw, 52px);
+  bottom: calc(clamp(14px, 2.4vh, 24px) + clamp(28px, 2.2vw, 44px) + 16px);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 }
-#radio-host iframe { width: 320px; height: 152px; }
+.radio[hidden] { display: none; }
+#radio-host {
+  display: block;
+  width: 200px;
+  height: 200px;
+  border: 1px solid var(--chrome);
+  border-radius: 10px;
+  background: #000;
+}
+.radio__bar { display: flex; align-items: center; gap: 10px; }
+.radio__close {
+  background: none; border: 0; cursor: pointer;
+  color: var(--chrome);
+  font: 600 .56rem 'Archivo', system-ui, sans-serif;
+  letter-spacing: .12em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.radio__note {
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-size: .56rem;
+  letter-spacing: .05em;
+  color: var(--chrome);
+}
+body.booting .radio { opacity: 0; }
 .sysbtn {
   background: none; border: 0; cursor: pointer;
   color: var(--chrome-dim); font-size: 1.05rem; line-height: 1; padding: 6px;
@@ -1092,6 +1120,34 @@ a.card:focus-visible, .gear:focus-visible, .pill__btn:focus-visible,
   box-shadow: 0 30px 80px -28px rgba(0, 0, 0, .7);
 }
 
+/* the demo video before its click: a plain box, nothing from YouTube */
+.ytclick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: color-mix(in oklab, var(--void) 70%, transparent);
+  border: 1px solid var(--chrome);
+  color: var(--chrome);
+  text-align: center;
+  padding: 12px;
+}
+.ytclick__play {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--chrome);
+  color: var(--void);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform .18s var(--ease);
+}
+.ytclick__play:hover { transform: scale(1.06); }
+.ytclick__title { font-family: 'Anton', sans-serif; font-size: 1.1rem; letter-spacing: .04em; }
+.ytclick__note { font-size: .62rem; letter-spacing: .05em; }
+
 .btn {
   align-self: flex-start;
   margin-top: 4px;
@@ -1449,6 +1505,8 @@ a.card:hover { box-shadow: inset 0 0 0 2px var(--chrome); transform: translateY(
 }
 .recform button:hover { transform: translateY(-2px); }
 .recform__note { grid-column: 1 / -1; font-size: .88rem; color: var(--chrome); font-weight: 600; }
+.recform__legal { grid-column: 1 / -1; font-size: .7rem; color: var(--chrome); }
+.recform__legal a { color: inherit; }
 
 /* ---------- lightbox ---------- */
 
@@ -1670,6 +1728,8 @@ body.booting .settings:has(#sfxBtn) { display: none; }
   body.mobile .pill__title { font-size: .54rem; }
   body.mobile .pill__bar { height: 2px; }
   body.mobile .pill__btn { font-size: .58rem; padding: 1px 0; }
+  /* the radio card follows the pill in the flow, centred */
+  body.mobile .radio { position: static; align-items: center; }
   .mob-clock__time { font-family: 'Archivo', system-ui, sans-serif; font-weight: 300; font-size: 2.4rem; line-height: 1; letter-spacing: .02em; }
   .mob-clock__date { margin-top: 3px; font-size: .6rem; letter-spacing: .18em; }
   .mob-rows { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }

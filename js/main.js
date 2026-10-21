@@ -40,7 +40,12 @@ if (q.has('i')) xmb.setItem(Number(q.get('i')) || 0, true);
    data.js and the player loads the whole playlist itself. The current
    song's REAL title and channel come from the player at runtime
    (getVideoData), prev/next skip real tracks, clicking the disc cycles
-   playlists. The video is parked off-screen; the audio plays. */
+   playlists.
+
+   Privacy: NOTHING loads from YouTube until the visitor presses play,
+   previous, next or the disc. Then the YouTube script loads, the player
+   uses youtube-nocookie.com, and the player shows in a small visible
+   card (YouTube's terms forbid a hidden player). */
 const pill = document.getElementById('pill');
 const listIds = YT_PLAYLISTS
   .map(u => (String(u).match(/[?&]list=([\w-]+)/) || [])[1])
@@ -121,16 +126,30 @@ if (listIds.length) {
     }
   };
 
-  const api = document.createElement('script');
-  api.src = 'https://www.youtube.com/iframe_api';
-  api.async = true;
-  document.head.appendChild(api);
-  window.onYouTubeIframeAPIReady = () => {
+  /* Load the YouTube player once, on the first press. `then` runs when
+     the player is ready (at once if it is ready already). */
+  const radioCard = document.getElementById('radio');
+  let loading = false, onReadyQueue = [];
+  const withRadio = then => {
+    radioCard.hidden = false;
+    if (yt && yt.getPlayerState) { then(); return; }
+    onReadyQueue.push(then);
+    if (loading) return;
+    loading = true;
+    window.onYouTubeIframeAPIReady = createPlayer;
+    const api = document.createElement('script');
+    api.src = 'https://www.youtube.com/iframe_api';
+    api.async = true;
+    document.head.appendChild(api);
+  };
+
+  const createPlayer = () => {
     yt = window.__yt = new YT.Player('radio-host', {
-      width: 320, height: 180,
+      width: 200, height: 200,
+      host: 'https://www.youtube-nocookie.com',
       playerVars: {
         listType: 'playlist', list: listIds[curList],
-        controls: 0, disablekb: 1, playsinline: 1
+        controls: 0, disablekb: 1, playsinline: 1, rel: 0
       },
       events: {
         /* big playlists carry embed-blocked songs: skip them; if errors
@@ -142,7 +161,12 @@ if (listIds.length) {
           if (errStreak >= 3) { errStreak = 0; phase = 1; hopRandom(); }
           else if (yt && yt.nextVideo) yt.nextVideo();
         },
-        onReady: refresh,
+        onReady: () => {
+          refresh();
+          const queue = onReadyQueue;
+          onReadyQueue = [];
+          queue.forEach(fn => fn());
+        },
         onStateChange: e => {
           const playing = e.data === YT.PlayerState.PLAYING;
           setOn(playing);
@@ -167,8 +191,7 @@ if (listIds.length) {
     });
   };
 
-  btnPlay.addEventListener('click', () => {
-    if (!yt || !yt.getPlayerState) return;
+  btnPlay.addEventListener('click', () => withRadio(() => {
     const st = yt.getPlayerState();
     /* playing OR buffering both count as "on", so pause always lands */
     if (st === 1 || st === 3) {
@@ -178,7 +201,7 @@ if (listIds.length) {
       userPaused = false;
       yt.playVideo();
     }
-  });
+  }));
 
   /* watchdog: if the radio sits idle without the user pausing it, nudge it
      back to life; a second stall in a row hops to another playlist */
@@ -194,16 +217,25 @@ if (listIds.length) {
     }
   }, 6000);
 
-  /* NO autoplay (user rule): the radio sits loaded and quiet until the
-     play button is pressed. */
-  document.getElementById('pillPrev').addEventListener('click', () => yt && yt.previousVideo());
-  document.getElementById('pillNext').addEventListener('click', () => yt && yt.nextVideo());
+  /* close = pause and hide; any radio button shows the card again */
+  document.getElementById('radioClose').addEventListener('click', () => {
+    userPaused = true;
+    if (yt && yt.pauseVideo) yt.pauseVideo();
+    radioCard.hidden = true;
+  });
+
+  /* NO autoplay (user rule): the radio does not even load until a
+     button is pressed. */
+  document.getElementById('pillPrev').addEventListener('click', () =>
+    withRadio(() => yt.previousVideo()));
+  document.getElementById('pillNext').addEventListener('click', () =>
+    withRadio(() => yt.nextVideo()));
   /* the disc itself cycles between the playlists */
-  disc.addEventListener('click', () => {
-    if (!yt || listIds.length < 2) return;
+  disc.addEventListener('click', () => withRadio(() => {
+    if (listIds.length < 2) return;
     curList = (curList + 1) % listIds.length;
     yt.loadPlaylist({ listType: 'playlist', list: listIds[curList] });
-  });
+  }));
 
   setInterval(() => {
     if (!yt || !yt.getDuration) return;

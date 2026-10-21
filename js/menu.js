@@ -11,7 +11,7 @@
    'work/amazon_logo.jpeg'). If the file is missing the renderer falls back
    to `mark`, so images can be dropped in later without touching code. */
 
-import { ABOUT, WORK, PROJECTS, PEOPLE, TROPHIES, CERTS, EDUCATION, CONTACT } from './data.js?v=2026-09-25b';
+import { ABOUT, WORK, PROJECTS, PEOPLE, TROPHIES, CERTS, EDUCATION, CONTACT, SUPA } from './data.js?v=2026-09-25b';
 
 /* One consistent icon family for the deck: Google Material Icons
    (Apache 2.0), 24px paths, drawn inline so nothing is fetched. */
@@ -22,6 +22,7 @@ export const ICONS = {
   gamepad: 'M21.58 16.09l-1.09-7.66C20.21 6.46 18.52 5 16.53 5H7.47C5.48 5 3.79 6.46 3.51 8.43l-1.09 7.66C2.2 17.63 3.39 19 4.94 19c.68 0 1.32-.27 1.8-.75L9 16h6l2.25 2.25c.48.48 1.13.75 1.8.75 1.56 0 2.75-1.37 2.53-2.91zM11 11H9v2H8v-2H6v-1h2V8h1v2h2v1zm4-1c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm2 3c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z',
   group: 'M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z',
   trophy: 'M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z',
+  info: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z',
   mail: 'M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z',
   /* brand marks from Simple Icons (CC0), same 24px grid */
   github: 'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12',
@@ -74,6 +75,7 @@ const education = {
   id: 'education', label: 'EDUCATION', mark: null, svg: ICONS.school, key: 'var(--sys-red)',
   items: EDUCATION.map(e => ({
     id: slug(e.school), mark: e.mark, key: 'var(--sys-red)', logo: e.logo,
+    alt: `${e.school} logo`,
     shape: isShape(e.logo),
     title: e.school,
     sub: e.role || 'education',
@@ -92,6 +94,7 @@ const work = {
   id: 'work', label: 'WORK', mark: null, svg: ICONS.work, key: 'var(--sys-blue)',
   items: WORK.map(j => ({
     id: slug(j.company), mark: j.mark, key: 'var(--sys-blue)', logo: j.logo,
+    alt: `${j.company} logo`,
     shape: isShape(j.logo),
     title: j.company.toUpperCase(),
     sub: j.role,
@@ -113,6 +116,8 @@ const play = {
   items: PROJECTS.filter(p => p.video || (p.photos && p.photos.length) || p.logo)
     .map((p, i) => ({
     id: slug(p.name), mark: p.mark, key: PALETTE[i % PALETTE.length], logo: p.logo,
+    alt: `${p.name} logo`,
+    photoAlt: `Photo from ${p.name}, ${p.tag}`,
     shape: isShape(p.logo),
     title: p.name,
     sub: p.tag,
@@ -132,21 +137,30 @@ const play = {
 /* ---------- PEOPLE ---------- */
 const people = {
   id: 'people', label: 'PEOPLE', mark: null, svg: ICONS.group, key: 'var(--sys-purple)',
-  items: [{
+  items: [SUPA.open ? {
     id: 'add-yours', mark: '+', key: 'var(--sys-purple)', form: true,
     title: 'ADD YOURS', sub: 'worked with me?', meta: null, badge: null,
     body: 'Worked with me and have something to say? Fill the form. Your recommendation lands in my review queue, and once I approve it, it appears right here with the others.',
     action: null,
     cards: []
+  } : {
+    /* the form is off (see SUPA in data.js): no broken submit, just email */
+    id: 'add-yours', mark: '+', key: 'var(--sys-purple)', form: false,
+    title: 'ADD YOURS', sub: 'worked with me?', meta: null, badge: null,
+    body: 'Worked with me and have something to say? The form is paused for now. Send your recommendation by email and I will add it here with the others.',
+    action: { label: 'send it by email', href: `mailto:${CONTACT.email}` },
+    cards: []
   },
   ...PEOPLE.map(p => ({
     id: slug(p.name), mark: p.init, key: 'var(--sys-purple)', logo: p.photo,
+    alt: `Photo of ${p.name}`,
     person: true,
     title: p.name.toUpperCase(),
     sub: p.role,
     meta: p.rel,
     badge: null,
     body: `“${p.quote}”`,
+    stack: 'Recommendations from LinkedIn, shown unedited.',
     action: null,
     cards: []
   }))]
@@ -159,6 +173,7 @@ const trophies = {
   id: 'trophies', label: 'TROPHIES', mark: null, svg: ICONS.trophy, key: 'var(--sys-orange)',
   items: CERTS.filter(c => c.logo).map(c => ({
     id: slug(c.name), mark: c.mark, key: 'var(--sys-orange)', logo: c.logo,
+    alt: `${c.name} certification badge, ${c.issuer}`,
     shape: isShape(c.logo),
     title: c.name,
     sub: c.issuer,
@@ -188,7 +203,15 @@ const contact = {
       body: null,
       action: { label: `open ${l.label.toLowerCase()}`, href: l.href },
       cards: []
-    }))
+    })),
+    {
+      /* the legal notice and privacy notice, one page, English and French */
+      id: 'legal', mark: null, svg: ICONS.info, key: 'var(--chrome)',
+      title: 'LEGAL', sub: 'legal notice and privacy', meta: 'mentions légales · confidentialité', badge: null,
+      body: 'Who publishes this site, who hosts it, and what it does with your data. In English and in French.',
+      action: { label: 'open the legal page', href: '/legal/' },
+      cards: []
+    }
   ]
 };
 

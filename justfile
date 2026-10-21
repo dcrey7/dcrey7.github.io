@@ -23,3 +23,21 @@ seo-monitor-install:
 seo-monitor-status:
     systemctl --user list-timers hiabhi-seo.timer --no-pager
     systemctl --user show hiabhi-seo.service --property=Result --property=ExecMainStatus
+
+# Copy ONLY the public files into dist/. Notes, tests, scripts, tools,
+# supabase/, results/ and updates/ never reach the web.
+# Functions (functions/) are not copied: wrangler reads them from the
+# repo root, and copying them would publish their source.
+build:
+    rm -rf dist
+    mkdir -p dist
+    cp -r index.html 404.html css js assets themes locales privacy legal dist/
+    cp _headers _redirects _routes.json robots.txt sitemap.xml llms.txt dist/
+    cp favicon.ico favicon.svg apple-touch-icon.png dist/
+    rm -f dist/assets/links.txt
+    @echo "dist/ ready: $(find dist -type f | wc -l) files"
+
+# Deploy dist/ to Cloudflare Pages (production branch worktree-ps5-ui).
+# Needs CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in the environment.
+deploy: build
+    pnpm dlx wrangler pages deploy dist --project-name=hiabhi --branch=worktree-ps5-ui --commit-dirty=true

@@ -146,9 +146,7 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="assets/afaicon.png" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@300;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/fonts.css?v=2026-10-22">
 <link rel="stylesheet" href="css/main.css?v=2026-09-25b">
 <!-- Only without JavaScript: the profile in <body> becomes the page. -->
 <noscript><style>
@@ -213,6 +211,7 @@
 <li>GitHub: <a href="https://github.com/dcrey7">https://github.com/dcrey7</a></li>
 <li>LinkedIn: <a href="https://www.linkedin.com/in/dcrey7/">https://www.linkedin.com/in/dcrey7/</a></li>
 <li>Hugging Face: <a href="https://huggingface.co/dcrey7">https://huggingface.co/dcrey7</a></li>
+<li>Legal notice and privacy: <a href="https://hiabhi.com/legal/">https://hiabhi.com/legal/</a></li>
 </ul>
 </article>
 </noscript>
@@ -281,14 +280,22 @@
   </div>
 </header>
 
-<div id="radio-host" aria-hidden="true"></div>
+<!-- The radio's YouTube player. Nothing loads from YouTube until the
+     visitor presses play; then the player shows here, small but visible. -->
+<div class="radio" id="radio" hidden>
+  <div id="radio-host"></div>
+  <div class="radio__bar">
+    <p class="radio__note">Plays via YouTube (Google)</p>
+    <button class="radio__close" id="radioClose" type="button" aria-label="Stop and hide the radio">CLOSE</button>
+  </div>
+</div>
 
 <div class="pill" id="pill" hidden>
   <img class="pill__disc" id="pillDisc" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">
   <div class="pill__meta">
     <span class="pill__line">
       <span id="pillTimeCur">0:00</span>
-      <span class="pill__title" id="pillTitleWrap"><span id="pillTitle">…</span></span>
+      <span class="pill__title" id="pillTitleWrap"><span id="pillTitle">Plays via YouTube (Google)</span></span>
       <span id="pillTimeTot">0:00</span>
     </span>
     <span class="pill__bar"><i id="pillProg"></i></span>

@@ -51,3 +51,4 @@ AWS Machine Learning Specialty, AWS Cloud Practitioner, Google Cloud skills badg
 - GitHub: https://github.com/dcrey7
 - LinkedIn: https://www.linkedin.com/in/dcrey7/
 - Hugging Face: https://huggingface.co/dcrey7
+- Legal notice and privacy: https://hiabhi.com/legal/
