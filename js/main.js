@@ -1,14 +1,12 @@
 /* Boot order: cross media bar renders → boot gate → player → clock. */
 
-import { initXmb } from './xmb.js?v=2026-09-25b';
-import { initBoot } from './boot.js?v=2026-09-25b';
-import { YT_PLAYLISTS, THEME } from './data.js?v=2026-09-25b';
-import * as theme from './theme.js?v=2026-09-25b';
-import { CATEGORIES } from './menu.js?v=2026-09-25b';
-import { bus, MOBILE } from './config.js?v=2026-09-25b';
-import { initMobile } from './mobile.js?v=2026-09-25b';
-import { initAurora } from './aurora.js?v=2026-09-25b';
-import { sfx } from './sfx.js?v=2026-09-25b';
+import { initXmb } from './xmb.js?v=2026-10-22';
+import { initBoot } from './boot.js?v=2026-10-22';
+import { YT_PLAYLISTS } from './data.js?v=2026-10-22';
+import { CATEGORIES } from './menu.js?v=2026-10-22';
+import { MOBILE } from './config.js?v=2026-10-22';
+import { initMobile } from './mobile.js?v=2026-10-22';
+import { initAurora } from './aurora.js?v=2026-10-22';
 
 const xmb = initXmb();
 
@@ -170,8 +168,6 @@ if (listIds.length) {
         onStateChange: e => {
           const playing = e.data === YT.PlayerState.PLAYING;
           setOn(playing);
-          /* one music at a time: the theme waits while the radio plays */
-          theme.hold(playing || e.data === YT.PlayerState.BUFFERING);
           if (playing) { startedOnce = true; userPaused = false; }
           /* after a random hop lands: shuffle the list and jump to a
              random SONG inside it */
@@ -249,15 +245,12 @@ if (listIds.length) {
   }, 800);
 }
 
-/* ---------- the theme song ----------
-   The site's background music, separate from the radio in the pill. It
-   starts as early as the browser allows (at load, or on the first key or
-   click, which on the gate is PRESS ANY KEY), loops for ever, dips a
-   little when the home screen opens, waits while the radio plays, and
-   mutes with the speaker button. */
-theme.initTheme(THEME);
-window.__theme = theme;   /* a debug handle, like __yt */
-bus.addEventListener('start', () => theme.duck(true));
+/* ---------- no site sounds (owner rule, 2026-10-22) ----------
+   The site makes NO sound by itself: no theme song, no menu ticks, no
+   sound button. js/theme.js and js/sfx.js are no longer loaded. The only
+   audio is the YouTube radio, after the visitor presses its play button.
+   The old sound setting is removed so no stored value can turn it on. */
+try { localStorage.removeItem('xmb-sound'); } catch {}
 
 /* ---------- themes ----------
    The settings gear, top left, swaps the backdrop. Shader themes are the
@@ -390,25 +383,6 @@ searchInput.addEventListener('keydown', e => {
    Royal blue flips its palette; the lava lamp has its own mode button
    (we press it), the beach has a Time knob (night for dark, day for
    light). The choice persists. */
-/* ---------- sounds: a tick per move, a blip per select, one mute button ---------- */
-bus.addEventListener('cat', () => sfx.cat());
-bus.addEventListener('focus', () => sfx.item());
-bus.addEventListener('act', () => sfx.select());
-const sfxBtn = document.getElementById('sfxBtn');
-function applySound(v) {
-  sfx.set(v);
-  theme.mute(!v);
-  document.getElementById('sfxOn').style.display = v ? 'block' : 'none';
-  document.getElementById('sfxOff').style.display = v ? 'none' : 'block';
-  sfxBtn.setAttribute('aria-pressed', String(v));
-  sfxBtn.setAttribute('aria-label', v ? 'Mute sounds' : 'Unmute sounds');
-  try { localStorage.setItem('xmb-sound', v ? 'on' : 'off'); } catch {}
-}
-sfxBtn.addEventListener('click', () => applySound(!sfx.on));
-let storedSound = 'on';
-try { storedSound = localStorage.getItem('xmb-sound') || 'on'; } catch {}
-applySound(storedSound !== 'off');
-
 const modeBtn = document.getElementById('modeBtn');
 const sunI = document.getElementById('modeSun');
 const moonI = document.getElementById('modeMoon');

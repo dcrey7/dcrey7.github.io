@@ -48,6 +48,18 @@ The `ps5-ui` worktree was clean, so no snapshot commit was needed.
     badges, project photos and afaicon now carry alt text (desktop and
     phone).
 
+11. **No site sounds (owner request).** The theme song never plays and
+    `assets/theme.mp3` is never requested; the menu ticks are gone; the
+    speaker button is removed; any stored `xmb-sound` value is deleted on
+    load. `js/theme.js` and `js/sfx.js` stay in the repo but are not
+    loaded. The theme.mp3 file itself was left in place (owner decision on
+    the copyright items). The only audio left is the YouTube radio after
+    its play button.
+12. **Cache busting.** All `?v=` tokens moved from `2026-09-25b` to
+    `2026-10-22`. JS is cached for 4 hours, so without this a returning
+    visitor would keep the old code (radio loading YouTube on page load,
+    theme song) under the new CSP.
+
 `supabase/schema.sql` is rewritten for a future project: anon can only
 insert pending rows, the public reads a view without the `contact` column,
 the photo bucket is private (pending photos cannot be listed or read),
@@ -66,8 +78,11 @@ size and type limits, and a note on Turnstile or CAPTCHA plus rate limits.
   `https://cloudflareinsights.com` to `connect-src`, and update /legal.
 - **Testimonial check:** Olivier Taugourdeau's quote starts "Thomas worked
   on ...". It is shown unedited as asked.
-- **Not touched (owner decision):** the Flume theme track and the avatar
-  animations under `assets/avatar/play`.
+- **Not touched (owner decision):** the Flume theme track file and the
+  avatar animations under `assets/avatar/play`. Note: the avatar dev
+  viewer (`assets/avatar/play/viewer.js`) has a prop gun with a synth
+  shot sound; its panels are hidden in the embed and the check above
+  heard nothing, but the code is still there.
 
 ## Verification
 
@@ -80,6 +95,10 @@ size and type limits, and a note on Turnstile or CAPTCHA plus rate limits.
   1 (playing) in the visible card; CLOSE pauses (state 2) and hides it.
   Demo video click loads `youtube-nocookie.com/embed/...`. 0 console
   errors. No horizontal scroll on the phone.
+- Sound check (Playwright, both sizes, `xmb-sound=on` stored first, then
+  keys, clicks and navigation): 0 AudioContexts, 0 oscillators, 0 buffer
+  sources, 0 media `play()` calls in every frame; no `.mp3` request; the
+  stored value is gone afterwards.
 - `tests/interaction.html`: 64/67, the same 3 failures as the unchanged
   branch (the test still expects "MEMORY BRIDGEAI", renamed to Recolli).
 - `tests/test_seo.py`: 19 passed.
@@ -87,3 +106,4 @@ size and type limits, and a note on Turnstile or CAPTCHA plus rate limits.
 ## Changelog
 
 - 2026-10-22 00:14 CEST: created.
+- 2026-10-22 00:22 CEST: added the no sound change and the cache bump.

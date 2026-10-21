@@ -1,9 +1,9 @@
 /* Boot gate: a short load bar, then PRESS START. Console splash, nothing more. */
 
-import { emit, REDUCED } from './config.js?v=2026-09-25b';
-import { spin, setSpeed, setEnv } from './icon3d.js?v=2026-09-25b';
-import { chromeMark } from './chrome3d.js?v=2026-09-25b';
-import { AFAICON_PATH } from './afaicon-path.js?v=2026-09-25b';
+import { emit, REDUCED } from './config.js?v=2026-10-22';
+import { spin, setSpeed, setEnv } from './icon3d.js?v=2026-10-22';
+import { chromeMark } from './chrome3d.js?v=2026-10-22';
+import { AFAICON_PATH } from './afaicon-path.js?v=2026-10-22';
 
 export function initBoot() {
   const bar   = document.getElementById('bar-fill');
